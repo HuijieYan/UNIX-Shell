@@ -58,8 +58,20 @@ public class Shell {
                 if (regexMatcher.group(1) != null || regexMatcher.group(2) != null) {
                     String quoted = regexMatcher.group(0).trim();
                     tokens.add(quoted.substring(1,quoted.length()-1));
+                
+                // Dealing with globbling (backquotes)
                 } else {
+                    // this command deals with the multiple spaces
                     nonQuote = regexMatcher.group().trim();
+                    
+                    /*
+                    dealing with glob, which does command substitution  --> find all mathced filenameas
+                    & add then into tokens.
+                    eg. `*.txt` & there are "1.txt, 2.txt, 3.txt in the working directory"
+                    Then globbingResult will be a list of strings {"1.txt","2.txt","3.txt"}
+                    And the final tokens will be <command> <arguments> where <arguments> = globbingResult
+                    */
+
                     ArrayList<String> globbingResult = new ArrayList<String>();
                     Path dir = Paths.get(currentDirectory);
                     DirectoryStream<Path> stream = Files.newDirectoryStream(dir, nonQuote);
@@ -73,6 +85,7 @@ public class Shell {
                 }
             }
             String appName = tokens.get(0);
+            //tokens contain <app name> <arguments> where <arguments> is a list of argument
             ArrayList<String> appArgs = new ArrayList<String>(tokens.subList(1, tokens.size()));
             switch (appName) {
             case "cd":
