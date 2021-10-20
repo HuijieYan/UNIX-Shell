@@ -1,10 +1,7 @@
-package uk.ac.ucl;
+package uk.ac.ucl.shell;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-
-import uk.ac.ucl.shell.AppFactory;
-import uk.ac.ucl.shell.ShellApplication;
 
 public class AppBuilder {
     
