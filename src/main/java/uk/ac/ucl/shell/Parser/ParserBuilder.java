@@ -1,14 +1,13 @@
+package uk.ac.ucl.shell.Parser;
+
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.function.Function;
 
-import pack.parser.Item;
-import pack.parser.Result;
-import pack.parser.Zero;
-import pack.parser.ParserInterface;
-import pack.type.MonadicValue;
-import pack.type.pair.Pair;
+import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
+import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
+
 public class ParserBuilder {
     public ArrayList<Character> spaces = new ArrayList<>();
     public ParserBuilder(){

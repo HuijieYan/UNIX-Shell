@@ -26,7 +26,7 @@ public class Shell {
 
         CharStream parserInput = CharStreams.fromString(cmdline); 
         ShellGrammarLexer lexer = new ShellGrammarLexer(parserInput);
-        CommonTokenStream tokenStream = new CommonTokenStream(lexer);        
+        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         ShellGrammarParser parser = new ShellGrammarParser(tokenStream);
         ParseTree tree = parser.command();
         ArrayList<String> rawCommands = new ArrayList<String>();

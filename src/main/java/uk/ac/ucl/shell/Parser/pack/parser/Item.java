@@ -1,6 +1,6 @@
-package pack.parser;
-import pack.type.pair.Pair;
-import pack.parser.ParserInterface;
+package uk.ac.ucl.shell.Parser.pack.parser;
+
+import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
 
 public class Item implements ParserInterface<String,String>{
     private Pair<String,String> pair;

@@ -1,10 +1,7 @@
-package pack.parser;
-import pack.type.pair.Pair;
-import pack.parser.ParserInterface;
-/*
-    Type V is the value.
-    Type I is the rest of the input stream.
-*/
+package uk.ac.ucl.shell.Parser.pack.parser;
+
+
+import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
 
 public class Result<V,I> implements ParserInterface<V,I>{
     private Pair<V,I> pair;

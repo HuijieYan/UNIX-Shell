@@ -1,11 +1,8 @@
+package uk.ac.ucl.shell.Parser;
+
 import java.util.function.Function;
 
-import pack.parser.Item;
-import pack.parser.Result;
-import pack.parser.Zero;
-import pack.parser.ParserInterface;
-import pack.type.MonadicValue;
-import pack.type.pair.Pair;
+import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
 public class Parser<T> implements Monad<T>{
     private Function<String,MonadicValue<T,String>> parserFunction;

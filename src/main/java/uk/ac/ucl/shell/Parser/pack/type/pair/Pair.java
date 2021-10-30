@@ -1,5 +1,7 @@
-package pack.type.pair;
-import pack.type.MonadicValue;
+package uk.ac.ucl.shell.Parser.pack.type.pair;
+
+import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
+
 /*
     Type V is the value.
     Type I is the rest of the input stream.

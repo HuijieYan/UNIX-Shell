@@ -2,7 +2,7 @@ package uk.ac.ucl.shell;
 
 import org.junit.Test;
 
-import uk.ac.ucl.shell.Shell;
+import uk.ac.ucl.shell.Shell_Monad;
 
 import static org.junit.Assert.*;
 
@@ -19,9 +19,11 @@ public class ShellTest {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Shell.eval("echo foo", out);
+        Shell_Monad.eval("echo foo", out);
         Scanner scn = new Scanner(in);
         assertEquals(scn.next(),"foo");
     }
+    
+    
 
 }
