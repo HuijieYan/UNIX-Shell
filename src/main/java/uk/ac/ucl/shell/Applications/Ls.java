@@ -27,18 +27,17 @@ public class Ls implements ShellApplication {
         } else {
             throw new RuntimeException("ls: too many arguments");
         }
+
         try {
             File[] listOfFiles = currDir.listFiles();
-            boolean atLeastOnePrinted = false;
             for (File file : listOfFiles) {
                 if (!file.getName().startsWith(".")) {
                     writer.write(file.getName());
                     writer.write("\t");
                     writer.flush();
-                    atLeastOnePrinted = true;
                 }
             }
-            if (atLeastOnePrinted) {
+            if (listOfFiles.length > 0) {
                 writer.write(System.getProperty("line.separator"));
                 writer.flush();
             }

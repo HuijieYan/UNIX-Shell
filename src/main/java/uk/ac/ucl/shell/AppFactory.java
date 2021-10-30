@@ -3,13 +3,7 @@ package uk.ac.ucl.shell;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import uk.ac.ucl.shell.Applications.Cat;
-import uk.ac.ucl.shell.Applications.Cd;
-import uk.ac.ucl.shell.Applications.Echo;
-import uk.ac.ucl.shell.Applications.Grep;
-import uk.ac.ucl.shell.Applications.Head;
-import uk.ac.ucl.shell.Applications.Ls;
-import uk.ac.ucl.shell.Applications.Pwd;
+import uk.ac.ucl.shell.Applications.*;
 
 public class AppFactory {
 

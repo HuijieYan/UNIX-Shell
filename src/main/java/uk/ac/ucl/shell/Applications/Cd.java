@@ -21,11 +21,18 @@ public class Cd implements ShellApplication {
         } else if (appArgs.size() > 1) {
             throw new RuntimeException("cd: too many arguments");
         }
+
+
         String dirString = appArgs.get(0);
         File dir = new File(currentDirectory, dirString);
+
         if (!dir.exists() || !dir.isDirectory()) {
-            throw new RuntimeException("cd: " + dirString + " is not an existing directory");
+            dir = new File(dirString);
+            if(!dir.exists() || !dir.isDirectory()){
+                throw new RuntimeException("cd: " + dirString + " is not an existing directory");
+            }
         }
+
         currentDirectory = dir.getCanonicalPath();
         return currentDirectory;
     }

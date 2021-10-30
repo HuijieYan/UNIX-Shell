@@ -18,17 +18,17 @@ public class Echo implements ShellApplication {
 
     @Override
     public String exec(List<String> appArgs) throws IOException {
-        boolean atLeastOnePrinted = false;
-        for (String arg : appArgs) {
-            writer.write(arg);
-            writer.write(" ");
-            writer.flush();
-            atLeastOnePrinted = true;
-        }
-        if (atLeastOnePrinted) {
+        if(appArgs.size() > 0){
+            for (String arg : appArgs) {
+                writer.write(arg);
+                writer.write(" ");
+                writer.flush();
+            }
             writer.write(System.getProperty("line.separator"));
             writer.flush();
-        }        
+        }else {
+            throw new RuntimeException("Echo application should at least has one argument");
+        }
 
         return currentDirectory;
     }

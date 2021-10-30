@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface ShellApplication {
 
-    public String exec(List<String> appArgs) throws IOException;
+    String exec(List<String> appArgs) throws IOException;
 }
