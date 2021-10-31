@@ -7,8 +7,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
@@ -27,25 +25,24 @@ public class Cat implements ShellApplication {
     public String exec(List<String> appArgs) throws IOException {
         if (appArgs.isEmpty()) {
             throw new RuntimeException("cat: missing arguments");
-        } else {
-            for (String arg : appArgs) {
-                Charset encoding = StandardCharsets.UTF_8;
-                File currFile = new File(currentDirectory + File.separator + arg);
-                if (currFile.exists()) {
-                    Path filePath = Paths.get(currentDirectory + File.separator + arg);
-                    try (BufferedReader reader = Files.newBufferedReader(filePath, encoding)) {
-                        String line = null;
-                        while ((line = reader.readLine()) != null) {
-                            writer.write(String.valueOf(line));
-                            writer.write(System.getProperty("line.separator"));
-                            writer.flush();
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException("cat: cannot open " + arg);
-                    }
-                } else {
-                    throw new RuntimeException("cat: file does not exist");
+        }
+
+        Charset encoding = StandardCharsets.UTF_8;
+        for (String arg : appArgs){
+            File file = Tools.getFile(currentDirectory, arg);
+            if(file == null){
+                throw new RuntimeException("cat: file" + arg + "does not exist");
+            }
+
+            try (BufferedReader reader = Files.newBufferedReader(file.toPath(), encoding)) {
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line);
+                    writer.write(System.getProperty("line.separator"));
+                    writer.flush();
                 }
+            } catch (IOException e) {
+                throw new RuntimeException("cat: cannot open " + arg);
             }
         }
         

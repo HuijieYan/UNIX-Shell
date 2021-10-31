@@ -3,15 +3,14 @@ package uk.ac.ucl.shell;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Array;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import uk.ac.ucl.shell.Parser.Monad;
 import uk.ac.ucl.shell.Parser.ParserBuilder;
@@ -83,11 +82,19 @@ public class Shell_Monad {
             System.out.println("Current Command -> "+command);
             //may meet null
 
+
+            PipedInputStream pipInput = new PipedInputStream();
+            PipedOutputStream pipOutput = new PipedOutputStream(pipInput);
+
+            OutputStreamWriter pipeWriter = new OutputStreamWriter(pipOutput);
+
+
             //dealing with pipe
             for (ArrayList<String> call: command) {
+
+
                 //debug
                 System.out.println("Current call -> "+call);
-
 
                 String appName = call.get(0);
                 //tokens contain <app name> <arguments> where <arguments> is a list of argument
@@ -96,8 +103,10 @@ public class Shell_Monad {
                 //check globbing
                 appArgs = globbingChecker(appArgs);
     
+                //change stream
+                //ShellApplication myApp = new AppBuilder(appName, currentDirectory, pipeWriter, pipOutput).createApp();
                 ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
-                //keep track of directory
+                // keep track of directory
                 currentDirectory = myApp.exec(appArgs);
             }
 
