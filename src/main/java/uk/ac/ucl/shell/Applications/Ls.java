@@ -20,10 +20,13 @@ public class Ls implements ShellApplication {
     @Override
     public String exec(List<String> appArgs) throws IOException {
         File currDir;
+        int rootDirLength;
         if (appArgs.isEmpty()) {
             currDir = new File(currentDirectory);
+            rootDirLength = currentDirectory.length();
         } else if (appArgs.size() == 1) {
             currDir = new File(appArgs.get(0));
+            rootDirLength = appArgs.get(0).length();
         } else {
             throw new RuntimeException("ls: too many arguments");
         }
@@ -32,7 +35,7 @@ public class Ls implements ShellApplication {
             File[] listOfFiles = currDir.listFiles();
             for (File file : listOfFiles) {
                 if (!file.getName().startsWith(".")) {
-                    writer.write(file.getName());
+                    writer.write(file.getAbsolutePath().substring(rootDirLength + 1));
                     writer.write("\t");
                     writer.flush();
                 }
