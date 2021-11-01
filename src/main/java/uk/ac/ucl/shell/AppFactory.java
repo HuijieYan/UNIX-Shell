@@ -10,13 +10,11 @@ public class AppFactory {
     private String appName;
     private String currentDirectory;
     private OutputStreamWriter writer;
-    private OutputStream output;
 
-    public AppFactory(String appName, String currentDirectory, OutputStreamWriter writer, OutputStream output) {
+    public AppFactory(String appName, String currentDirectory, OutputStreamWriter writer) {
         this.appName = appName;
         this.currentDirectory = currentDirectory;
         this.writer = writer;
-        this.output = output;        
     }
 
     public ShellApplication makeApp() {

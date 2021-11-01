@@ -1,8 +1,7 @@
 package uk.ac.ucl.shell;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +15,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import uk.ac.ucl.shell.Applications.Tools;
 
 public class Shell {
 
@@ -42,7 +42,7 @@ public class Shell {
         rawCommands.add(lastSubcommand);
         for (String rawCommand : rawCommands) {
             String spaceRegex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'";
-            ArrayList<String> tokens = new ArrayList<String>();
+            ArrayList<String> tokens = new ArrayList<>();
             Pattern regex = Pattern.compile(spaceRegex);
             Matcher regexMatcher = regex.matcher(rawCommand);
             String nonQuote;
@@ -78,7 +78,7 @@ public class Shell {
             }
             String appName = tokens.get(0);
             //tokens contain <app name> <arguments> where <arguments> is a list of argument
-            ArrayList<String> appArgs = new ArrayList<String>(tokens.subList(1, tokens.size()));
+            ArrayList<String> appArgs = new ArrayList<>(tokens.subList(1, tokens.size()));
 
             ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
             //keep track of directory

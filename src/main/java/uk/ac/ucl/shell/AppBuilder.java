@@ -18,7 +18,7 @@ public class AppBuilder {
     }
 
     public ShellApplication createApp() {
-        AppFactory myFactory = new AppFactory(this.appName, this.currentDirectory, this.writer, this.output);
+        AppFactory myFactory = new AppFactory(this.appName, this.currentDirectory, this.writer);
         ShellApplication myApp = myFactory.makeApp();
         return myApp;
     }
@@ -58,9 +58,6 @@ public class AppBuilder {
             );
         }
     }
-
-
-
 
 
 }
