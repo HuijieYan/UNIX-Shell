@@ -33,10 +33,12 @@ public class Ls implements ShellApplication {
 
         try {
             File[] listOfFiles = currDir.listFiles();
-            for (File file : listOfFiles) {
-                if (!file.getName().startsWith(".")) {
-                    writer.write(file.getAbsolutePath().substring(rootDirLength + 1));
-                    writer.write("\t");
+            for(int index = 0; index < listOfFiles.length; index++){
+                if (!listOfFiles[index].getName().startsWith(".")) {
+                    writer.write(listOfFiles[index].getAbsolutePath().substring(rootDirLength + 1));
+                    if(index != listOfFiles.length - 1){
+                        writer.write("\t");
+                    }
                     writer.flush();
                 }
             }

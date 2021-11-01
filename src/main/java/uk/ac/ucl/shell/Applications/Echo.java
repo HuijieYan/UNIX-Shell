@@ -19,9 +19,11 @@ public class Echo implements ShellApplication {
     @Override
     public String exec(List<String> appArgs) throws IOException {
         if(appArgs.size() > 0){
-            for (String arg : appArgs) {
-                writer.write(arg);
-                writer.write(" ");
+            for(int index = 0; index < appArgs.size(); index++){
+                writer.write(appArgs.get(index));
+                if(index != appArgs.size() - 1){
+                    writer.write(" ");
+                }
                 writer.flush();
             }
             writer.write(System.getProperty("line.separator"));
