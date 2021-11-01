@@ -18,10 +18,14 @@ public class Echo implements ShellApplication {
 
     @Override
     public String exec(List<String> appArgs) throws IOException {
+        //System.out.println("echo -> CurrentArgSize: "+appArgs.size());
         if(appArgs.size() > 0){
             for (String arg : appArgs) {
                 writer.write(arg);
-                writer.write(" ");
+                //need refactory
+                if (appArgs.indexOf(arg) != appArgs.size()-1) {
+                    writer.write(" ");
+                }
                 writer.flush();
             }
             writer.write(System.getProperty("line.separator"));

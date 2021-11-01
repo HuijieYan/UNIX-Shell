@@ -23,7 +23,17 @@ public class ShellTest {
         Scanner scn = new Scanner(in);
         assertEquals(scn.next(),"foo");
     }
-    
+
+    @Test
+    public void testEcho() throws Exception {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        Shell_Monad.eval("echo hello", out);
+        Scanner scn = new Scanner(in);
+        //assertEquals(scn.next(),"hello");
+        System.out.println("Returned from shell -> "+scn.next());        
+    }
     
 
 }
