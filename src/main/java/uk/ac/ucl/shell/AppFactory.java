@@ -46,6 +46,12 @@ public class AppFactory {
         case "grep":
             myApp = new Grep(writer, currentDirectory);
             break;
+        case "uniq":
+            myApp = new Uniq(writer, currentDirectory);
+            break;
+        case "sort":
+            myApp = new Sort(writer, currentDirectory);
+            break;
         default:
             throw new RuntimeException(appName + ": unknown application");
         }
