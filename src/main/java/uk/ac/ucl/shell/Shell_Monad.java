@@ -52,7 +52,7 @@ public class Shell_Monad {
             }
         }
     }
-c
+    
     public static void main(String[] args) {
         if (args.length > 0) {
             if (args.length != 2) {
