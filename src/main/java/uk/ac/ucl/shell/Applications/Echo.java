@@ -18,12 +18,10 @@ public class Echo implements ShellApplication {
 
     @Override
     public String exec(List<String> appArgs) throws IOException {
-        //System.out.println("echo -> CurrentArgSize: "+appArgs.size());
         if(appArgs.size() > 0){
-            for (String arg : appArgs) {
-                writer.write(arg);
-                //need refactory
-                if (appArgs.indexOf(arg) != appArgs.size()-1) {
+            for(int index = 0; index < appArgs.size(); index++){
+                writer.write(appArgs.get(index));
+                if(index != appArgs.size() - 1){
                     writer.write(" ");
                 }
                 writer.flush();
