@@ -1,53 +1,46 @@
 package uk.ac.ucl.shell.Applications;
 
-import java.io.File;
+import java.io.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
 
 public class Tools {
-    public static File getFile(String currentDirectory, String fileName){
+    public static Path getPath(String currentDirectory, String fileName) throws IOException {
         File file = new File(currentDirectory + File.separator + fileName);
         if(file.isFile()){
-            return file;
+            return file.toPath();
         }
-        file = new File(currentDirectory);
+        file = new File(fileName);
         if(file.isFile()){
-            return file;
+            return file.toPath();
         }
-        return null;
+        throw new IOException();
     }
 
-    /*
-    public static ArrayList<String> stdinNextLine(int number){
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
-        ArrayList<String> lines = new ArrayList<>();
-        if(number > 0){
-            while(number > 0){
-                try {
-                    String content = input.readLine();
-                    if(content == null){
-                        lines.add(null);
-                        input.close();
-                        break;
-                    }
-                    lines.add(content);
-                }catch (Exception ignored){}
-                number--;
-            }
+    public static ArrayList<String> globbingHelper(String glob, String currentDirectory) throws IOException {
+        ArrayList<String> globbingResult = new ArrayList<>();
+
+        Path dir;
+        DirectoryStream<Path> stream;
+        if(glob.contains(System.getProperty("file.separator")) || !glob.startsWith("*")){
+            dir = Paths.get(glob.substring(0, glob.indexOf("*") - 1));
+            stream = Files.newDirectoryStream(dir, glob.substring(glob.indexOf("*")));
         }else {
-            while (true){
-                try {
-                    String content = input.readLine();
-                    if(content == null){
-                        lines.add(null);
-                        input.close();
-                        break;
-                    }
-                    lines.add(content);
-                }catch (Exception ignored){}
-            }
+            dir = Paths.get(currentDirectory);
+            stream = Files.newDirectoryStream(dir, glob);
         }
 
-        return lines;
+        for (Path entry : stream) {
+            globbingResult.add(entry.getFileName().toString());
+        }
+
+        if(globbingResult.size() == 0){
+            throw new IOException();
+        }
+        return globbingResult;
     }
-     */
 }

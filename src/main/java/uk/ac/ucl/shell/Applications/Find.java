@@ -2,19 +2,19 @@ package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class Find implements ShellApplication {
-    private OutputStreamWriter writer;
     private String currentDirectory;
+    private BufferedReader reader;
+    private OutputStreamWriter writer;
 
-    public Find(OutputStreamWriter writer, String currentDirectory) {
-        this.writer = writer;
+    public Find(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
+        this.reader = reader;
+        this.writer = writer;
     }
 
     @Override

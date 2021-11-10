@@ -1,5 +1,6 @@
 package uk.ac.ucl.shell.Applications;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.List;
 import uk.ac.ucl.shell.ShellApplication;
 
 public class Cd implements ShellApplication {
-
     private String currentDirectory;
 
     public Cd(String currentDirectory) {
@@ -22,17 +22,17 @@ public class Cd implements ShellApplication {
             throw new RuntimeException("cd: too many arguments");
         }
 
-
         String dirString = appArgs.get(0);
-        File dir = new File(currentDirectory, dirString);
-        if (!dir.isDirectory()) {
-            dir = new File(dirString);
-            if(!dir.isDirectory()){
-                throw new RuntimeException("cd: " + dirString + " is not an existing directory");
-            }
+        File dir;
+        if (!(dir = new File(currentDirectory, dirString)).isDirectory() && !(dir = new File(dirString)).isDirectory()) {
+            throw new RuntimeException("cd: " + dirString + " is not an existing directory");
         }
 
-        currentDirectory = dir.getCanonicalPath();
+        try {
+            currentDirectory = dir.getCanonicalPath();
+        }catch (IOException e){
+            throw new RuntimeException("cd: fail to change the directory");
+        }
         return currentDirectory;
     }
 }

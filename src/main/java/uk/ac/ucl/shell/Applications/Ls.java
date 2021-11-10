@@ -1,5 +1,6 @@
 package uk.ac.ucl.shell.Applications;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -8,13 +9,12 @@ import java.util.List;
 import uk.ac.ucl.shell.ShellApplication;
 
 public class Ls implements ShellApplication {
-
-    private OutputStreamWriter writer;
     private String currentDirectory;
+    private OutputStreamWriter writer;
 
-    public Ls(OutputStreamWriter writer, String currentDirectory) {
-        this.writer = writer;
+    public Ls(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
+        this.writer = writer;
     }
     
     @Override
@@ -39,14 +39,13 @@ public class Ls implements ShellApplication {
                     if(index != listOfFiles.length - 1){
                         writer.write("\t");
                     }
-                    writer.flush();
                 }
             }
             if (listOfFiles.length > 0) {
                 writer.write(System.getProperty("line.separator"));
-                writer.flush();
             }
-        } catch (NullPointerException e) {
+            writer.flush();
+        } catch (Exception e) {
             throw new RuntimeException("ls: no such directory");
         }
 

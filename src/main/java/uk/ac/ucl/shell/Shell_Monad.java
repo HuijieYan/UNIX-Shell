@@ -1,8 +1,6 @@
 package uk.ac.ucl.shell;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -38,17 +36,31 @@ public class Shell_Monad {
                 //System.out.println("Current call -> "+call);
                 String appName = call.get(0);
                 // tokens contain <app name> <arguments> where <arguments> is a list of argument
-                ArrayList<String> appArgs = new ArrayList<String>(call.subList(1, call.size()));
-            
-                //check subcommand
-                appArgs = ShellUtil.checkSubCmd(appArgs);
+                ArrayList<String> appArgs = new ArrayList<>(call.subList(1, call.size()));
+
                 //check globbing
-                appArgs = ShellUtil.globbingChecker(appArgs, currentDirectory);
+                //appArgs = ShellUtil.globbingChecker(appArgs, currentDirectory);
+
 
                 //change stream
-                ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
+                ByteArrayOutputStream bufferStream = new ByteArrayOutputStream();
+                OutputStreamWriter bufferWriter = new OutputStreamWriter(bufferStream);
+                BufferedReader bufferedReader = new BufferedReader(new StringReader(bufferStream.toString()));
+
+                ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, bufferWriter).createApp();
+
                 // keep track of directory
                 currentDirectory = myApp.exec(appArgs);
+
+
+                BufferedReader reader = new BufferedReader(new StringReader(bufferStream.toString()));
+                String line;
+                while ((line = reader.readLine()) != null){
+                    writer.write(line);
+                    writer.write(System.getProperty("line.separator"));
+                    writer.flush();
+                }
+
             }
         }
     }
@@ -68,8 +80,7 @@ public class Shell_Monad {
                 System.out.println("COMP0010 shell: " + e.getMessage());
             }
         } else {
-            Scanner input = new Scanner(System.in);
-            try {
+            try (Scanner input = new Scanner(System.in)) {
                 while (true) {
                     String prompt = currentDirectory + "> ";
                     System.out.print(prompt);
@@ -80,8 +91,6 @@ public class Shell_Monad {
                         System.out.println("COMP0010 shell: " + e.getMessage());
                     }
                 }
-            } finally {
-                input.close();
             }
         }
     }
