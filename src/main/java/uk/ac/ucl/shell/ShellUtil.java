@@ -38,7 +38,7 @@ public class ShellUtil {
             for (String curSubCmd:matches) {
                 //System.out.println("SUBCMD found -> " + curSubCmd);
                 ByteArrayOutputStream subStream = new ByteArrayOutputStream();
-                Shell_Monad.eval(curSubCmd, subStream);
+                Shell_newParser.eval(curSubCmd, subStream);
                 //check exception
                 String resultStr = subStream.toString();
                 //tidy string since subShell has newLine at the end
