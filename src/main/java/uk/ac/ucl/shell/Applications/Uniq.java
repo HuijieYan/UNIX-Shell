@@ -4,7 +4,6 @@ import uk.ac.ucl.shell.ShellApplication;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Uniq implements ShellApplication{
@@ -19,55 +18,78 @@ public class Uniq implements ShellApplication{
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
-        if(appArgs.isEmpty()){
-            throw new RuntimeException("Uniq: missing arguments");
-        }else if (appArgs.size() > 2){
-            throw new RuntimeException("Uniq: too many arguments");
+    public String exec(List<String> appArgs) throws RuntimeException {
+        if(appArgs.size() > 2){
+            throw new RuntimeException("uniq: too many argument number");
         }
 
-        String fileName;
-        String option = "";
-        if (appArgs.size() == 2){
+        String option;
+        if(appArgs.size() > 0){
             option = appArgs.get(0);
-            if (!option.equals("-i")){
-                throw new RuntimeException("Uniq: invalid option "+option);
-            }
-            fileName = appArgs.get(1);
-        }else{
-            fileName = appArgs.get(0);
+        }else {
+            option = "";
         }
 
-        try (BufferedReader reader = Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8)) {
-            ArrayList<String> readLines = new ArrayList<>();
-            //lines that already been read
-            String line = reader.readLine();
-            while(line != null){
-                if (!compare(option,line,readLines)){
-                    writer.write(line);
-                    writer.write(System.getProperty("line.separator"));
-                    writer.flush();
-                    readLines.add(line);
-                }
-                line = reader.readLine();
+        if (appArgs.size() == 2){
+            if (!option.equals("-i")){
+                throw new RuntimeException("uniq: invalid option " + option);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Uniq: cannot open " + fileName);
+            execFromStream(option, appArgs.get(1));
+        }else if(appArgs.size() == 1){
+            if(option.equals("-i")){
+                execFromStream(option, null);
+            }else {
+                execFromStream("", appArgs.get(0));
+            }
+        } else {
+            execFromStream(option, null);
         }
 
         return currentDirectory;
     }
 
-    private boolean compare(String option, String line,ArrayList<String> readLine){
-        if (option.equals("")){
-            return readLine.contains(line);
-        }else{
-            for (String str:readLine){
-                if (line.compareToIgnoreCase(str)==0){
-                    return true;
-                }
+    private void execFromStream(String option, String fileName) {
+        BufferedReader reader;
+        if(fileName == null){
+            reader = this.reader;
+        }else {
+            try {
+                reader = Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8);
+            }catch (IOException e){
+                throw new RuntimeException("uniq: cannot open " + fileName);
             }
-            return false;
+        }
+
+        if(reader == null){
+            throw new RuntimeException("uniq: no data from pipe or redirection and can not find file to read");
+        }
+        try {
+            this.writeToBuffer(option, reader);
+        } catch (IOException e) {
+            throw new RuntimeException("uniq: fail to read or write");
+        }
+    }
+
+    private void writeToBuffer(String option, BufferedReader reader) throws IOException {
+        String lastLine = null;
+        String currentLine;
+        while((currentLine = reader.readLine()) != null){
+            if (notEqual(option,currentLine,lastLine)){
+                writer.write(currentLine + System.getProperty("line.separator"));
+            }
+            lastLine = currentLine;
+        }
+        writer.flush();
+    }
+
+    private boolean notEqual(String option, String currentLine, String lastLine){
+        if(lastLine == null){
+            return true;
+        }
+        if (option.equals("")){
+            return !currentLine.equals(lastLine);
+        }else{
+            return !currentLine.equalsIgnoreCase(lastLine);
         }
     }
 }

@@ -1,9 +1,12 @@
 package uk.ac.ucl.shell;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import uk.ac.ucl.shell.Applications.Tools;
 import uk.ac.ucl.shell.Parser.Monad;
 import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
@@ -13,7 +16,7 @@ public class Shell_Monad {
     private static String currentDirectory = System.getProperty("user.dir");
 
     //change to non-static at the moment
-    public static void eval(String cmdline, OutputStream output) throws IOException {
+    public static void eval(String cmdline, OutputStream output) throws RuntimeException {
         OutputStreamWriter writer = new OutputStreamWriter(output);
 
         // Using monad Parser
@@ -47,18 +50,35 @@ public class Shell_Monad {
                 OutputStreamWriter bufferWriter = new OutputStreamWriter(bufferStream);
                 BufferedReader bufferedReader = new BufferedReader(new StringReader(bufferStream.toString()));
 
-                ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, bufferWriter).createApp();
+                ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(appArgs);
+                if(inputAndOutputFile.get(0) != null){
+                    try {
+                        bufferedReader = Files.newBufferedReader(Tools.getPath(currentDirectory, inputAndOutputFile.get(0)), StandardCharsets.UTF_8);
+                    }catch (IOException e){
+                        throw new RuntimeException("can not open the input redirection file: " + inputAndOutputFile.get(0));
+                    }
+                }
 
+                ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, bufferWriter).createApp();
                 // keep track of directory
                 currentDirectory = myApp.exec(appArgs);
 
-
-                BufferedReader reader = new BufferedReader(new StringReader(bufferStream.toString()));
-                String line;
-                while ((line = reader.readLine()) != null){
-                    writer.write(line);
-                    writer.write(System.getProperty("line.separator"));
-                    writer.flush();
+                if(inputAndOutputFile.get(1) != null){
+                    try {
+                        FileWriter outputFile = new FileWriter(inputAndOutputFile.get(1));
+                        outputFile.write(bufferStream.toString());
+                        outputFile.flush();
+                        outputFile.close();
+                    }catch (IOException e){
+                        throw new RuntimeException("fail to write to the output redirection file: " + inputAndOutputFile.get(1));
+                    }
+                }else {
+                    try {
+                        writer.write(bufferStream.toString());
+                        writer.flush();
+                    }catch (IOException e){
+                        throw new RuntimeException("fail to print to the shell command line");
+                    }
                 }
 
             }

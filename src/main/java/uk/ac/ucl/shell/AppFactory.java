@@ -52,7 +52,7 @@ public class AppFactory {
             myApp = new Cut(currentDirectory, reader, writer);
             break;
         case "find":
-            myApp = new Find(currentDirectory, reader, writer);
+            myApp = new Find(currentDirectory, writer);
             break;
         case "uniq":
             myApp = new Uniq(currentDirectory, reader, writer);

@@ -8,54 +8,58 @@ import java.util.regex.Pattern;
 
 public class Find implements ShellApplication {
     private String currentDirectory;
-    private BufferedReader reader;
     private OutputStreamWriter writer;
+    private int rootDirLength;
 
-    public Find(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
+    public Find(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
-        this.reader = reader;
         this.writer = writer;
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
+    public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.size() != 2 && appArgs.size() != 3) {
             throw new RuntimeException("find: Wrong number of arguments");
-        }else if (!((appArgs.get(appArgs.size() - 2)).equals("-name"))) {
-            throw new RuntimeException("find: Wrong argument " + appArgs.get(appArgs.size() - 2));
+        }
+        if (!appArgs.get(appArgs.size() - 2).equals("-name")) {
+            throw new RuntimeException("find: can not find -name argument or lack of pattern");
         }
 
         File rootDirectory;
-        int rootDirLength;
         if (appArgs.size() == 2) {
             rootDirectory = new File(currentDirectory);
-            rootDirLength = currentDirectory.length();
+            this.rootDirLength = currentDirectory.length() + 1;
         } else {
             rootDirectory = new File(appArgs.get(0));
-            rootDirLength = appArgs.get(0).length();
+            this.rootDirLength = appArgs.get(0).length() + 1;
         }
 
         if(!rootDirectory.isDirectory()){
             throw new RuntimeException("find: no such root directory " + rootDirectory.getAbsolutePath());
         }
 
-        Pattern findPattern = Pattern.compile(appArgs.get(appArgs.size() - 1).replaceAll("\\*", "*"));
-        findFilesInDir(writer, rootDirectory, findPattern, rootDirLength + 1);
+        Pattern findPattern = Pattern.compile(appArgs.get(appArgs.size() - 1).replaceAll("\\*", ".*"));
+        try {
+            findFilesInDir(rootDirectory, findPattern);
+        }catch (IOException e){
+            throw new RuntimeException("find: fail to write to the output");
+        }
         return currentDirectory;
     }
 
-    private void findFilesInDir(OutputStreamWriter writer, File currDirectory, Pattern findPattern, int rootDirLength) throws IOException {
+    private void findFilesInDir(File currDirectory, Pattern findPattern) throws IOException {
         try {
             File[] listFiles = currDirectory.listFiles();
             for (File file : listFiles) {
                 if (file.isDirectory()) {
-                    findFilesInDir(writer, file, findPattern, rootDirLength);
+                    findFilesInDir(file, findPattern);
                 } else if (findPattern.matcher(file.getName()).matches()) {
-                    writer.write(file.getAbsolutePath().substring(rootDirLength));
+                    writer.write(file.getAbsolutePath().substring(this.rootDirLength));
                     writer.write(System.getProperty("line.separator"));
-                    writer.flush();
                 }
             }
-        }catch (NullPointerException ignored){}
+            writer.flush();
+        }catch (NullPointerException ignored){
+        }
     }
 }

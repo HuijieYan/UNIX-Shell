@@ -1,7 +1,9 @@
 package uk.ac.ucl.shell;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import uk.ac.ucl.shell.Applications.Tools;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +17,37 @@ import java.util.stream.Collectors;
 // For Shell
 
 public class ShellUtil {
+
+    public static ArrayList<String> checkRedirection(ArrayList<String> appArgs) throws RuntimeException {
+        ArrayList<String> inputAndOutputFile = new ArrayList<>();
+        int inputIndex = appArgs.indexOf("<");
+        if(inputIndex == -1){
+            inputAndOutputFile.add(null);
+        }else {
+            appArgs.remove(inputIndex);
+            if(appArgs.contains("<")){
+                throw new RuntimeException("Error: several files are specified for input");
+            }else if(inputIndex >= appArgs.size()){
+                throw new RuntimeException("Error: no file is specified for input");
+            }
+            inputAndOutputFile.add(appArgs.remove(inputIndex));
+        }
+
+        int outputIndex = appArgs.indexOf(">");
+        if(outputIndex == -1){
+            inputAndOutputFile.add(null);
+        }else {
+            appArgs.remove(outputIndex);
+            if(appArgs.contains(">")){
+                throw new RuntimeException("Error: several files are specified for output");
+            }else if(outputIndex >= appArgs.size()){
+                throw new RuntimeException("Error: no file is specified for output");
+            }
+
+            inputAndOutputFile.add(appArgs.remove(outputIndex));
+        }
+        return inputAndOutputFile;
+    }
     
     public static ArrayList<String> checkSubCmd(ArrayList<String> appArgs) throws IOException {
 
