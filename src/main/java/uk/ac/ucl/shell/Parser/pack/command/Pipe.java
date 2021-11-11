@@ -1,16 +1,14 @@
 package uk.ac.ucl.shell.Parser.pack.command;
 
-import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 
 import uk.ac.ucl.shell.CommandVisitor;
-import uk.ac.ucl.shell.Shell_newParser;
 
 public class Pipe implements Command {
     private ArrayList<Command> parsedArgs;
@@ -31,40 +29,41 @@ public class Pipe implements Command {
         return parsedArgs;
     }
 
-    //visitor
-    public String accept(CommandVisitor visitor, String currentDirectory, OutputStream output) throws IOException {
+    //visitorCall 
+    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws IOException {
         this.myVisitor = visitor;
-        return visitor.visit(this, currentDirectory, output);
+        return visitor.visit(this, currentDirectory, bufferedReader, output);
     }
 
     //tbd
-    public String eval(String currentDirectory, OutputStream output) throws IOException {
+    public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws IOException {
         
         ByteArrayOutputStream subStream;
         subStream = new ByteArrayOutputStream();
 
-        for (Command curCmd : parsedArgs) {
+        //iterate size - 2 times
+        for (int i=0; i < parsedArgs.size()-1; i++) {
+            Command curCmd = parsedArgs.get(i);
+            if (bufferedReader == null) {
 
-                if (subStream.toString().isEmpty()) {
-                    currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, subStream);
+                currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, bufferedReader, subStream);
 
-                } else {
-                    currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, subStream);
-                    //clear stream
-                    subStream.reset();
-                }
-                
+            } else {
+
+                bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
+                currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, bufferedReader, subStream);
+                //clear stream
+                //subStream.reset();
+            }
         }
 
-        //last command
         Command lastCmd = parsedArgs.get(parsedArgs.size()-1);
-        currentDirectory = lastCmd.accept(this.myVisitor, currentDirectory, output);
+        bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
+        lastCmd.accept(this.myVisitor, currentDirectory, bufferedReader, output);
 
-        
+
         return currentDirectory;
  
-       //return currentDirectory;
-
     }
 
 

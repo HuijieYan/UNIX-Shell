@@ -1,8 +1,5 @@
 package uk.ac.ucl.shell.Applications;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,13 +10,14 @@ import java.util.regex.Pattern;
 import uk.ac.ucl.shell.ShellApplication;
 
 public class Grep implements ShellApplication {
-
-    private OutputStreamWriter writer;
     private String currentDirectory;
+    private BufferedReader reader;
+    private OutputStreamWriter writer;
 
-    public Grep(OutputStreamWriter writer, String currentDirectory) {
-        this.writer = writer;
+    public Grep(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
+        this.reader = reader;
+        this.writer = writer;
     }
 
     @Override
@@ -32,12 +30,7 @@ public class Grep implements ShellApplication {
         Charset encoding = StandardCharsets.UTF_8;
         int numOfFiles = appArgs.size() - 1;
         for (int index = 1; index < appArgs.size(); index++){
-            File file = Tools.getFile(currentDirectory, appArgs.get(index));
-            if(file == null){
-                throw new RuntimeException("grep: file" + appArgs.get(index) + "does not exist");
-            }
-
-            try (BufferedReader reader = Files.newBufferedReader(file.toPath(), encoding)) {
+            try (BufferedReader reader = Files.newBufferedReader(Tools.getPath(currentDirectory, appArgs.get(index)), encoding)) {
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     Matcher matcher = grepPattern.matcher(line);

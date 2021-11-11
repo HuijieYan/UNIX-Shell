@@ -1,29 +1,29 @@
 package uk.ac.ucl.shell.Applications;
 import uk.ac.ucl.shell.ShellApplication;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Uniq implements ShellApplication{
-    private OutputStreamWriter writer;
     private String currentDirectory;
+    private BufferedReader reader;
+    private OutputStreamWriter writer;
 
-    public Uniq(OutputStreamWriter outputStreamWriter,String currentDirectory){
+    public Uniq(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
-        this.writer = outputStreamWriter;
+        this.reader = reader;
+        this.writer = writer;
     }
 
     @Override
     public String exec(List<String> appArgs) throws IOException {
         if(appArgs.isEmpty()){
-            throw new RuntimeException("exec: missing arguments");
+            throw new RuntimeException("Uniq: missing arguments");
         }else if (appArgs.size() > 2){
-            throw new RuntimeException("exec: too many arguments");
+            throw new RuntimeException("Uniq: too many arguments");
         }
 
         String fileName;
@@ -31,19 +31,14 @@ public class Uniq implements ShellApplication{
         if (appArgs.size() == 2){
             option = appArgs.get(0);
             if (!option.equals("-i")){
-                throw new RuntimeException("exec: invalid option "+option);
+                throw new RuntimeException("Uniq: invalid option "+option);
             }
             fileName = appArgs.get(1);
         }else{
             fileName = appArgs.get(0);
         }
 
-        File file = Tools.getFile(currentDirectory, fileName);
-        if(file == null){
-            throw new RuntimeException("exec: " + fileName + " does not exist");
-        }
-
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8)) {
             ArrayList<String> readLines = new ArrayList<>();
             //lines that already been read
             String line = reader.readLine();
@@ -57,7 +52,7 @@ public class Uniq implements ShellApplication{
                 line = reader.readLine();
             }
         } catch (IOException e) {
-            throw new RuntimeException("exec: cannot open " + fileName);
+            throw new RuntimeException("Uniq: cannot open " + fileName);
         }
 
         return currentDirectory;

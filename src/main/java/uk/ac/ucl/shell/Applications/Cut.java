@@ -2,10 +2,7 @@ package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,12 +11,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class Cut implements ShellApplication {
-    private OutputStreamWriter writer;
     private String currentDirectory;
+    private BufferedReader reader;
+    private OutputStreamWriter writer;
 
-    public Cut(OutputStreamWriter writer, String currentDirectory) {
-        this.writer = writer;
+    public Cut(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
+        this.reader = reader;
+        this.writer = writer;
     }
 
     @Override
@@ -136,13 +135,8 @@ public class Cut implements ShellApplication {
         }
 
 
-        File file = Tools.getFile(currentDirectory, appArgs.get(2));
-        if(file == null){
-            throw new RuntimeException("cut: file input does not exist.");
-        }
-
         Charset charset = StandardCharsets.UTF_8;
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
+        try (BufferedReader reader = Files.newBufferedReader(Tools.getPath(currentDirectory, appArgs.get(2)), charset)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 byte[] bytes = line.getBytes(charset);

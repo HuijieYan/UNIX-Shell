@@ -1,5 +1,6 @@
 package uk.ac.ucl.shell.Applications;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
@@ -7,13 +8,12 @@ import java.util.List;
 import uk.ac.ucl.shell.ShellApplication;
 
 public class Pwd implements ShellApplication {
-
+    private String currentDirectory;
     private OutputStreamWriter writer;
-    String currentDirectory;
 
-    public Pwd(OutputStreamWriter writer, String currentDirectory) {
-        this.writer = writer;
+    public Pwd(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
+        this.writer = writer;
     }
 
     @Override

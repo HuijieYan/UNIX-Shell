@@ -1,5 +1,6 @@
 package uk.ac.ucl.shell;
 
+import java.io.BufferedReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
@@ -7,20 +8,18 @@ public class AppBuilder {
     
     private String appName;
     private String currentDirectory;
+    private BufferedReader reader;
     private OutputStreamWriter writer;
-    private OutputStream output;
 
-    public AppBuilder(String appName, String currentDirectory, OutputStreamWriter writer, OutputStream output) {
+    public AppBuilder(String appName, String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.appName = appName;
         this.currentDirectory = currentDirectory;
+        this.reader = reader;
         this.writer = writer;
-        this.output = output;
     }
 
     public ShellApplication createApp() {
-        AppFactory myFactory = new AppFactory(this.appName, this.currentDirectory, this.writer, this.output);
-        ShellApplication myApp = myFactory.makeApp();
-        return myApp;
+        return new AppFactory(this.appName, this.currentDirectory,this.reader, this.writer).makeApp();
     }
 
     public static class AppBuilderNested {
@@ -49,14 +48,6 @@ public class AppBuilder {
         }
 
         //build final appBuilder
-        public AppBuilder createBuilder() {
-            return new AppBuilder(
-                nestedAppName,
-                nestedDirectory,
-                nestedWriter,
-                nestedOutput
-            );
-        }
     }
 
 

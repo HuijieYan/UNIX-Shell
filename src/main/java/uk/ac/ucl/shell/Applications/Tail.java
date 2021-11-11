@@ -2,73 +2,84 @@ package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Tail implements ShellApplication {
-
-    private OutputStreamWriter writer;
+public class Tail implements ShellApplication{
     private String currentDirectory;
+    private BufferedReader reader;
+    private OutputStreamWriter writer;
+    private int tailLines;
 
-    public Tail(OutputStreamWriter writer, String currentDirectory) {
-        this.writer = writer;
+    public Tail(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
-    } 
+        this.reader = reader;
+        this.writer = writer;
+    }
 
     @Override
     public String exec(List<String> appArgs) throws IOException {
-        if (appArgs.isEmpty()) {
-            throw new RuntimeException("tail: missing arguments");
-        }else if (appArgs.size() != 1 && appArgs.size() != 3) {
+        tailLines = 10;
+        String fileName = null;
+        int argSize = appArgs.size();
+        if (argSize > 3) {
             throw new RuntimeException("tail: wrong argument number");
-        }else if (appArgs.size() == 3 && !appArgs.get(0).equals("-n")) {
-            throw new RuntimeException("tail: wrong argument " + appArgs.get(0));
-        }
+        }else if (argSize == 3 || argSize == 2) {
+            if(!appArgs.get(0).equals("-n")){
+                throw new RuntimeException("tail: wrong argument " + appArgs.get(0));
+            }
 
-
-        int tailLines = 10;
-        String fileName;
-        if (appArgs.size() == 3) {
             try {
                 tailLines = Integer.parseInt(appArgs.get(1));
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 throw new RuntimeException("tail: wrong argument " + appArgs.get(1));
             }
-            fileName = appArgs.get(2);
-        } else {
+
+            if(argSize == 3){
+                fileName = appArgs.get(2);
+            }
+        }else if(argSize == 1){
             fileName = appArgs.get(0);
         }
 
-        File file = Tools.getFile(currentDirectory, fileName);
-        if(file == null){
-            throw new RuntimeException("tail: " + fileName + " does not exist");
-        }
-
-        ArrayList<String> storage = new ArrayList<>();
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                storage.add(line);
+        if(fileName == null){
+            if(this.reader == null){
+                throw new RuntimeException("tail: no data from pipe or redirection and can not find file to read");
             }
-
-            int index = 0;
-            if (tailLines < storage.size()) {
-                index = storage.size() - tailLines;
+            try {
+                writeToBuffer(this.reader);
+            }catch (IOException e){
+                throw new RuntimeException("tail: fail to read from pipe or redirection");
             }
-            for (int i = index; i < storage.size(); i++) {
-                writer.write(storage.get(i) + System.getProperty("line.separator"));
-                writer.flush();
+        } else {
+            try {
+                writeToBuffer(Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
+            }catch (IOException e){
+                throw new RuntimeException("tail: cannot open " + fileName);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("tail: cannot open " + fileName);
         }
 
         return currentDirectory;
     }
+
+    private void writeToBuffer(BufferedReader reader) throws IOException {
+        ArrayList<String> storage = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            storage.add(line);
+        }
+
+        int index = 0;
+        if (tailLines < storage.size()) {
+            index = storage.size() - tailLines;
+        }
+        for (int i = index; i < storage.size(); i++) {
+            writer.write(storage.get(i) + System.getProperty("line.separator"));
+        }
+        writer.flush();
+    }
+
 }

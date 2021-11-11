@@ -29,7 +29,7 @@ public class ShellUtil {
             .map(mr -> mr.group(1)) 
             .collect(Collectors.toList());
 
-            if (matches == null || matches.size() == 0) {
+            if (matches.size() == 0) {
                 resultArgs.add(curArg);
                 continue;
             }
@@ -59,26 +59,26 @@ public class ShellUtil {
     // And the final tokens will be <command> <arguments> where <arguments> = globbingResult
     private static ArrayList<String> globbingHelper(String glob, String currentDirectory) throws IOException {
 
-        ArrayList<String> globbingResult = new ArrayList<String>();
-        Path dir = Paths.get(currentDirectory);
+        ArrayList<String> globbingResult = new ArrayList<>();
+        Path dir;
+        if(glob.contains(System.getProperty("file.separator")) || !glob.startsWith("*")){
+            dir = Paths.get(glob.substring(0, glob.indexOf("*") - 1));
+        }else {
+            dir = Paths.get(currentDirectory);
+        }
+
         DirectoryStream<Path> stream = Files.newDirectoryStream(dir, glob);
         for (Path entry : stream) {
             globbingResult.add(entry.getFileName().toString());
         }
-        if (globbingResult.isEmpty()) {
-            globbingResult.add(glob);
-        }
+
         return globbingResult;
     }
 
     public static ArrayList<String> globbingChecker(ArrayList<String> appArgs, String curDirectory) throws IOException {
-
         ArrayList<String> result = new ArrayList<>();
 
-        //need refact using Stream
-        for (int i=0; i< appArgs.size(); i++) {
-            String curString = appArgs.get(i);
-
+        for (String curString : appArgs) {
             if (curString.contains("*")) {
                 ArrayList<String> globbingResult = globbingHelper(curString, curDirectory);
                 result.addAll(globbingResult);

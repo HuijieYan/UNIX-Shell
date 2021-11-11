@@ -1,7 +1,7 @@
 package uk.ac.ucl.shell.Parser.pack.command;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -26,9 +26,7 @@ public class Call implements Command {
         return rawCommand;
     }
 
-    public String eval(String currentDirectory, OutputStream output) throws IOException {
-
-        OutputStreamWriter writer = new OutputStreamWriter(output);
+    public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws IOException {
  
         String appName = this.getArgs().get(0);
         // tokens contain <app name> <arguments> where <arguments> is a list of argument
@@ -46,15 +44,21 @@ public class Call implements Command {
         //appArgs = ShellUtil.globbingChecker(appArgs, currentDirectory);
 
         //change stream
-        ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
+        //ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
+        // keep track of directory
+        //currentDirectory = myApp.exec(appArgs);
+        
+        ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, writer).createApp();
+
         // keep track of directory
         currentDirectory = myApp.exec(appArgs);
+
         return currentDirectory;
     }
 
     //visitor 
-    public String accept(CommandVisitor visitor, String currentDirectory, OutputStream output) throws IOException {
-        return visitor.visit(this, currentDirectory, output);
+    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws IOException {
+        return visitor.visit(this, currentDirectory, bufferedReader, output);
     }
 
 }

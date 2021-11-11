@@ -29,41 +29,13 @@ public class Shell_newParser {
         for (Command curCmd: commandList) {
             //access visitor
             try {
-                currentDirectory = curCmd.accept(myVisitor, currentDirectory, output);
+                currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, output);
             } catch (IOException e) {
                 System.out.println("IO error catched");
             }
         
         }
-
-        // System.out.println("result "+result.getValue());
-        // System.out.println("input left "+result.getInputStream());
-
-        //In seq
-        // for (ArrayList<ArrayList<String>> command:result.getValue()) {
-
-        //     //System.out.println("Current Command -> "+command);
-
-        //     //may meet null
-
-        //     //dealing with pipe
-        //     for (ArrayList<String> call: command) {
-        //         //System.out.println("Current call -> "+call);
-        //         String appName = call.get(0);
-        //         // tokens contain <app name> <arguments> where <arguments> is a list of argument
-        //         ArrayList<String> appArgs = new ArrayList<String>(call.subList(1, call.size()));
-            
-        //         //check subcommand
-        //         appArgs = ShellUtil.checkSubCmd(appArgs);
-        //         //check globbing
-        //         appArgs = ShellUtil.globbingChecker(appArgs, currentDirectory);
-
-        //         //change stream
-        //         ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
-        //         // keep track of directory
-        //         currentDirectory = myApp.exec(appArgs);
-        //     }
-        // }
+        
     }
     
     public static void main(String[] args) {

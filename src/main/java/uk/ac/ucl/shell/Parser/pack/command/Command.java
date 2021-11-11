@@ -1,7 +1,7 @@
 package uk.ac.ucl.shell.Parser.pack.command;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
@@ -11,6 +11,6 @@ public interface Command {
     public ArrayList<Command> getCommands();
 
     //visitor
-    public String accept(CommandVisitor visitor, String currentDirectory, OutputStream output) throws IOException;
+    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws IOException;
 
 }

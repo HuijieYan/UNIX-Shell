@@ -80,9 +80,9 @@ public class Shell {
             //tokens contain <app name> <arguments> where <arguments> is a list of argument
             ArrayList<String> appArgs = new ArrayList<String>(tokens.subList(1, tokens.size()));
 
-            ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
+            //ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
             //keep track of directory
-            currentDirectory = myApp.exec(appArgs);
+            //currentDirectory = myApp.exec(appArgs);
 
         }
     }

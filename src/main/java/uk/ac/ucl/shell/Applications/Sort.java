@@ -1,10 +1,8 @@
 package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -13,12 +11,14 @@ import java.util.List;
 import java.io.OutputStreamWriter;
 
 public class Sort implements ShellApplication {
-    private OutputStreamWriter writer;
     private String currentDirectory;
+    private BufferedReader reader;
+    private OutputStreamWriter writer;
 
-    public Sort(OutputStreamWriter outputStreamWriter,String currentDirectory){
+    public Sort(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
-        this.writer = outputStreamWriter;
+        this.reader = reader;
+        this.writer = writer;
     }
 
     @Override
@@ -41,12 +41,7 @@ public class Sort implements ShellApplication {
             fileName = appArgs.get(0);
         }
 
-        File file = Tools.getFile(currentDirectory, fileName);
-        if(file == null){
-            throw new RuntimeException("exec: " + fileName + " does not exist");
-        }
-
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
+        try (BufferedReader reader = Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8)) {
             ArrayList<String> readLines = new ArrayList<>();
             //lines that already been read
             String line = reader.readLine();
