@@ -15,7 +15,7 @@ public class Cd implements ShellApplication {
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
+    public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.isEmpty()) {
             throw new RuntimeException("cd: missing argument");
         } else if (appArgs.size() > 1) {

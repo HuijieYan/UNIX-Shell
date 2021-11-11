@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -22,16 +23,25 @@ public class Cut implements ShellApplication {
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
-        if (appArgs.size() < 3) {
-            throw new RuntimeException("cut: no enough arguments.");
+    public String exec(List<String> appArgs) throws RuntimeException {
+        if (appArgs.size() < 2 || appArgs.size() > 3) {
+            throw new RuntimeException("cut: wrong argument number");
         }
-        if (!appArgs.get(0).equals("-b")) { // cut -b 1,2,3 Dockerfile
+        if (!appArgs.get(0).equals("-b")) {
             throw new RuntimeException("cut: incorrect option input " + appArgs.get(0));
         }
-        if (appArgs.size() > 3) {
-            throw new RuntimeException("cut: too many arguments.");
+        if(appArgs.size() == 2 && this.reader == null){
+            throw new RuntimeException("cut: no data from pipe or redirection and can not find file to read");
         }
+        Path path = null;
+        if(appArgs.size() == 3){
+            try {
+                path = Tools.getPath(currentDirectory, appArgs.get(2));
+            }catch (IOException e){
+                throw new RuntimeException("cut: can not open file " + appArgs.get(2));
+            }
+        }
+
 
         String[] args = appArgs.get(1).split(",");
 
@@ -135,39 +145,51 @@ public class Cut implements ShellApplication {
         }
 
 
-        Charset charset = StandardCharsets.UTF_8;
-        try (BufferedReader reader = Files.newBufferedReader(Tools.getPath(currentDirectory, appArgs.get(2)), charset)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                byte[] bytes = line.getBytes(charset);
-                ArrayList<Integer> bytesToPrintIndexes = new ArrayList<>();
-                for(int index = 0; index < bytes.length; index++){
-                    int bytesToPrintIndex = index + 1;
-                    if(singleIndexes.contains(bytesToPrintIndex)){
-                        bytesToPrintIndexes.add(index);
-                        continue;
-                    }
-
-                    for(ArrayList<Integer> range : ranges){
-                        if(range.get(0) <= bytesToPrintIndex && bytesToPrintIndex <= range.get(1)){
-                            bytesToPrintIndexes.add(index);
-                            break;
-                        }
-                    }
-                }
-
-                byte[] bytesToPrint = new byte[bytesToPrintIndexes.size()];
-                for(int index = 0; index < bytesToPrintIndexes.size(); index++){
-                    bytesToPrint[index] = bytes[bytesToPrintIndexes.get(index)];
-                }
-                writer.write(new String(bytesToPrint, charset));
-                writer.write(System.getProperty("line.separator"));
-                writer.flush();
+        if(appArgs.size() == 2){
+            try {
+                this.writeToBuffer(this.reader, singleIndexes, ranges);
+            }catch (IOException e){
+                System.out.println("cut: fail to read from pipe or redirection");
             }
-        } catch (IOException e) {
-            throw new RuntimeException("cut: cannot open " + appArgs.get(2));
+        }else {
+            try {
+                this.writeToBuffer(Files.newBufferedReader(path, StandardCharsets.UTF_8), singleIndexes, ranges);
+            }catch (IOException e){
+                System.out.println("cut: cannot open " + appArgs.get(2));
+            }
         }
 
         return currentDirectory;
+    }
+
+    private void writeToBuffer(BufferedReader reader, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) throws IOException{
+        Charset charset = StandardCharsets.UTF_8;
+        String line;
+        while ((line = reader.readLine()) != null) {
+            byte[] bytes = line.getBytes(charset);
+            ArrayList<Integer> bytesToPrintIndexes = new ArrayList<>();
+            for(int index = 0; index < bytes.length; index++){
+                int bytesToPrintIndex = index + 1;
+                if(singleIndexes.contains(bytesToPrintIndex)){
+                    bytesToPrintIndexes.add(index);
+                    continue;
+                }
+
+                for(ArrayList<Integer> range : ranges){
+                    if(range.get(0) <= bytesToPrintIndex && bytesToPrintIndex <= range.get(1)){
+                        bytesToPrintIndexes.add(index);
+                        break;
+                    }
+                }
+            }
+
+            byte[] bytesToPrint = new byte[bytesToPrintIndexes.size()];
+            for(int index = 0; index < bytesToPrintIndexes.size(); index++){
+                bytesToPrint[index] = bytes[bytesToPrintIndexes.get(index)];
+            }
+            writer.write(new String(bytesToPrint, charset));
+            writer.write(System.getProperty("line.separator"));
+        }
+        writer.flush();
     }
 }

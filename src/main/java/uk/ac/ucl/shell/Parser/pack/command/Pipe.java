@@ -47,6 +47,7 @@ public class Pipe implements Command {
             if (bufferedReader == null) {
 
                 currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, bufferedReader, subStream);
+                bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
 
             } else {
 

@@ -21,7 +21,7 @@ public class Tail implements ShellApplication{
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
+    public String exec(List<String> appArgs) throws RuntimeException {
         tailLines = 10;
         String fileName = null;
         int argSize = appArgs.size();
@@ -29,7 +29,7 @@ public class Tail implements ShellApplication{
             throw new RuntimeException("tail: wrong argument number");
         }else if (argSize == 3 || argSize == 2) {
             if(!appArgs.get(0).equals("-n")){
-                throw new RuntimeException("tail: wrong argument " + appArgs.get(0));
+                throw new RuntimeException("tail: wrong argument " + appArgs.get(0) + " should be -n");
             }
 
             try {

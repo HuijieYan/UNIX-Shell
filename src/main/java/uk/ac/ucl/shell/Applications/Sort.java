@@ -22,51 +22,81 @@ public class Sort implements ShellApplication {
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
-        if(appArgs.isEmpty()){
-            throw new RuntimeException("sort: missing arguments");
-        }else if (appArgs.size() > 2){
-            throw new RuntimeException("sort: too many arguments");
+    public String exec(List<String> appArgs) throws RuntimeException {
+        if(appArgs.size() > 2){
+            throw new RuntimeException("sort: wrong argument number");
         }
 
-        String fileName;
-        String option = "";
-        if (appArgs.size() == 2){
+        String option;
+        if(appArgs.size() > 0){
             option = appArgs.get(0);
-            if (!option.equals("-r")){
-                throw new RuntimeException("exec: invalid option "+option);
-            }
-            fileName = appArgs.get(1);
-        }else{
-            fileName = appArgs.get(0);
+        }else {
+            option = "";
         }
 
-        try (BufferedReader reader = Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8)) {
-            ArrayList<String> readLines = new ArrayList<>();
-            //lines that already been read
-            String line = reader.readLine();
-            while(line != null){
-                readLines.add(line);
-                line = reader.readLine();
+        if (appArgs.size() == 2){
+            if (!option.equals("-r")){
+                throw new RuntimeException("sort: invalid option "+option);
             }
-            readLines = sort(option,readLines);
-            for(String str:readLines){
-                writer.write(str);
-                writer.write(System.getProperty("line.separator"));
-                writer.flush();
+            execFromStream(option, appArgs.get(1));
+        }else if(appArgs.size() == 1){
+            if(option.equals("-r")){
+                execFromStream(option, null);
+            }else {
+                execFromStream("", appArgs.get(0));
             }
-        } catch (IOException e) {
-            throw new RuntimeException("exec: cannot open " + fileName);
+        }else {
+            execFromStream(option, null);
         }
 
         return currentDirectory;
     }
 
-    private ArrayList<String> sort(String option,ArrayList<String> readLines){
+    private void execFromStream(String option, String fileName) {
+        BufferedReader reader;
+        if(fileName == null){
+            reader = this.reader;
+        }else {
+            try {
+                reader = Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8);
+            }catch (IOException e){
+                throw new RuntimeException("sort: cannot open " + fileName);
+            }
+        }
+
+        if(reader == null){
+            throw new RuntimeException("sort: no data from pipe or redirection and can not find file to read");
+        }
+        try {
+            ArrayList<String> lines = readFromReader(reader);
+            sort(option, lines);
+            writeToBuffer(lines);
+        }catch (IOException e){
+            throw new RuntimeException("sort: fail to read or write");
+        }
+    }
+
+    private void sort(String option, ArrayList<String> readLines){
         Collections.sort(readLines);
         if (option.equals("-r")){
             Collections.reverse(readLines);
         }
-        return readLines;
+    }
+
+    private ArrayList<String> readFromReader(BufferedReader reader) throws IOException{
+        ArrayList<String> lines = new ArrayList<>();
+        String line;
+        while((line = reader.readLine()) != null){
+            lines.add(line);
+        }
+        return lines;
+    }
+
+    private void writeToBuffer(ArrayList<String> lines) throws IOException{
+        for(String str : lines){
+            writer.write(str);
+            writer.write(System.getProperty("line.separator"));
+        }
+        writer.flush();
     }
 }

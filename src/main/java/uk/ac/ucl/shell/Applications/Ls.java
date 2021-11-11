@@ -18,7 +18,7 @@ public class Ls implements ShellApplication {
     }
     
     @Override
-    public String exec(List<String> appArgs) throws IOException {
+    public String exec(List<String> appArgs) throws RuntimeException {
         File currDir;
         int rootDirLength;
         if (appArgs.isEmpty()) {

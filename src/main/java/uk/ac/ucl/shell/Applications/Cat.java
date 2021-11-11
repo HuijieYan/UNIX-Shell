@@ -21,7 +21,7 @@ public class Cat implements ShellApplication {
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
+    public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.isEmpty()) {
             if(this.reader == null){
                 throw new RuntimeException("cat: no data from pipe or redirection and can not find file to read");

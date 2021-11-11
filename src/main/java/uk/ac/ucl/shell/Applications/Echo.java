@@ -16,7 +16,7 @@ public class Echo implements ShellApplication {
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
+    public String exec(List<String> appArgs) throws RuntimeException {
         if(appArgs.size() > 0){
             try {
                 for(int index = 0; index < appArgs.size(); index++){
