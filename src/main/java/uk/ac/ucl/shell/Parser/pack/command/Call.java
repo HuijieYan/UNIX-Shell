@@ -1,14 +1,20 @@
 package uk.ac.ucl.shell.Parser.pack.command;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 import uk.ac.ucl.shell.AppBuilder;
 import uk.ac.ucl.shell.CommandVisitor;
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
+import uk.ac.ucl.shell.Applications.Tools;
 
 public class Call implements Command {
     private ArrayList<String> rawCommand;
@@ -26,32 +32,58 @@ public class Call implements Command {
         return rawCommand;
     }
 
+
     public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws IOException {
  
         String appName = this.getArgs().get(0);
         // tokens contain <app name> <arguments> where <arguments> is a list of argument
         ArrayList<String> appArgs = new ArrayList<String>(this.getArgs().subList(1, this.getArgs().size()));
 
-        System.out.print("Current arg -> ");
-        for (String curArg : appArgs) {
-            System.out.print(curArg + " ");
-        }
-        System.out.println("");
+        //check subcommand (layer3) --need fix (check single quote)
+        appArgs = ShellUtil.checkSubCmd(appArgs);
 
-        //check subcommand
-        //appArgs = ShellUtil.checkSubCmd(appArgs);
+        //check redirection
+
+        ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(appArgs);
+        if(inputAndOutputFile.get(0) != null){
+            try {
+                bufferedReader = Files.newBufferedReader(Tools.getPath(currentDirectory, inputAndOutputFile.get(0)), StandardCharsets.UTF_8);
+            }catch (IOException e){
+                throw new RuntimeException("can not open the input redirection file: " + inputAndOutputFile.get(0));
+            }
+        }
+
         //check globbing
         //appArgs = ShellUtil.globbingChecker(appArgs, currentDirectory);
 
-        //change stream
-        //ShellApplication myApp = new AppBuilder(appName, currentDirectory, writer, output).createApp();
-        // keep track of directory
-        //currentDirectory = myApp.exec(appArgs);
-        
-        ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, writer).createApp();
+        OutputStream bufferedStream = new ByteArrayOutputStream();
+        OutputStreamWriter innerWriter = new OutputStreamWriter(bufferedStream);
+
+        ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, innerWriter).createApp();
 
         // keep track of directory
         currentDirectory = myApp.exec(appArgs);
+
+        //redirection part
+        if(inputAndOutputFile.get(1) != null) {
+            try {
+                FileWriter outputFile = new FileWriter(inputAndOutputFile.get(1));
+                outputFile.write(bufferedStream.toString());
+                outputFile.flush();
+                outputFile.close();
+            }catch (IOException e){
+                throw new RuntimeException("fail to write to the output redirection file: " + inputAndOutputFile.get(1));
+            }
+        
+        } else {
+            try {
+                writer.write(bufferedStream.toString());
+                writer.flush();
+            }catch (IOException e){
+                throw new RuntimeException("fail to print to the shell command line");
+            }
+            
+        }
 
         return currentDirectory;
     }

@@ -62,6 +62,9 @@ public class ShellUtil {
             .map(mr -> mr.group(1)) 
             .collect(Collectors.toList());
 
+            //check if not in singlequote
+
+
             if (matches.size() == 0) {
                 resultArgs.add(curArg);
                 continue;
@@ -71,7 +74,7 @@ public class ShellUtil {
             for (String curSubCmd:matches) {
                 //System.out.println("SUBCMD found -> " + curSubCmd);
                 ByteArrayOutputStream subStream = new ByteArrayOutputStream();
-                Shell_newParser.eval(curSubCmd, subStream);
+                Shell.eval(curSubCmd, subStream);
                 //check exception
                 String resultStr = subStream.toString();
                 //tidy string since subShell has newLine at the end
