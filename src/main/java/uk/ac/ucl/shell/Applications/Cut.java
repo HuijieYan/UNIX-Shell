@@ -68,7 +68,6 @@ public class Cut implements ShellApplication {
                 }
 
             } else {
-                //char[] argChars = arg.toCharArray();
                 if (arg.charAt(0) == '-') {
                     String stringIndex = arg.substring(1);
                     int index = 0;

@@ -1,0 +1,21 @@
+ParserBuilder p = new ParserBuilder();
+        Monad<ArrayList<Command>> sat = p.parseCommand();
+        //Monad<ArrayList<String>> sat = p.parseCall();
+        //System.out.println("Result: "+sat.parse("   < abc > abc abc sdf abc").getValue());
+        String input = "cat test1.txt | > test5.txt";
+        System.out.println(input);
+        ArrayList<Command> seq = sat.parse(input).getValue();
+        for(Command command : seq){
+            if(command instanceof Call){
+                System.out.println(((Call) command).getArgs());
+            }else {
+                ArrayList<Command> commandsInPipe = command.getCommands();
+                for(Command commandInPipe : commandsInPipe){
+                    if(commandInPipe instanceof Call) {
+                        System.out.println(((Call) commandInPipe).getArgs());
+                    }
+                }
+            }
+        }
+        System.out.println("Result: "+sat.parse(input).getValue());
+        System.out.println("Input Left: "+sat.parse(input).getInputStream());
