@@ -34,8 +34,7 @@ public class Shell {
                 System.out.println("IO error catched");
             }
         
-        }
-        
+        }   
     }
     
     public static void main(String[] args) {

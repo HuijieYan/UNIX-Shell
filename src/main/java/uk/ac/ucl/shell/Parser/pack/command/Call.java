@@ -35,16 +35,22 @@ public class Call implements Command {
 
     public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws IOException {
  
-        String appName = this.getArgs().get(0);
-        // tokens contain <app name> <arguments> where <arguments> is a list of argument
-        ArrayList<String> appArgs = new ArrayList<String>(this.getArgs().subList(1, this.getArgs().size()));
+        
+        ArrayList<String> cmdArgs = this.getArgs();
+        String appName = cmdArgs.get(0);
 
-        //check subcommand (layer3) --need fix (check single quote)
-        appArgs = ShellUtil.checkSubCmd(appArgs);
+        //check subcommand (layer3)
+        //only do check when content not in single quote
+        cmdArgs = ShellUtil.checkSubCmd(cmdArgs);
+        appName = cmdArgs.get(0);
+
+        //debug
+        //System.out.println("App name -> " + appName);
+        // tokens contain <app name> <arguments> where <arguments> is a list of argument
+        ArrayList<String> appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
 
         //check redirection
-
-        ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(appArgs);
+        ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(cmdArgs);
         if(inputAndOutputFile.get(0) != null){
             try {
                 bufferedReader = Files.newBufferedReader(Tools.getPath(currentDirectory, inputAndOutputFile.get(0)), StandardCharsets.UTF_8);
@@ -54,7 +60,16 @@ public class Call implements Command {
         }
 
         //check globbing
-        //appArgs = ShellUtil.globbingChecker(appArgs, currentDirectory);
+        cmdArgs = ShellUtil.globbingChecker(cmdArgs, currentDirectory);
+        appName = cmdArgs.get(0);
+        appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+
+        //extract stuff inside quotes
+        cmdArgs = ShellUtil.processSingleQuotes(cmdArgs);
+        cmdArgs = ShellUtil.processDoubleQuotes(cmdArgs);
+        appName = cmdArgs.get(0);
+        appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+
 
         OutputStream bufferedStream = new ByteArrayOutputStream();
         OutputStreamWriter innerWriter = new OutputStreamWriter(bufferedStream);
