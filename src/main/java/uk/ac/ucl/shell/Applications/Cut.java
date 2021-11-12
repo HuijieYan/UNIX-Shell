@@ -70,7 +70,7 @@ public class Cut implements ShellApplication {
             } else {
                 if (arg.charAt(0) == '-') {
                     String stringIndex = arg.substring(1);
-                    int index = 0;
+                    int index;
                     try {
                         index = Integer.parseInt(stringIndex);
                     } catch (NumberFormatException e) {
@@ -87,7 +87,7 @@ public class Cut implements ShellApplication {
                     }
 
                 } else if (arg.charAt(arg.length() - 1) == '-') {
-                    String stringIndex = arg.substring(0, args.length);
+                    String stringIndex = arg.substring(0, args.length - 1);
                     int index;
                     try {
                         index = Integer.parseInt(stringIndex);
