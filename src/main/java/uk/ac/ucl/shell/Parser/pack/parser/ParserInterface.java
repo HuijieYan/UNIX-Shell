@@ -1,5 +1,4 @@
 package uk.ac.ucl.shell.Parser.pack.parser;
-
 import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
 /*
     Type V is the value.
