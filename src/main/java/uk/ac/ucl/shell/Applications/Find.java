@@ -10,6 +10,7 @@ public class Find implements ShellApplication {
     private String currentDirectory;
     private OutputStreamWriter writer;
     private int rootDirLength;
+    private boolean isChildDir;
 
     public Find(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
@@ -28,14 +29,19 @@ public class Find implements ShellApplication {
         File rootDirectory;
         if (appArgs.size() == 2) {
             rootDirectory = new File(currentDirectory);
-            this.rootDirLength = currentDirectory.length() + 1;
+            this.rootDirLength = currentDirectory.length();
         } else {
             rootDirectory = new File(appArgs.get(0));
-            this.rootDirLength = appArgs.get(0).length() + 1;
-        }
-
-        if(!rootDirectory.isDirectory()){
-            throw new RuntimeException("find: no such root directory " + rootDirectory.getAbsolutePath());
+            if(rootDirectory.getAbsolutePath().startsWith(currentDirectory)){
+                this.rootDirLength = currentDirectory.length() + 1;
+                this.isChildDir = true;
+            }else {
+                this.rootDirLength = -1;
+                this.isChildDir = false;
+            }
+            if(!rootDirectory.isDirectory()){
+                throw new RuntimeException("find: no such root directory " + appArgs.get(0));
+            }
         }
 
         Pattern findPattern = Pattern.compile(appArgs.get(appArgs.size() - 1).replaceAll("\\*", ".*"));
@@ -54,7 +60,13 @@ public class Find implements ShellApplication {
                 if (file.isDirectory()) {
                     findFilesInDir(file, findPattern);
                 } else if (findPattern.matcher(file.getName()).matches()) {
-                    writer.write(file.getAbsolutePath().substring(this.rootDirLength));
+                    if(this.rootDirLength == -1){
+                        writer.write(file.getAbsolutePath());
+                    }else if(isChildDir){
+                        writer.write(file.getAbsolutePath().substring(this.rootDirLength));
+                    } else {
+                        writer.write("." + file.getAbsolutePath().substring(this.rootDirLength));
+                    }
                     writer.write(System.getProperty("line.separator"));
                 }
             }

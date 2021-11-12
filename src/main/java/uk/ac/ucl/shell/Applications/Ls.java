@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
@@ -19,23 +21,25 @@ public class Ls implements ShellApplication {
     
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
-        File currDir;
-        int rootDirLength;
-        if (appArgs.isEmpty()) {
-            currDir = new File(currentDirectory);
-            rootDirLength = currentDirectory.length();
-        } else if (appArgs.size() == 1) {
-            currDir = new File(appArgs.get(0));
-            rootDirLength = appArgs.get(0).length();
-        } else {
+        if(appArgs.size() > 1){
             throw new RuntimeException("ls: too many arguments");
         }
 
         try {
+            File currDir;
+            int rootDirLength;
+            if (appArgs.isEmpty()) {
+                currDir = new File(currentDirectory);
+                rootDirLength = currentDirectory.length() + 1;
+            } else {
+                currDir = new File(appArgs.get(0));
+                rootDirLength = currDir.getCanonicalPath().length() + 1;
+            }
+
             File[] listOfFiles = currDir.listFiles();
             for(int index = 0; index < listOfFiles.length; index++){
                 if (!listOfFiles[index].getName().startsWith(".")) {
-                    writer.write(listOfFiles[index].getAbsolutePath().substring(rootDirLength + 1));
+                    writer.write(listOfFiles[index].getCanonicalPath().substring(rootDirLength));
                     if(index != listOfFiles.length - 1){
                         writer.write("\t");
                     }
@@ -46,7 +50,7 @@ public class Ls implements ShellApplication {
             }
             writer.flush();
         } catch (Exception e) {
-            throw new RuntimeException("ls: no such directory");
+            throw new RuntimeException("ls: no such directory: " + appArgs.get(0));
         }
 
         return currentDirectory;

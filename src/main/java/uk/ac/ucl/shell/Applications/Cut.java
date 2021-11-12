@@ -88,8 +88,8 @@ public class Cut implements ShellApplication {
                     }
 
                 } else if (arg.charAt(arg.length() - 1) == '-') {
-                    String stringIndex = arg.substring(0, args.length - 1);
-                    int index = 0;
+                    String stringIndex = arg.substring(0, args.length);
+                    int index;
                     try {
                         index = Integer.parseInt(stringIndex);
                     } catch (NumberFormatException e) {
