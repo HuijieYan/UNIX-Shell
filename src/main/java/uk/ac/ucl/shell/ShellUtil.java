@@ -54,10 +54,8 @@ public class ShellUtil {
 
     //check if content around by singleQuote
     public static boolean isInSingleQuote(String cmd) {
-        Pattern singleQuotePattern = Pattern.compile("'([^']*)'");
-        Matcher matcher = singleQuotePattern.matcher(cmd);
-        boolean matchFound = matcher.find();
-        if (matchFound) {
+        //check if first & last char is '
+        if (cmd.charAt(0) == '\'' && cmd.charAt(cmd.length()-1) == '\'') {
             return true;
         }
         return false;
@@ -65,10 +63,8 @@ public class ShellUtil {
 
     //check if content around by doubleQuote
     public static boolean isInDoubleQuote(String cmd) {
-        Pattern singleQuotePattern = Pattern.compile("\"([^\"]*)\"");
-        Matcher matcher = singleQuotePattern.matcher(cmd);
-        boolean matchFound = matcher.find();
-        if (matchFound) {
+        //check if first & last char is '
+        if (cmd.charAt(0) == '"' && cmd.charAt(cmd.length()-1) == '"') {
             return true;
         }
         return false;
@@ -150,7 +146,7 @@ public class ShellUtil {
 
         for (String curArg:callCmd) {
 
-            //check if not in singlequote
+            //continue if not in singlequote
             if (isInSingleQuote(curArg)) {
                 resultCmd.add(curArg);
                 continue;
@@ -162,34 +158,47 @@ public class ShellUtil {
             .filter(mr -> mr.group(1) != null) 
             .map(mr -> mr.group(1)) 
             .collect(Collectors.toList());
+            
+            //debug
+            // for (String curMatch:matches) {
+            //     System.out.println("mathed -> "+curMatch);
+            // }
 
             if (matches.size() == 0) {
                 resultCmd.add(curArg);
                 continue;
             }
-
+            
             //need refactory
-            for (String curSubCmd:matches) {
+            for (String curSubCmd: matches) {
+
                 //System.out.println("SUBCMD found -> " + curSubCmd);
                 ByteArrayOutputStream subStream = new ByteArrayOutputStream();
                 Shell.eval(curSubCmd, subStream);
                 //check exception
                 String resultStr = subStream.toString();
                 //tidy string since subShell has newLine at the end
-                resultStr = resultStr.replace(System.getProperty("line.separator"), "");
+                //System.out.println("resultStr = "+resultStr + " last index of result str-> " + matches.lastIndexOf(resultStr) + " matches size -> "+ (matches.size()-1));
+
+                resultStr = resultStr.replace(System.getProperty("line.separator"), " ");
+                //delete last space
+                resultStr = resultStr.substring(0, resultStr.length()-1);
                 //System.out.println("Result from sub shell -> " + resultStr);
-                curArg = curArg.replace("`" + curSubCmd+ "`", resultStr);
+                curArg = curArg.replace("`" + curSubCmd + "`", resultStr);
                 //System.out.println("Replaced arg -> "+curArg);
 
                 resultCmd.add(curArg);
             }
+
             
         }
 
         //debug
+        // System.out.print("Curcmd -> ");
         // for (String curCmd: resultCmd) {
-        //     System.out.println("Curcmd -> " + curCmd);
+        //     System.out.print(curCmd+" ");
         // }
+        // System.out.println("");
 
         return resultCmd;
     }
@@ -199,23 +208,30 @@ public class ShellUtil {
     // eg. `*.txt` & there are "1.txt, 2.txt, 3.txt in the working directory"
     // Then globbingResult will be a list of strings {"1.txt","2.txt","3.txt"}
     // And the final tokens will be <command> <arguments> where <arguments> = globbingResult
-    private static ArrayList<String> globbingHelper(String glob, String currentDirectory) throws IOException {
+    // private static ArrayList<String> globbingHelper(String glob, String currentDirectory) throws IOException {
+    //     ArrayList<String> globbingResult = new ArrayList<>();
 
-        ArrayList<String> globbingResult = new ArrayList<>();
-        Path dir;
-        if(glob.contains(System.getProperty("file.separator")) || !glob.startsWith("*")){
-            dir = Paths.get(glob.substring(0, glob.indexOf("*") - 1));
-        }else {
-            dir = Paths.get(currentDirectory);
-        }
+    //     Path dir;
+    //     DirectoryStream<Path> stream;
+    //     if(glob.contains(System.getProperty("file.separator")) || !glob.startsWith("*")){
+    //         dir = Paths.get(glob.substring(0, glob.indexOf("*") - 1));
+    //         stream = Files.newDirectoryStream(dir, glob.substring(glob.indexOf("*")));
+    //     }else {
+    //         dir = Paths.get(currentDirectory);
+    //         stream = Files.newDirectoryStream(dir, glob);
+    //     }
 
-        DirectoryStream<Path> stream = Files.newDirectoryStream(dir, glob);
-        for (Path entry : stream) {
-            globbingResult.add(entry.getFileName().toString());
-        }
+    //     for (Path entry : stream) {
+    //         globbingResult.add(entry.getFileName().toString());
+    //     }
 
-        return globbingResult;
-    }
+    //     if(globbingResult.size() == 0){
+    //         throw new IOException();
+    //     }
+    //     return globbingResult;
+    // }
+
+
 
     //need refactory
     public static ArrayList<String> globbingChecker(ArrayList<String> appArgs, String curDirectory) throws IOException {
@@ -226,7 +242,8 @@ public class ShellUtil {
             //only if unquoted
             if (!isInDoubleQuote(curString) && !isInSingleQuote(curString)) {
                 if (curString.contains("*")) {
-                    ArrayList<String> globbingResult = globbingHelper(curString, curDirectory);
+
+                    ArrayList<String> globbingResult = Tools.globbingHelper(curString, curDirectory);
                     result.addAll(globbingResult);
                 } else {
                     result.add(curString);

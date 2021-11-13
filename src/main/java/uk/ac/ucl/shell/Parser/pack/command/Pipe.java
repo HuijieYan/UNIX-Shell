@@ -42,26 +42,20 @@ public class Pipe implements Command {
         subStream = new ByteArrayOutputStream();
 
         //iterate size - 2 times
-        for (int i=0; i < parsedArgs.size()-1; i++) {
-            Command curCmd = parsedArgs.get(i);
+        for (Command curCmd:parsedArgs) {
             if (bufferedReader == null) {
-
                 currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, bufferedReader, subStream);
                 bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
-
             } else {
-
                 bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
-                currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, bufferedReader, subStream);
-                //clear stream
-                //subStream.reset();
+                subStream.reset();
+                if (parsedArgs.lastIndexOf(curCmd) == parsedArgs.size()-1) {
+                    currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, bufferedReader, output);
+                } else {
+                    currentDirectory = curCmd.accept(this.myVisitor, currentDirectory, bufferedReader, subStream);
+                }
             }
         }
-
-        Command lastCmd = parsedArgs.get(parsedArgs.size()-1);
-        bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
-        lastCmd.accept(this.myVisitor, currentDirectory, bufferedReader, output);
-
 
         return currentDirectory;
  
