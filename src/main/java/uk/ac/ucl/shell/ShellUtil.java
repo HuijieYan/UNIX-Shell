@@ -208,28 +208,34 @@ public class ShellUtil {
     // eg. `*.txt` & there are "1.txt, 2.txt, 3.txt in the working directory"
     // Then globbingResult will be a list of strings {"1.txt","2.txt","3.txt"}
     // And the final tokens will be <command> <arguments> where <arguments> = globbingResult
-    // private static ArrayList<String> globbingHelper(String glob, String currentDirectory) throws IOException {
-    //     ArrayList<String> globbingResult = new ArrayList<>();
 
-    //     Path dir;
-    //     DirectoryStream<Path> stream;
-    //     if(glob.contains(System.getProperty("file.separator")) || !glob.startsWith("*")){
-    //         dir = Paths.get(glob.substring(0, glob.indexOf("*") - 1));
-    //         stream = Files.newDirectoryStream(dir, glob.substring(glob.indexOf("*")));
-    //     }else {
-    //         dir = Paths.get(currentDirectory);
-    //         stream = Files.newDirectoryStream(dir, glob);
-    //     }
+    /* has bugggggggggggg */
+    private static ArrayList<String> globbingHelper(String glob, String currentDirectory) throws IOException {
+        ArrayList<String> globbingResult = new ArrayList<>();
 
-    //     for (Path entry : stream) {
-    //         globbingResult.add(entry.getFileName().toString());
-    //     }
+        Path dir;
+        DirectoryStream<Path> stream;
+        if(glob.contains(System.getProperty("file.separator")) || !glob.startsWith("*")){
+            dir = Paths.get(glob.substring(0, glob.indexOf("*") - 1));
+            stream = Files.newDirectoryStream(dir, glob.substring(glob.indexOf("*")));
+        } else {
+            dir = Paths.get(currentDirectory);
+            stream = Files.newDirectoryStream(dir, glob);
+        }
 
-    //     if(globbingResult.size() == 0){
-    //         throw new IOException();
-    //     }
-    //     return globbingResult;
-    // }
+        for (Path entry : stream) {
+            if (dir.equals(Paths.get(currentDirectory))) {
+                globbingResult.add(entry.getFileName().toString());
+            } else {
+                globbingResult.add(glob.substring(0, glob.indexOf("*") - 1)+ File.separator + entry.getFileName().toString());
+            }
+        }
+
+        if(globbingResult.size() == 0){
+            throw new IOException();
+        }
+        return globbingResult;
+    }
 
 
 
@@ -242,8 +248,7 @@ public class ShellUtil {
             //only if unquoted
             if (!isInDoubleQuote(curString) && !isInSingleQuote(curString)) {
                 if (curString.contains("*")) {
-
-                    ArrayList<String> globbingResult = Tools.globbingHelper(curString, curDirectory);
+                    ArrayList<String> globbingResult = globbingHelper(curString, curDirectory);
                     result.addAll(globbingResult);
                 } else {
                     result.add(curString);

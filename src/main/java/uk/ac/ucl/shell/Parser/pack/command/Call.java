@@ -65,6 +65,7 @@ public class Call implements Command {
         appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
 
         //extract stuff inside quotes
+        //has bug
         cmdArgs = ShellUtil.processSingleQuotes(cmdArgs);
         cmdArgs = ShellUtil.processDoubleQuotes(cmdArgs);
         appName = cmdArgs.get(0);
