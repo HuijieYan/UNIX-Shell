@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 public class Find implements ShellApplication {
     private String currentDirectory;
     private OutputStreamWriter writer;
-    private int rootDirLength;
-    private boolean isChildDir;
+    private int rootDirLength = -1;
+    private boolean isChildDir = false;
 
     public Find(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
@@ -31,15 +31,11 @@ public class Find implements ShellApplication {
             rootDirectory = new File(currentDirectory);
             this.rootDirLength = currentDirectory.length();
         } else {
-            rootDirectory = new File(appArgs.get(0));
-            if(rootDirectory.getAbsolutePath().startsWith(currentDirectory)){
+            rootDirectory = new File(currentDirectory, appArgs.get(0));
+            if(rootDirectory.isDirectory()){
                 this.rootDirLength = currentDirectory.length() + 1;
                 this.isChildDir = true;
-            }else {
-                this.rootDirLength = -1;
-                this.isChildDir = false;
-            }
-            if(!rootDirectory.isDirectory()){
+            } else if(!(rootDirectory = new File(appArgs.get(0))).isDirectory() || !rootDirectory.isAbsolute()){
                 throw new RuntimeException("find: no such root directory " + appArgs.get(0));
             }
         }

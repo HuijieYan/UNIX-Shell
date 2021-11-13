@@ -87,7 +87,7 @@ public class Cut implements ShellApplication {
                     }
 
                 } else if (arg.charAt(arg.length() - 1) == '-') {
-                    String stringIndex = arg.substring(0, args.length - 1);
+                    String stringIndex = arg.substring(0, arg.length() - 1);
                     int index;
                     try {
                         index = Integer.parseInt(stringIndex);
@@ -105,7 +105,7 @@ public class Cut implements ShellApplication {
                     }
 
                 } else {
-                    int rangeSymbolIndex = 0;
+                    int rangeSymbolIndex;
                     rangeSymbolIndex = arg.indexOf('-');
                     ArrayList<Integer> range = new ArrayList<>();
 

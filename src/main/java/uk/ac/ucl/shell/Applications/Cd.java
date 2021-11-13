@@ -24,7 +24,7 @@ public class Cd implements ShellApplication {
 
         String dirString = appArgs.get(0);
         File dir;
-        if (!(dir = new File(currentDirectory, dirString)).isDirectory() && !(dir = new File(dirString)).isDirectory()) {
+        if (!(dir = new File(currentDirectory, dirString)).isDirectory() && (!(dir = new File(dirString)).isDirectory() || !dir.isAbsolute())) {
             throw new RuntimeException("cd: " + dirString + " is not an existing directory");
         }
 
