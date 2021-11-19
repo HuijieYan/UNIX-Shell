@@ -2,14 +2,12 @@ package uk.ac.ucl.shell;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import uk.ac.ucl.shell.Parser.Monad;
 import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
-import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
 public class Shell {
 
@@ -25,6 +23,7 @@ public class Shell {
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
 
+        //TBD: need to raise error when parsing is failed
         String stuffLeft = sat.parse(cmdline).getInputStream();
         //System.out.println("stuff left (should be empty if parese success) -> "+stuffLeft);
 

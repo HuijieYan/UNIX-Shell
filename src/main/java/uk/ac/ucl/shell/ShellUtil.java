@@ -1,9 +1,7 @@
 package uk.ac.ucl.shell;
 
-import uk.ac.ucl.shell.Applications.Tools;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,142 +48,6 @@ public class ShellUtil {
         return inputAndOutputFile;
     }
 
-    //need refactory
-
-    //check if content around by singleQuote
-    public static boolean isInSingleQuote(String cmd) {
-        //check if first & last char is '
-        if (cmd.charAt(0) == '\'' && cmd.charAt(cmd.length()-1) == '\'') {
-            return true;
-        }
-        return false;
-    }
-
-    //check if content around by doubleQuote
-    public static boolean isInDoubleQuote(String cmd) {
-        //check if first & last char is '
-        if (cmd.charAt(0) == '"' && cmd.charAt(cmd.length()-1) == '"') {
-            return true;
-        }
-        return false;
-    }
-
-    /*
-    public static ArrayList<String> processSingleQuotes(ArrayList<String> callCmd) {
-        
-        ArrayList<String> resultCmd = new ArrayList<>();
-        for (String curArg:callCmd) {
-
-            List<String> matches = Pattern.compile("'([^']*)'")
-            .matcher(curArg)
-            .results()
-            .filter(mr -> mr.group(1) != null) 
-            .map(mr -> mr.group(1)) 
-            .collect(Collectors.toList());
-
-            if (matches.size() == 0) {
-                resultCmd.add(curArg);
-                continue;
-            }
-
-            //need refactory
-            for (String curSubCmd:matches) {
-                curArg = curArg.replace("'" + curSubCmd+ "'", curSubCmd);
-                //System.out.println("Replaced arg -> "+curArg);
-                resultCmd.add(curArg);
-            }
-        }
-
-        //debug
-        // for (String curCmd: resultCmd) {
-        //     System.out.println("Curcmd -> " + curCmd);
-        // }
-
-        return resultCmd;
-       
-    }
-
-    public static ArrayList<String> processDoubleQuotes(ArrayList<String> callCmd) {
-        
-        ArrayList<String> resultCmd = new ArrayList<>();
-        for (String curArg:callCmd) {
-
-            List<String> matches = Pattern.compile("\"([^\"]*)\"")
-            .matcher(curArg)
-            .results()
-            .filter(mr -> mr.group(1) != null) 
-            .map(mr -> mr.group(1)) 
-            .collect(Collectors.toList());
-
-            if (matches.size() == 0) {
-                resultCmd.add(curArg);
-                continue;
-            }
-
-            //need refactory
-            for (String curSubCmd:matches) {
-                curArg = curArg.replace("\"" + curSubCmd+ "\"", curSubCmd);
-                //System.out.println("Replaced arg -> "+curArg);
-                resultCmd.add(curArg);
-            }
-        }
-
-        //debug
-        // for (String curCmd: resultCmd) {
-        //     System.out.println("Curcmd -> " + curCmd);
-        // }
-
-        return resultCmd;
-       
-    }
-
-    */
-
-    private static int removeSingleQuote(StringBuilder myBuilder, char[] charArray, int curIndex) {
-
-        //since paseed parser, there must be at least a pair of quotes
-        curIndex += 1;
-        char curChar = charArray[curIndex];
-        while (curChar != '\'') {
-            myBuilder.append(curChar);
-            curIndex++;
-            curChar = charArray[curIndex];
-        }
-        return curIndex;
-    }
-
-    private static int removeDoubleQuote(StringBuilder myBuilder, char[] charArray, int curIndex) {
-
-        //since paseed parser, there must be at least a pair of quotes
-        curIndex += 1;
-        char curChar = charArray[curIndex];
-        while (curChar != '"') {
-            myBuilder.append(curChar);
-            curIndex++;
-            curChar = charArray[curIndex];
-        }
-        return curIndex;
-    }
-
-
-    public static String processStrQuotes(String arg) {
-        
-        StringBuilder myBuilder = new StringBuilder();
-        char[] argCharArray = arg.toCharArray();
-        for (int i=0; i < argCharArray.length; i++) {
-            char curChar = argCharArray[i];
-            if (curChar == '\'') {
-                i = removeSingleQuote(myBuilder, arg.toCharArray(), i);
-            } else if (curChar == '"') {
-                i = removeDoubleQuote(myBuilder, arg.toCharArray(), i);
-            } else {
-                myBuilder.append(curChar);
-            }
-        }
-    
-        return myBuilder.toString();
-    }
-
     public static String processDoubleQuotes(String arg) {
         
         Pattern pattern = Pattern.compile("\"([^\"]*)\"");
@@ -196,49 +58,19 @@ public class ShellUtil {
             //System.out.println("match not found");
             return arg;
         }
-
-        //assume
+        //extract content
         String matchedContent = matcher.group(1);
         //System.out.println("matchedContent -> "+matchedContent);
         arg = arg.replace("\"" + matchedContent + "\"", matchedContent);
 
         return arg;
-       
     }
-
-
-    public static ArrayList<String> processQuotesAndGlobbing(ArrayList<String> cmdArgs, String currentDirectory) {
-
-
-        String curCmd;
-        for (int i=0; i<cmdArgs.size(); i++) {
-            curCmd = cmdArgs.get(i);
-            //System.out.println("CurCmd -> "+curCmd);
-            //System.out.println("Processed -> "+processDoubleQuotes(curCmd));
-            // if (isInSingleQuote(curCmd)) {
-            //     cmdArgs.set(i, processSingleQuotes(curCmd));
-            // } else if (isInDoubleQuote(curCmd)) {
-            //     cmdArgs.set(i, processDoubleQuotes(curCmd));
-            // }
-            cmdArgs.set(i, processStrQuotes(curCmd));
-        
-        }
-        return cmdArgs;
-    }
-
     
     public static ArrayList<String> checkSubCmd(ArrayList<String> callCmd) throws IOException {
 
         ArrayList<String> resultCmd = new ArrayList<>();
 
         for (String curArg:callCmd) {
-
-            //bug
-            //continue if not in singlequote
-            if (isInSingleQuote(curArg)) {
-                resultCmd.add(curArg);
-                continue;
-            }
 
             List<String> matches = Pattern.compile("`([^`]*)`")
             .matcher(curArg)
@@ -277,10 +109,7 @@ public class ShellUtil {
 
                 resultCmd.add(curArg);
             }
-
-            
         }
-
         //debug
         // System.out.print("Curcmd -> ");
         // for (String curCmd: resultCmd) {
@@ -312,10 +141,7 @@ public class ShellUtil {
             stream = Files.newDirectoryStream(dir, glob);
         }
 
-
         return Globbing.exec(dir, glob);
-
-
     }
 
     public static String globbingFunc(String arg, String curDirectory) {
@@ -325,28 +151,5 @@ public class ShellUtil {
             return "";
         }
     }
-
-
-
-    //need refactory (not used)
-    // public static ArrayList<String> globbingChecker(ArrayList<String> appArgs, String curDirectory) throws IOException {
-    //     ArrayList<String> result = new ArrayList<>();
-
-    //     for (String curString : appArgs) {
-
-    //         //only if unquoted
-    //         if (!isInDoubleQuote(curString) && !isInSingleQuote(curString)) {
-    //             if (curString.contains("*")) {
-    //                 ArrayList<String> globbingResult = globbingHelper(curString, curDirectory);
-    //                 result.addAll(globbingResult);
-    //             } else {
-    //                 result.add(curString);
-    //             }                
-    //         } else {
-    //             result.add(curString);
-    //         }
-    //     }
-    //     return result;
-    // }
 
 }

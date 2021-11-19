@@ -33,25 +33,12 @@ public class Call implements Command {
         return rawCommand;
     }
 
-
     public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws IOException {
  
         
         ArrayList<String> cmdArgs = this.getArgs();
         String appName = cmdArgs.get(0);
         ArrayList<String> appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
-
-        
-        //check subcommand (layer3)
-        //only do check when content not in single quote
-        // cmdArgs = ShellUtil.checkSubCmd(cmdArgs);
-        // appName = cmdArgs.get(0);
-
-        // //debug
-        // //System.out.println("App name -> " + appName);
-        // // tokens contain <app name> <arguments> where <arguments> is a list of argument
-        // ArrayList<String> appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
-
 
         //check redirection
         ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(cmdArgs);
@@ -63,7 +50,7 @@ public class Call implements Command {
             }
         }
 
-
+        //process in automata
         ArrayList<String> newArgs = new ArrayList<>();
         for (String curArg:cmdArgs) {
             newArgs.add(new ArgAutomata(curArg, currentDirectory).go());
@@ -72,25 +59,6 @@ public class Call implements Command {
         cmdArgs = newArgs;
         appName = cmdArgs.get(0);
         appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
-
-
-// need to be one layer
-        //extract stuff inside quotes
-        //has bug
-        //cmdArgs = ShellUtil.processSingleQuotes(cmdArgs);
-        //cmdArgs = ShellUtil.processDoubleQuotes(cmdArgs);
-        // cmdArgs = ShellUtil.processQuotes(cmdArgs);
-        // appName = cmdArgs.get(0);
-        // appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
-        
-        // //check globbing
-        // cmdArgs = ShellUtil.globbingChecker(cmdArgs, currentDirectory);
-        // appName = cmdArgs.get(0);
-        // appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
-//
-        // cmdArgs = ShellUtil.processQuotesAndGlobbing(cmdArgs, currentDirectory);
-        // appName = cmdArgs.get(0);
-        // appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
 
 
         OutputStream bufferedStream = new ByteArrayOutputStream();

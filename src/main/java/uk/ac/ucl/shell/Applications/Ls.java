@@ -1,11 +1,7 @@
 package uk.ac.ucl.shell.Applications;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
