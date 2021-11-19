@@ -1,0 +1,271 @@
+test_cat (__main__.TestFEL) ... ok
+test_cat_stdin (__main__.TestFEL) ... ok
+test_cd_pwd (__main__.TestFEL) ... ok
+test_cut (__main__.TestFEL) ... ok
+test_cut_interval (__main__.TestFEL) ... ok
+test_cut_open_interval (__main__.TestFEL) ... FAIL
+test_cut_overlapping (__main__.TestFEL) ... ok
+test_cut_stdin (__main__.TestFEL) ... ok
+test_cut_union (__main__.TestFEL) ... ok
+test_disabled_doublequotes (__main__.TestFEL) ... FAIL
+test_doublequotes (__main__.TestFEL) ... ok
+test_echo (__main__.TestFEL) ... ok
+test_find (__main__.TestFEL) ... FAIL
+test_find_dir (__main__.TestFEL) ... FAIL
+test_find_pattern (__main__.TestFEL) ... FAIL
+test_globbing (__main__.TestFEL) ... ok
+test_globbing_dir (__main__.TestFEL) ... FAIL
+test_grep (__main__.TestFEL) ... ok
+test_grep_files (__main__.TestFEL) ... ok
+test_grep_no_matches (__main__.TestFEL) ... ok
+test_grep_re (__main__.TestFEL) ... ok
+test_grep_stdin (__main__.TestFEL) ... ok
+test_head (__main__.TestFEL) ... ok
+test_head_n0 (__main__.TestFEL) ... ok
+test_head_n5 (__main__.TestFEL) ... ok
+test_head_n50 (__main__.TestFEL) ... ok
+test_head_stdin (__main__.TestFEL) ... ok
+test_input_redirection (__main__.TestFEL) ... ok
+test_input_redirection_infront (__main__.TestFEL) ... ok
+test_input_redirection_nospace (__main__.TestFEL) ... ok
+test_ls (__main__.TestFEL) ... ok
+test_ls_dir (__main__.TestFEL) ... FAIL
+test_ls_hidden (__main__.TestFEL) ... FAIL
+test_nested_doublequotes (__main__.TestFEL) ... ok
+test_output_redirection (__main__.TestFEL) ... ok
+test_output_redirection_overwrite (__main__.TestFEL) ... ok
+test_pipe_chain_sort_uniq (__main__.TestFEL) ... FAIL
+test_pipe_uniq (__main__.TestFEL) ... ok
+test_pwd (__main__.TestFEL) ... ok
+test_quote_keyword (__main__.TestFEL) ... ok
+test_semicolon (__main__.TestFEL) ... ok
+test_semicolon_chain (__main__.TestFEL) ... ok
+test_semicolon_exception (__main__.TestFEL) ... FAIL
+test_singlequotes (__main__.TestFEL) ... ok
+test_sort (__main__.TestFEL) ... ok
+test_sort_r (__main__.TestFEL) ... ok
+test_sort_stdin (__main__.TestFEL) ... ok
+test_sort_uniq (__main__.TestFEL) ... ok
+test_splitting (__main__.TestFEL) ... ok
+test_substitution (__main__.TestFEL) ... ok
+test_substitution_app (__main__.TestFEL) ... ok
+test_substitution_doublequotes (__main__.TestFEL) ... ok
+test_substitution_insidearg (__main__.TestFEL) ... ok
+test_substitution_keywords (__main__.TestFEL) ... FAIL
+test_substitution_semicolon (__main__.TestFEL) ... FAIL
+test_substitution_sort_find (__main__.TestFEL) ... FAIL
+test_substitution_splitting (__main__.TestFEL) ... ok
+test_tail (__main__.TestFEL) ... ok
+test_tail_n0 (__main__.TestFEL) ... ok
+test_tail_n5 (__main__.TestFEL) ... ok
+test_tail_n50 (__main__.TestFEL) ... ok
+test_tail_stdin (__main__.TestFEL) ... ok
+test_uniq (__main__.TestFEL) ... ok
+test_uniq_i (__main__.TestFEL) ... ok
+test_uniq_stdin (__main__.TestFEL) ... ok
+test_unsafe_ls (__main__.TestFEL) ... FAIL
+
+======================================================================
+FAIL: test_cut_open_interval (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 286, in test_cut_open_interval
+    self.assertEqual(result, ["AA", "BB", "AA"])
+AssertionError: Lists differ: ['COMP0010 shell: cut: invalid argument 2-'] != ['AA', 'BB', 'AA']
+
+First differing element 0:
+'COMP0010 shell: cut: invalid argument 2-'
+'AA'
+
+Second list contains 2 additional elements.
+First extra element 1:
+'BB'
+
+- ['COMP0010 shell: cut: invalid argument 2-']
++ ['AA', 'BB', 'AA']
+
+======================================================================
+FAIL: test_disabled_doublequotes (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 587, in test_disabled_doublequotes
+    self.assertEqual(result, '""')
+AssertionError: '' != '""'
++ ""
+
+======================================================================
+FAIL: test_find (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 340, in test_find
+    self.assertEqual(result, {"./dir2/subdir/file.txt"})
+AssertionError: Items in the first set but not the second:
+'dir2/subdir/file.txt'
+Items in the second set but not the first:
+'./dir2/subdir/file.txt'
+
+======================================================================
+FAIL: test_find_dir (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 361, in test_find_dir
+    self.assertEqual(
+AssertionError: Items in the first set but not the second:
+'/dir1/file2.txt'
+'/dir1/file1.txt'
+'/dir1/longfile.txt'
+Items in the second set but not the first:
+'dir1/longfile.txt'
+'dir1/file1.txt'
+'dir1/file2.txt'
+
+======================================================================
+FAIL: test_find_pattern (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 346, in test_find_pattern
+    self.assertEqual(
+AssertionError: Items in the first set but not the second:
+'dir1/file1.txt'
+'dir1/longfile.txt'
+'dir2/subdir/file.txt'
+'test.txt'
+'dir1/file2.txt'
+Items in the second set but not the first:
+'./dir1/file2.txt'
+'./dir2/subdir/file.txt'
+'./dir1/file1.txt'
+'./dir1/longfile.txt'
+'./test.txt'
+
+======================================================================
+FAIL: test_globbing_dir (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 443, in test_globbing_dir
+    self.assertEqual(
+AssertionError: Items in the first set but not the second:
+'one'
+'application'
+'has'
+'should'
+'COMP0010'
+'Echo:'
+'at'
+'least'
+'argument'
+'shell:'
+Items in the second set but not the first:
+'dir1/longfile.txt'
+'dir1/file1.txt'
+'dir1/file2.txt'
+
+======================================================================
+FAIL: test_ls_dir (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 98, in test_ls_dir
+    self.assertEqual(result, {"file1.txt", "file2.txt", "longfile.txt"})
+AssertionError: Items in the first set but not the second:
+'/dir1/file2.txt'
+'/dir1/file1.txt'
+'/dir1/longfile.txt'
+Items in the second set but not the first:
+'file2.txt'
+'longfile.txt'
+'file1.txt'
+
+======================================================================
+FAIL: test_ls_hidden (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 104, in test_ls_hidden
+    self.assertEqual(result, {"file.txt"})
+AssertionError: Items in the first set but not the second:
+'ubdir/file.txt'
+Items in the second set but not the first:
+'file.txt'
+
+======================================================================
+FAIL: test_pipe_chain_sort_uniq (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 496, in test_pipe_chain_sort_uniq
+    self.assertEqual(result, ["AAA", "BBB", "CCC"])
+AssertionError: Lists differ: ['AAA', 'BBB', 'AAA', 'CCC', 'AAA', 'BBB', 'CCC'] != ['AAA', 'BBB', 'CCC']
+
+First differing element 2:
+'AAA'
+'CCC'
+
+First list contains 4 additional elements.
+First extra element 3:
+'CCC'
+
+- ['AAA', 'BBB', 'AAA', 'CCC', 'AAA', 'BBB', 'CCC']
++ ['AAA', 'BBB', 'CCC']
+
+======================================================================
+FAIL: test_semicolon_exception (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 463, in test_semicolon_exception
+    self.assertEqual(result, "")
+AssertionError: 'COMP0010 shell: ls: no such directory' != ''
+- COMP0010 shell: ls: no such directory
++ 
+
+
+======================================================================
+FAIL: test_substitution_keywords (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 545, in test_substitution_keywords
+    self.assertEqual(result, "''")
+AssertionError: '' != "''"
++ ''
+
+======================================================================
+FAIL: test_substitution_semicolon (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 539, in test_substitution_semicolon
+    self.assertEqual(result, "foo bar")
+AssertionError: 'foobar' != 'foo bar'
+- foobar
++ foo bar
+?    +
+
+
+======================================================================
+FAIL: test_substitution_sort_find (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 533, in test_substitution_sort_find
+    self.assertEqual(result, ["AAA", "AAA", "aaa"])
+AssertionError: Lists differ: ['COMP0010 shell: cat: can not open `find dir2 -name *.txt`'] != ['AAA', 'AAA', 'aaa']
+
+First differing element 0:
+'COMP0010 shell: cat: can not open `find dir2 -name *.txt`'
+'AAA'
+
+Second list contains 2 additional elements.
+First extra element 1:
+'AAA'
+
+- ['COMP0010 shell: cat: can not open `find dir2 -name *.txt`']
++ ['AAA', 'AAA', 'aaa']
+
+======================================================================
+FAIL: test_unsafe_ls (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 470, in test_unsafe_ls
+    self.assertEqual(result, "AAA")
+AssertionError: '' != 'AAA'
++ AAA
+
+----------------------------------------------------------------------
+Ran 66 tests in 155.917s
+
+FAILED (failures=14)

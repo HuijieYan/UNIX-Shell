@@ -1,19 +1,20 @@
 package uk.ac.ucl.shell.Applications;
 
+import uk.ac.ucl.shell.ShellApplication;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
-import uk.ac.ucl.shell.ShellApplication;
-
-public class Head implements ShellApplication {
+public class Tail implements ShellApplication{
     private String currentDirectory;
     private BufferedReader reader;
     private OutputStreamWriter writer;
-    private int headLines;
+    private int tailLines;
 
-    public Head(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
+    public Tail(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.reader = reader;
         this.writer = writer;
@@ -21,20 +22,20 @@ public class Head implements ShellApplication {
 
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
-        headLines = 10;
+        tailLines = 10;
         String fileName = null;
         int argSize = appArgs.size();
         if (argSize > 3) {
-            throw new RuntimeException("head: wrong argument number");
+            throw new RuntimeException("tail: wrong argument number");
         }else if (argSize == 3 || argSize == 2) {
             if(!appArgs.get(0).equals("-n")){
-                throw new RuntimeException("head: wrong argument " + appArgs.get(0) + " should be -n");
+                throw new RuntimeException("tail: wrong argument " + appArgs.get(0) + " should be -n");
             }
 
             try {
-                headLines = Integer.parseInt(appArgs.get(1));
+                tailLines = Integer.parseInt(appArgs.get(1));
             } catch (NumberFormatException e) {
-                throw new RuntimeException("head: wrong argument " + appArgs.get(1));
+                throw new RuntimeException("tail: wrong argument " + appArgs.get(1));
             }
 
             if(argSize == 3){
@@ -46,32 +47,37 @@ public class Head implements ShellApplication {
 
         if(fileName == null){
             if(this.reader == null){
-                throw new RuntimeException("head: no data from pipe or redirection and can not find file to read");
+                throw new RuntimeException("tail: no data from pipe or redirection and can not find file to read");
             }
             try {
                 writeToBuffer(this.reader);
             }catch (IOException e){
-                throw new RuntimeException("head: fail to read from pipe or redirection");
+                throw new RuntimeException("tail: fail to read from pipe or redirection");
             }
         } else {
             try {
                 writeToBuffer(Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
             }catch (IOException e){
-                throw new RuntimeException("head: cannot open " + fileName);
+                throw new RuntimeException("tail: cannot open " + fileName);
             }
         }
-        
+
         return currentDirectory;
     }
 
     private void writeToBuffer(BufferedReader reader) throws IOException {
-        for (int i = 0; i < headLines; i++) {
-            String line;
-            if ((line = reader.readLine()) != null) {
-                writer.write(line + System.getProperty("line.separator"));
-            }else {
-                break;
-            }
+        ArrayList<String> storage = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            storage.add(line);
+        }
+
+        int index = 0;
+        if (tailLines < storage.size()) {
+            index = storage.size() - tailLines;
+        }
+        for (int i = index; i < storage.size(); i++) {
+            writer.write(storage.get(i) + System.getProperty("line.separator"));
         }
         writer.flush();
     }

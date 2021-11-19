@@ -2,6 +2,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Globbing",
+            "request": "launch",
+            "mainClass": "uk.ac.ucl.shell.Globbing",
+            "projectName": "shell"
+        },
+        {
+            "type": "java",
+            "name": "Launch Shell_newParser",
+            "request": "launch",
+            "mainClass": "uk.ac.ucl.shell.Shell_newParser",
+            "projectName": "shell"
+        },
+        {
+            "type": "java",
+            "name": "Launch Shell_Monad",
+            "request": "launch",
+            "mainClass": "uk.ac.ucl.shell.Shell_Monad",
+            "projectName": "shell"
+        },
+        {
+            "type": "java",
+            "name": "Launch ParserBuilder",
+            "request": "launch",
+            "mainClass": "uk.ac.ucl.shell.Parser.ParserBuilder",
+            "projectName": "shell"
+        },
+        {
+            "type": "java",
             "name": "Launch Shell",
             "request": "launch",
             "mainClass": "uk.ac.ucl.shell.Shell",

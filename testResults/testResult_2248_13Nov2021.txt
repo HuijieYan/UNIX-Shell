@@ -1,0 +1,109 @@
+test_cat (__main__.TestFEL) ... ok
+test_cat_stdin (__main__.TestFEL) ... ok
+test_cd_pwd (__main__.TestFEL) ... ok
+test_cut (__main__.TestFEL) ... ok
+test_cut_interval (__main__.TestFEL) ... ok
+test_cut_open_interval (__main__.TestFEL) ... ok
+test_cut_overlapping (__main__.TestFEL) ... ok
+test_cut_stdin (__main__.TestFEL) ... ok
+test_cut_union (__main__.TestFEL) ... ok
+test_disabled_doublequotes (__main__.TestFEL) ... FAIL
+test_doublequotes (__main__.TestFEL) ... ok
+test_echo (__main__.TestFEL) ... ok
+test_find (__main__.TestFEL) ... ok
+test_find_dir (__main__.TestFEL) ... ok
+test_find_pattern (__main__.TestFEL) ... ok
+test_globbing (__main__.TestFEL) ... ok
+test_globbing_dir (__main__.TestFEL) ... ok
+test_grep (__main__.TestFEL) ... ok
+test_grep_files (__main__.TestFEL) ... ok
+test_grep_no_matches (__main__.TestFEL) ... ok
+test_grep_re (__main__.TestFEL) ... ok
+test_grep_stdin (__main__.TestFEL) ... ok
+test_head (__main__.TestFEL) ... ok
+test_head_n0 (__main__.TestFEL) ... ok
+test_head_n5 (__main__.TestFEL) ... ok
+test_head_n50 (__main__.TestFEL) ... ok
+test_head_stdin (__main__.TestFEL) ... ok
+test_input_redirection (__main__.TestFEL) ... ok
+test_input_redirection_infront (__main__.TestFEL) ... ok
+test_input_redirection_nospace (__main__.TestFEL) ... ok
+test_ls (__main__.TestFEL) ... ok
+test_ls_dir (__main__.TestFEL) ... ok
+test_ls_hidden (__main__.TestFEL) ... ok
+test_nested_doublequotes (__main__.TestFEL) ... ok
+test_output_redirection (__main__.TestFEL) ... ok
+test_output_redirection_overwrite (__main__.TestFEL) ... ok
+test_pipe_chain_sort_uniq (__main__.TestFEL) ... ok
+test_pipe_uniq (__main__.TestFEL) ... ok
+test_pwd (__main__.TestFEL) ... ok
+test_quote_keyword (__main__.TestFEL) ... ok
+test_semicolon (__main__.TestFEL) ... ok
+test_semicolon_chain (__main__.TestFEL) ... ok
+test_semicolon_exception (__main__.TestFEL) ... FAIL
+test_singlequotes (__main__.TestFEL) ... ok
+test_sort (__main__.TestFEL) ... ok
+test_sort_r (__main__.TestFEL) ... ok
+test_sort_stdin (__main__.TestFEL) ... ok
+test_sort_uniq (__main__.TestFEL) ... ok
+test_splitting (__main__.TestFEL) ... ok
+test_substitution (__main__.TestFEL) ... ok
+test_substitution_app (__main__.TestFEL) ... ok
+test_substitution_doublequotes (__main__.TestFEL) ... ok
+test_substitution_insidearg (__main__.TestFEL) ... ok
+test_substitution_keywords (__main__.TestFEL) ... FAIL
+test_substitution_semicolon (__main__.TestFEL) ... ok
+test_substitution_sort_find (__main__.TestFEL) ... ok
+test_substitution_splitting (__main__.TestFEL) ... ok
+test_tail (__main__.TestFEL) ... ok
+test_tail_n0 (__main__.TestFEL) ... ok
+test_tail_n5 (__main__.TestFEL) ... ok
+test_tail_n50 (__main__.TestFEL) ... ok
+test_tail_stdin (__main__.TestFEL) ... ok
+test_uniq (__main__.TestFEL) ... ok
+test_uniq_i (__main__.TestFEL) ... ok
+test_uniq_stdin (__main__.TestFEL) ... ok
+test_unsafe_ls (__main__.TestFEL) ... FAIL
+
+======================================================================
+FAIL: test_disabled_doublequotes (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 587, in test_disabled_doublequotes
+    self.assertEqual(result, '""')
+AssertionError: '' != '""'
++ ""
+
+======================================================================
+FAIL: test_semicolon_exception (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 463, in test_semicolon_exception
+    self.assertEqual(result, "")
+AssertionError: 'COMP0010 shell: ls: no such directory: dir3' != ''
+- COMP0010 shell: ls: no such directory: dir3
++ 
+
+
+======================================================================
+FAIL: test_substitution_keywords (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 545, in test_substitution_keywords
+    self.assertEqual(result, "''")
+AssertionError: '' != "''"
++ ''
+
+======================================================================
+FAIL: test_unsafe_ls (__main__.TestFEL)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/yadongliu/Desktop/comp0010-shell-java-j1/system_test/tests.py", line 470, in test_unsafe_ls
+    self.assertEqual(result, "AAA")
+AssertionError: '' != 'AAA'
++ AAA
+
+----------------------------------------------------------------------
+Ran 66 tests in 129.890s
+
+FAILED (failures=4)

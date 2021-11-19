@@ -1,48 +1,52 @@
 package uk.ac.ucl.shell.Applications;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
 
 public class Ls implements ShellApplication {
-
-    private OutputStreamWriter writer;
     private String currentDirectory;
+    private OutputStreamWriter writer;
 
-    public Ls(OutputStreamWriter writer, String currentDirectory) {
-        this.writer = writer;
+    public Ls(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
+        this.writer = writer;
     }
     
     @Override
-    public String exec(List<String> appArgs) throws IOException {
-        File currDir;
-        if (appArgs.isEmpty()) {
-            currDir = new File(currentDirectory);
-        } else if (appArgs.size() == 1) {
-            currDir = new File(appArgs.get(0));
-        } else {
+    public String exec(List<String> appArgs) throws RuntimeException {
+        if(appArgs.size() > 1){
             throw new RuntimeException("ls: too many arguments");
         }
 
         try {
+            File currDir;
+            int rootDirLength;
+            if (appArgs.isEmpty()) {
+                currDir = new File(currentDirectory);
+                rootDirLength = currentDirectory.length() + 1;
+            } else {
+                currDir = new File(appArgs.get(0));
+                rootDirLength = currDir.getCanonicalPath().length() + 1;
+            }
+
             File[] listOfFiles = currDir.listFiles();
-            for (File file : listOfFiles) {
-                if (!file.getName().startsWith(".")) {
-                    writer.write(file.getName());
-                    writer.write("\t");
-                    writer.flush();
+            for(int index = 0; index < listOfFiles.length; index++){
+                if (!listOfFiles[index].getName().startsWith(".")) {
+                    writer.write(listOfFiles[index].getCanonicalPath().substring(rootDirLength));
+                    if(index != listOfFiles.length - 1){
+                        writer.write("\t");
+                    }
                 }
             }
             if (listOfFiles.length > 0) {
                 writer.write(System.getProperty("line.separator"));
-                writer.flush();
             }
-        } catch (NullPointerException e) {
-            throw new RuntimeException("ls: no such directory");
+            writer.flush();
+        } catch (Exception e) {
+            throw new RuntimeException("ls: no such directory: " + appArgs.get(0));
         }
 
         return currentDirectory;

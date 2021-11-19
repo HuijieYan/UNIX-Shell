@@ -2,8 +2,6 @@ package uk.ac.ucl.shell;
 
 import org.junit.Test;
 
-import uk.ac.ucl.shell.Shell;
-
 import static org.junit.Assert.*;
 
 import java.io.PipedInputStream;
@@ -19,9 +17,21 @@ public class ShellTest {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out;
         out = new PipedOutputStream(in);
-        Shell.eval("echo foo", out);
+        //Shell_Monad.eval("echo foo", out);
         Scanner scn = new Scanner(in);
         assertEquals(scn.next(),"foo");
     }
+
+    @Test
+    public void testEcho() throws Exception {
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+        out = new PipedOutputStream(in);
+        //Shell_Monad.eval("echo hello", out);
+        Scanner scn = new Scanner(in);
+        //assertEquals(scn.next(),"hello");
+        System.out.println("Returned from shell -> "+scn.next());        
+    }
+    
 
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import uk.ac.ucl.shell.ShellApplication;
 
 public class Cd implements ShellApplication {
-
     private String currentDirectory;
 
     public Cd(String currentDirectory) {
@@ -15,25 +14,24 @@ public class Cd implements ShellApplication {
     }
 
     @Override
-    public String exec(List<String> appArgs) throws IOException {
+    public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.isEmpty()) {
             throw new RuntimeException("cd: missing argument");
         } else if (appArgs.size() > 1) {
             throw new RuntimeException("cd: too many arguments");
         }
 
-
         String dirString = appArgs.get(0);
-        File dir = new File(currentDirectory, dirString);
-
-        if (!dir.exists() || !dir.isDirectory()) {
-            dir = new File(dirString);
-            if(!dir.exists() || !dir.isDirectory()){
-                throw new RuntimeException("cd: " + dirString + " is not an existing directory");
-            }
+        File dir;
+        if (!(dir = new File(currentDirectory, dirString)).isDirectory() && (!(dir = new File(dirString)).isDirectory() || !dir.isAbsolute())) {
+            throw new RuntimeException("cd: " + dirString + " is not an existing directory");
         }
 
-        currentDirectory = dir.getCanonicalPath();
+        try {
+            currentDirectory = dir.getCanonicalPath();
+        }catch (IOException e){
+            throw new RuntimeException("cd: fail to change the directory");
+        }
         return currentDirectory;
     }
 }

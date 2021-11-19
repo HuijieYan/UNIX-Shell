@@ -1,6 +1,6 @@
 package uk.ac.ucl.shell;
 
-import java.io.OutputStream;
+import java.io.BufferedReader;
 import java.io.OutputStreamWriter;
 
 import uk.ac.ucl.shell.Applications.*;
@@ -9,14 +9,14 @@ public class AppFactory {
 
     private String appName;
     private String currentDirectory;
+    private  BufferedReader reader;
     private OutputStreamWriter writer;
-    private OutputStream output;
 
-    public AppFactory(String appName, String currentDirectory, OutputStreamWriter writer, OutputStream output) {
+    public AppFactory(String appName, String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.appName = appName;
         this.currentDirectory = currentDirectory;
+        this.reader = reader;
         this.writer = writer;
-        this.output = output;        
     }
 
     public ShellApplication makeApp() {
@@ -24,29 +24,41 @@ public class AppFactory {
         ShellApplication myApp;
 
         switch (appName) {
+        case "pwd":
+            myApp = new Pwd(currentDirectory, writer);
+            break;
         case "cd":
             myApp = new Cd(currentDirectory);
             break;
-        case "pwd":
-            myApp = new Pwd(writer, currentDirectory);
-            break;
         case "ls":
-            myApp = new Ls(writer, currentDirectory);
+            myApp = new Ls(currentDirectory, writer);
             break;
         case "cat":
-            myApp = new Cat(writer, currentDirectory);
+            myApp = new Cat(currentDirectory, reader, writer);
             break;
         case "echo":
-            myApp = new Echo(writer, currentDirectory);
+            myApp = new Echo(currentDirectory, writer);
             break;
         case "head":
-            myApp = new Head(writer, currentDirectory);
+            myApp = new Head(currentDirectory, reader, writer);
             break;
         case "tail":
-            myApp = new Tail(writer, currentDirectory);
+            myApp = new Tail(currentDirectory, reader, writer);
             break;
         case "grep":
-            myApp = new Grep(writer, currentDirectory);
+            myApp = new Grep(currentDirectory, reader, writer);
+            break;
+        case "cut":
+            myApp = new Cut(currentDirectory, reader, writer);
+            break;
+        case "find":
+            myApp = new Find(currentDirectory, writer);
+            break;
+        case "uniq":
+            myApp = new Uniq(currentDirectory, reader, writer);
+            break;
+        case "sort":
+            myApp = new Sort(currentDirectory, reader, writer);
             break;
         default:
             throw new RuntimeException(appName + ": unknown application");
