@@ -70,6 +70,7 @@ public class ShellUtil {
         return false;
     }
 
+    /*
     public static ArrayList<String> processSingleQuotes(ArrayList<String> callCmd) {
         
         ArrayList<String> resultCmd = new ArrayList<>();
@@ -138,6 +139,92 @@ public class ShellUtil {
        
     }
 
+    */
+
+    private static int removeSingleQuote(StringBuilder myBuilder, char[] charArray, int curIndex) {
+
+        //since paseed parser, there must be at least a pair of quotes
+        curIndex += 1;
+        char curChar = charArray[curIndex];
+        while (curChar != '\'') {
+            myBuilder.append(curChar);
+            curIndex++;
+            curChar = charArray[curIndex];
+        }
+        return curIndex;
+    }
+
+    private static int removeDoubleQuote(StringBuilder myBuilder, char[] charArray, int curIndex) {
+
+        //since paseed parser, there must be at least a pair of quotes
+        curIndex += 1;
+        char curChar = charArray[curIndex];
+        while (curChar != '"') {
+            myBuilder.append(curChar);
+            curIndex++;
+            curChar = charArray[curIndex];
+        }
+        return curIndex;
+    }
+
+
+    public static String processStrQuotes(String arg) {
+        
+        StringBuilder myBuilder = new StringBuilder();
+        char[] argCharArray = arg.toCharArray();
+        for (int i=0; i < argCharArray.length; i++) {
+            char curChar = argCharArray[i];
+            if (curChar == '\'') {
+                i = removeSingleQuote(myBuilder, arg.toCharArray(), i);
+            } else if (curChar == '"') {
+                i = removeDoubleQuote(myBuilder, arg.toCharArray(), i);
+            } else {
+                myBuilder.append(curChar);
+            }
+        }
+    
+        return myBuilder.toString();
+    }
+
+    public static String processDoubleQuotes(String arg) {
+        
+        Pattern pattern = Pattern.compile("\"([^\"]*)\"");
+        Matcher matcher = pattern.matcher(arg);
+
+        //if not found
+        if (!matcher.find()) {
+            //System.out.println("match not found");
+            return arg;
+        }
+
+        //assume
+        String matchedContent = matcher.group(1);
+        //System.out.println("matchedContent -> "+matchedContent);
+        arg = arg.replace("\"" + matchedContent + "\"", matchedContent);
+
+        return arg;
+       
+    }
+
+
+    public static ArrayList<String> processQuotesAndGlobbing(ArrayList<String> cmdArgs, String currentDirectory) {
+
+
+        String curCmd;
+        for (int i=0; i<cmdArgs.size(); i++) {
+            curCmd = cmdArgs.get(i);
+            //System.out.println("CurCmd -> "+curCmd);
+            //System.out.println("Processed -> "+processDoubleQuotes(curCmd));
+            // if (isInSingleQuote(curCmd)) {
+            //     cmdArgs.set(i, processSingleQuotes(curCmd));
+            // } else if (isInDoubleQuote(curCmd)) {
+            //     cmdArgs.set(i, processDoubleQuotes(curCmd));
+            // }
+            cmdArgs.set(i, processStrQuotes(curCmd));
+        
+        }
+        return cmdArgs;
+    }
 
     
     public static ArrayList<String> checkSubCmd(ArrayList<String> callCmd) throws IOException {
@@ -146,6 +233,7 @@ public class ShellUtil {
 
         for (String curArg:callCmd) {
 
+            //bug
             //continue if not in singlequote
             if (isInSingleQuote(curArg)) {
                 resultCmd.add(curArg);
@@ -210,11 +298,12 @@ public class ShellUtil {
     // And the final tokens will be <command> <arguments> where <arguments> = globbingResult
 
     /* has bugggggggggggg */
-    private static ArrayList<String> globbingHelper(String glob, String currentDirectory) throws IOException {
+    private static String globbingHelper(String glob, String currentDirectory) throws IOException {
         ArrayList<String> globbingResult = new ArrayList<>();
 
         Path dir;
         DirectoryStream<Path> stream;
+        
         if(glob.contains(System.getProperty("file.separator")) || !glob.startsWith("*")){
             dir = Paths.get(glob.substring(0, glob.indexOf("*") - 1));
             stream = Files.newDirectoryStream(dir, glob.substring(glob.indexOf("*")));
@@ -223,41 +312,41 @@ public class ShellUtil {
             stream = Files.newDirectoryStream(dir, glob);
         }
 
-        for (Path entry : stream) {
-            if (dir.equals(Paths.get(currentDirectory))) {
-                globbingResult.add(entry.getFileName().toString());
-            } else {
-                globbingResult.add(glob.substring(0, glob.indexOf("*") - 1)+ File.separator + entry.getFileName().toString());
-            }
-        }
 
-        if(globbingResult.size() == 0){
-            throw new IOException();
+        return Globbing.exec(dir, glob);
+
+
+    }
+
+    public static String globbingFunc(String arg, String curDirectory) {
+        try {
+            return globbingHelper(arg, curDirectory);
+        } catch (IOException e) {
+            return "";
         }
-        return globbingResult;
     }
 
 
 
-    //need refactory
-    public static ArrayList<String> globbingChecker(ArrayList<String> appArgs, String curDirectory) throws IOException {
-        ArrayList<String> result = new ArrayList<>();
+    //need refactory (not used)
+    // public static ArrayList<String> globbingChecker(ArrayList<String> appArgs, String curDirectory) throws IOException {
+    //     ArrayList<String> result = new ArrayList<>();
 
-        for (String curString : appArgs) {
+    //     for (String curString : appArgs) {
 
-            //only if unquoted
-            if (!isInDoubleQuote(curString) && !isInSingleQuote(curString)) {
-                if (curString.contains("*")) {
-                    ArrayList<String> globbingResult = globbingHelper(curString, curDirectory);
-                    result.addAll(globbingResult);
-                } else {
-                    result.add(curString);
-                }                
-            } else {
-                result.add(curString);
-            }
-        }
-        return result;
-    }
+    //         //only if unquoted
+    //         if (!isInDoubleQuote(curString) && !isInSingleQuote(curString)) {
+    //             if (curString.contains("*")) {
+    //                 ArrayList<String> globbingResult = globbingHelper(curString, curDirectory);
+    //                 result.addAll(globbingResult);
+    //             } else {
+    //                 result.add(curString);
+    //             }                
+    //         } else {
+    //             result.add(curString);
+    //         }
+    //     }
+    //     return result;
+    // }
 
 }

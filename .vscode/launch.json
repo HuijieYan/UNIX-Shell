@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch Globbing",
+            "request": "launch",
+            "mainClass": "uk.ac.ucl.shell.Globbing",
+            "projectName": "shell"
+        },
+        {
+            "type": "java",
             "name": "Launch Shell_newParser",
             "request": "launch",
             "mainClass": "uk.ac.ucl.shell.Shell_newParser",

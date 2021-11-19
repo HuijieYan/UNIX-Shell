@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 
 import uk.ac.ucl.shell.AppBuilder;
+import uk.ac.ucl.shell.ArgAutomata;
 import uk.ac.ucl.shell.CommandVisitor;
 import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
@@ -38,16 +39,19 @@ public class Call implements Command {
         
         ArrayList<String> cmdArgs = this.getArgs();
         String appName = cmdArgs.get(0);
+        ArrayList<String> appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
 
+        
         //check subcommand (layer3)
         //only do check when content not in single quote
-        cmdArgs = ShellUtil.checkSubCmd(cmdArgs);
-        appName = cmdArgs.get(0);
+        // cmdArgs = ShellUtil.checkSubCmd(cmdArgs);
+        // appName = cmdArgs.get(0);
 
-        //debug
-        //System.out.println("App name -> " + appName);
-        // tokens contain <app name> <arguments> where <arguments> is a list of argument
-        ArrayList<String> appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+        // //debug
+        // //System.out.println("App name -> " + appName);
+        // // tokens contain <app name> <arguments> where <arguments> is a list of argument
+        // ArrayList<String> appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+
 
         //check redirection
         ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(cmdArgs);
@@ -59,17 +63,34 @@ public class Call implements Command {
             }
         }
 
-        //check globbing
-        cmdArgs = ShellUtil.globbingChecker(cmdArgs, currentDirectory);
+
+        ArrayList<String> newArgs = new ArrayList<>();
+        for (String curArg:cmdArgs) {
+            newArgs.add(new ArgAutomata(curArg, currentDirectory).go());
+        }
+        
+        cmdArgs = newArgs;
         appName = cmdArgs.get(0);
         appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
 
+
+// need to be one layer
         //extract stuff inside quotes
         //has bug
-        cmdArgs = ShellUtil.processSingleQuotes(cmdArgs);
-        cmdArgs = ShellUtil.processDoubleQuotes(cmdArgs);
-        appName = cmdArgs.get(0);
-        appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+        //cmdArgs = ShellUtil.processSingleQuotes(cmdArgs);
+        //cmdArgs = ShellUtil.processDoubleQuotes(cmdArgs);
+        // cmdArgs = ShellUtil.processQuotes(cmdArgs);
+        // appName = cmdArgs.get(0);
+        // appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+        
+        // //check globbing
+        // cmdArgs = ShellUtil.globbingChecker(cmdArgs, currentDirectory);
+        // appName = cmdArgs.get(0);
+        // appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+//
+        // cmdArgs = ShellUtil.processQuotesAndGlobbing(cmdArgs, currentDirectory);
+        // appName = cmdArgs.get(0);
+        // appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
 
 
         OutputStream bufferedStream = new ByteArrayOutputStream();

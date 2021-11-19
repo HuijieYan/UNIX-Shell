@@ -25,6 +25,9 @@ public class Shell {
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
 
+        String stuffLeft = sat.parse(cmdline).getInputStream();
+        //System.out.println("stuff left (should be empty if parese success) -> "+stuffLeft);
+
         // in seq
         for (Command curCmd: commandList) {
             //access visitor
