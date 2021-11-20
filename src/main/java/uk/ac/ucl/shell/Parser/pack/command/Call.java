@@ -16,11 +16,13 @@ import uk.ac.ucl.shell.CommandVisitor;
 import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
 import uk.ac.ucl.shell.Applications.Tools;
+import uk.ac.ucl.shell.Parser.pack.type.atom.*;
 
 public class Call implements Command {
-    private ArrayList<String> rawCommand;
+    private ArrayList<Atom> rawCommand;
     private ArrayList<Command> selfList = new ArrayList<>();;
-    public Call(ArrayList<String> arguments){
+    
+    public Call(ArrayList<Atom> arguments){
         rawCommand = arguments;
         selfList.add(this);
     }
@@ -29,7 +31,7 @@ public class Call implements Command {
         return selfList;
     }
 
-    public ArrayList<String> getArgs(){
+    public ArrayList<Atom> getArgs(){
         return rawCommand;
     }
 

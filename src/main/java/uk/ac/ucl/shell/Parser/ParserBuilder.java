@@ -9,10 +9,10 @@ import java.util.function.Function;
 import uk.ac.ucl.shell.Parser.pack.command.*;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
+import uk.ac.ucl.shell.Parser.pack.type.atom.*;
 
 public class ParserBuilder {
     public ArrayList<Character> spaces = new ArrayList<>();
-    private MonadOperation op = new ParserOperation();
     
     public ParserBuilder(){
         spaces.add(' ');
@@ -124,64 +124,6 @@ public class ParserBuilder {
     public Monad<Character> isAnyLetter(){
         return or(isLowerChar(), isUpperChar());
     }
-/*
-    public Monad<String> word(){
-        Function<String,MonadicValue<String,String>> func = input->{
-            if (input.equals("")){
-                return this.result("").parse("");
-            }
-            Monad<String> neWord = this.newWord();
-            return or(neWord,this.result("")).parse(input);
-        };
-        return new Parser<>(func);
-    }
-
-    private Monad<String> newWord(){
-    // a private parser
-        Function<String,MonadicValue<String,String>> neWordFunc = input ->{
-            Function<Character,Monad<String>> bindFunction = character ->{
-                Function<String,Monad<String>> func = inp ->{
-                    StringBuilder str = new StringBuilder(character);
-                    return result(str.append(inp).toString());
-                    //result (character:inp)
-                };
-                return this.bind(this.word(), func);
-                //bind word /inp-> result (character:inp)
-            };
-            return this.bind(or(this.isLowerChar(),this.isUpperChar()), bindFunction).parse(input);
-        };
-        return new Parser<>(neWordFunc);
-    }
-    */
-
-    /*
-    many p = p x bind /_ ->
-            many p xs bind /_ -> 
-            result (x:xs)
-    eg. many char('a') "aab" = result(['a','a']) "b"
-    */
-    /*
-    public <T> Monad<ArrayList<T>> many(final Monad<T> parser){
-    // Function many would let the parser keep parsing the input until
-    // the end of input is reached or the parsing has failed.
-        Function<String,MonadicValue<ArrayList<T>,String>> function = input->{
-            String inputStream = input;
-            ArrayList<T> values = new ArrayList<>();
-            while (inputStream.length()>0){
-                MonadicValue<T,String> pair = parser.parse(inputStream);  
-                if (pair.isEmpty()){
-                //if parse failed
-                    break;
-                }
-                inputStream = pair.getInputStream();
-                values.add(pair.getValue());       
-            }
-            return this.result(values).parse(inputStream);
-        };
-        return new Parser<>(function);
-    }
-    //need refactoring
-    */
 
     /**
      * Parser many let the given parser keep parsing the input until the end
@@ -277,8 +219,9 @@ public class ParserBuilder {
     /**
      * This is a different version of symbolQuoted parser, the content between the symbol is
      * a combination of serval strings.
-     * @param parser parser returns a list of strings which are the content between the symbol,
-     *               this list can be empty
+     * 
+     * @param parser parser returns a list of strings which are the content between 
+     *               the symbol, this list can be empty
      */
     public Monad<String> symbolQuoted(Monad<Deque<String>> parser,char symbol){
     //swap the order of argument for method overloading
@@ -332,16 +275,17 @@ public class ParserBuilder {
     }
     
     public Monad<String> doubleQuoted(){
+    /*
+        double quoted content can be many strings that can be backquoted string or 
+        strings that does not includes new lines, back quotes nor double quotes
+    */
         return new Parser<>(input->{
             ArrayList<Character> exception = new ArrayList<>();
             exception.add('`');
             exception.add('\"');
             exception.add('\n');
             Monad<Deque<String>> doubleQuotedContent = this.many(this.or(this.backQuoted(),this.quotedContent(exception)));
-            /*
-                double quoted content can be many strings that can be backquoted string or 
-                strings that does not includes new lines, back quotes nor double quotes
-            */
+            
             return this.symbolQuoted(doubleQuotedContent,'\"').parse(input);
         });
     }
@@ -399,145 +343,16 @@ public class ParserBuilder {
             });
         }
 
-/*
-    public Monad<ArrayList<ArrayList<ArrayList<String>>>> lexSeq(){
-        return this.pSepp(this.or(this.lexPipe(),this.lexCall()), lexCommand(), ';');
-    }
-
-    private Monad<ArrayList<ArrayList<ArrayList<String>>>> pSepp(Monad<ArrayList<ArrayList<ArrayList<String>>>> parser1,Monad<ArrayList<ArrayList<ArrayList<String>>>> parser2,char symbol){
-        return new Parser<>(input->{
-            return this.bind(parser1, x->{
-                return this.bind(isChar(symbol), y->{
-                    return this.bind(parser2,z->{
-                        x.addAll(z);
-                        return this.result(x);
-                    });
-                });
-            }).parse(input);
-        });
-    }
-
-    public Monad<ArrayList<ArrayList<ArrayList<String>>>> lexPipe(){
-        return new Parser<>(input->{
-            return this.or(this.pipe(this.lexCall(), this.lexPipe(), '|'),
-            this.pipe(this.lexCall(), this.lexCall(), '|')).parse(input);
-        });
-    }
-
-    private Monad<ArrayList<ArrayList<ArrayList<String>>>> pipe(Monad<ArrayList<ArrayList<ArrayList<String>>>> parser1,Monad<ArrayList<ArrayList<ArrayList<String>>>> parser2,char symbol){
-        return new Parser<>(input->{
-            return this.bind(parser1, x->{
-                return this.bind(isChar(symbol), y->{
-                    return this.bind(parser2,z->{
-                        x.get(0).addAll(z.get(0));
-                        return this.result(x);
-                    });
-                });
-            }).parse(input);
-        });
-    }
-
-    public Monad<ArrayList<ArrayList<ArrayList<String>>>> lexCall(){
-        return new Parser<>(input->{
-            return this.bind(this.many(this.or(quoted(), nonKeyword())),strings->{
-                StringBuilder builder = new StringBuilder();
-                ArrayList<ArrayList<ArrayList<String>>> arr = new ArrayList<>();
-                for (String str:strings){
-                    builder.append(str);
-                }
-                arr.add(new ArrayList<ArrayList<String>>());
-                arr.get(0).add(this.parseCall().parse(builder.toString()).getValue());
-                return this.result(arr);
-            }).parse(input);
-        });
-    }
-
-    public Monad<ArrayList<ArrayList<ArrayList<String>>>> lexCommand(){
-        return new Parser<>(input->{
-            Monad<ArrayList<ArrayList<ArrayList<String>>>> command = this.or(this.or(this.lexSeq(),this.lexPipe()),this.lexCall());
-            return command.parse(input);
-        });
-    }
-*/
-    /*
-        parseCall = many (isChar(' ') ++ isChar('\t')) bind x/->
-    */
-    /*
-    public Monad<ArrayList<String>> parseCall(){
-        return new Parser<>(input->{
-            return this.bind(this.manySpaces(), emptySpaces1->{
-                return this.bind(this.many(this.bind(this.redirection(),x->{return this.bind(this.manySpaces(),spaces3->{return this.result(x);});})), redirections->{
-                    return this.bind(this.argument(), argument->{
-                        return this.bind(this.many(this.bind(this.manySpaces(),spaces4->{return this.atom();})), atoms->{
-                            return this.bind(this.manySpaces(), emptySpaces2->{
-                                ArrayList<String> result = new ArrayList<>();
-                                for (ArrayList<String> redirection:redirections){
-                                    result.addAll(redirection);
-                                }
-                                result.add(argument);
-                                for (ArrayList<String> atom:atoms){
-                                    result.addAll(atom);
-                                }
-                                return this.result(result);
-                            });
-                        });
-                    });
-                });
-            }).parse(input);
-        });
-    }
-
-    private Monad<ArrayList<String>> redirection(){
-        return new Parser<>(input->{
-            return this.bind(this.or(this.isChar('<'),this.isChar('>')), symbol->{
-                return this.bind(this.manySpaces(),spaces->{
-                    return this.bind(this.argument(),argument->{
-                        ArrayList<String> result = new ArrayList<>();
-                        result.add(Character.toString(symbol));
-                        result.add(argument);
-                        return this.result(result);
-                    });
-                });
-            }).parse(input);
-        });
-    }
-
-    private Monad<ArrayList<String>> atom(){
-        return new Parser<>(input->{
-            return this.or(this.redirection(),this.bind(this.argument(),argument->{
-                ArrayList<String> result = new ArrayList<>();
-                result.add(argument);
-                return this.result(result);
-            })).parse(input);
-        });
-    }
-
-    private Monad<Deque<Character>> manySpaces(){
-        return new Parser<>(input->{
-            return this.many(this.or(this.isChar(' '),this.isChar('\t'))).parse(input);
-        });
-    }
-
-    private Monad<String> argument(){
-        return new Parser<>(input->{
-            return this.bind(this.many1(this.or(this.quoted(), this.unQuoted())),ls->{
-                StringBuilder builder = new StringBuilder();
-                for (String str:ls){
-                    builder.append(str);
-                }
-                return this.result(builder.toString());
-            }).parse(input);
-        });
-    }
-    */
-
-    /*
-        To avoid left factoring, command has changed to:
-        <command> ::= <seq> | <pipe> | <call>
-        <pipe> ::= <call> "|" <pipe> | <call> "|" <call>
-        <seq>  ::= (<pipe>|<call>) ";" <command>
-        <call> ::= ( <non-keyword> | <quoted> ) *
-    */
+    /**
+     * To avoid left factoring, command's BNF has changed to:
+     *  <command> ::= <seq> | <pipe> | <call>
+     *  <pipe> ::= <call> "|" <pipe> | <call> "|" <call>
+     *  <seq>  ::= (<pipe>|<call>) ";" <command>
+     *  (<call>'s BNF will be discussed in parseCall() and call())
+     * @return a Monad that returns a list of Command object, they will be either
+     * Call or Pipe, thus the list actually represents the sequece of commands,
+     * list can be empty but not null 
+     */
     public Monad<ArrayList<Command>> parseCommand(){
         return new Parser<>(input->{
             Monad<ArrayList<Command>> command = this.or(this.or(this.seq(),this.pipe()),this.call());
@@ -545,13 +360,18 @@ public class ParserBuilder {
         });
     }
 
-    public Monad<ArrayList<Command>> seq(){
-        return this.sepBySymbol(this.or(this.pipe(),this.call()), this.parseCommand(), ';',(commandList1,commandList2)->{
-            commandList1.addAll(commandList2);
-            return this.result(commandList1);
-        });
-    }
-
+    /**
+     * A generalisation parser for grammars such as pipe and seq, to let this parser sucessfully parse 
+     * the input must be successfully parsed by following parser in order: parser1, isChar(symbol),
+     * parser.
+     * @param parser1/parser2 returns a list of commands as parsed value, parser cannnot be null,
+     * list can be empty but not null
+     * @param symbol symbol that separates string of parser1 and string of parser2, not empty nor null
+     * @param function takes in the parsed value of both parsers, returns a Monad that returns a list 
+     * of commands
+     * @return returns what the function returns, list can be null indicating parsing unsuccessful 
+     * but not empty
+     */
     private Monad<ArrayList<Command>> sepBySymbol(Monad<ArrayList<Command>> parser1,Monad<ArrayList<Command>> parser2,
                     char symbol,BiFunction<ArrayList<Command>,ArrayList<Command>,Monad<ArrayList<Command>>> function){
         return new Parser<>(input->{
@@ -565,10 +385,19 @@ public class ParserBuilder {
         });
     }
 
+    public Monad<ArrayList<Command>> seq(){
+        return this.sepBySymbol(this.or(this.pipe(),this.call()), this.parseCommand(), ';',(commandList1,commandList2)->{
+            commandList1.addAll(commandList2);
+            return this.result(commandList1);
+        });
+    }
+
     public Monad<ArrayList<Command>> pipe(){
         return new Parser<>(input->{
             Monad<ArrayList<Command>> callThenPipe = this.sepBySymbol(this.call(), this.pipe(), '|',(commandList1,commandList2)->{
                 Command pipe = new Pipe(commandList1,commandList2.get(0).getCommands());
+                // commandList2 is a list with Pipe command only, so we get the list of calls in the Pipe object and then
+                // put it into the constructor to create a new Pipe object 
                 ArrayList<Command> arr = new ArrayList<>();
                 arr.add(pipe);
                 return this.result(arr);
@@ -583,6 +412,15 @@ public class ParserBuilder {
         });
     }
 
+    /**
+     * call() parses call command, it first makes the input goes through a lexer that uses BNF:
+     * <call> ::= ( <non-keyword> | <quoted> ) *
+     * Then put the parsed value into the actual parser parseCall(), it then takes the parsed 
+     * value of parsedCall() to create an Call object before putting this object to a new list
+     * 
+     * @return a Monad that returns an arraylist with Call object in it, list can be null which
+     * indicates parsing unsuccessful but not empty
+     */
     public Monad<ArrayList<Command>> call(){
         return new Parser<>(input->{
             return this.bind(this.many(this.or(quoted(), nonKeyword())),strings->{
@@ -591,7 +429,8 @@ public class ParserBuilder {
                 for (String str:strings){
                     builder.append(str);
                 }
-                ArrayList<String> result = this.parseCall().parse(builder.toString()).getValue();
+
+                ArrayList<Atom> result = this.parseCall().parse(builder.toString()).getValue();
                 if (result == null){
                     Monad<ArrayList<Command>> zero = this.zero();
                     return zero;
@@ -603,22 +442,31 @@ public class ParserBuilder {
         });
     }
 
-    /*
-        parseCall = many (isChar(' ') ++ isChar('\t')) bind x/->
-    */
-    public Monad<ArrayList<String>> parseCall(){
+    /**
+     * Parsing call follows the following BNF:
+     * <call> ::= [ <whitespace> ]*[ <redirection> <whitespace> ]* <argument> [ <whitespace> <atom> ]* [ <whitespace> ]*
+     * <atom> ::= <redirection> | <argument>
+     * <argument> ::= ( <quoted> | <unquoted> )+
+     * <redirection> ::= "<" [ <whitespace> ]* <argument> | ">" [ <whitespace> ]* <argument>
+     * 
+     * <argument> would be a string, <redirection> would be a list of strings with first string is either < or > and second
+     * string is argument. <atom> would be a list of strings. <whitespace> would be ignored and would not be included in 
+     * the string nor list. 
+     * @return a Monad that returns an arraylist of strings, list can be null but not empty.
+     */
+    public Monad<ArrayList<Atom>> parseCall(){
         return new Parser<>(input->{
             return this.bind(this.manySpaces(), emptySpaces1->{
                 return this.bind(this.many(this.bind(this.redirection(),x->{return this.bind(this.manySpaces(),spaces3->{return this.result(x);});})), redirections->{
-                    return this.bind(this.argument(), argument->{
+                    return this.bind(this.parseArgument(), argument->{
                         return this.bind(this.many(this.bind(this.manySpaces(),spaces4->{return this.atom();})), atoms->{
                             return this.bind(this.manySpaces(), emptySpaces2->{
-                                ArrayList<String> result = new ArrayList<>();
-                                for (ArrayList<String> redirection:redirections){
+                                ArrayList<Atom> result = new ArrayList<>();
+                                for (ArrayList<Atom> redirection:redirections){
                                     result.addAll(redirection);
                                 }
                                 result.add(argument);
-                                for (ArrayList<String> atom:atoms){
+                                for (ArrayList<Atom> atom:atoms){
                                     result.addAll(atom);
                                 }
                                 return this.result(result);
@@ -630,14 +478,16 @@ public class ParserBuilder {
         });
     }
 
-    private Monad<ArrayList<String>> redirection(){
+    private Monad<ArrayList<Atom>> redirection(){
         return new Parser<>(input->{
             return this.bind(this.or(this.isChar('<'),this.isChar('>')), symbol->{
                 return this.bind(this.manySpaces(),spaces->{
                     return this.bind(this.argument(),argument->{
-                        ArrayList<String> result = new ArrayList<>();
-                        result.add(Character.toString(symbol));
-                        result.add(argument);
+                        ArrayList<Atom> result = new ArrayList<>();
+                        Atom symbolAtom = new RedirectionSymbol(symbol);
+                        Atom argumentAtom = new NonRedirectionString(argument);
+                        result.add(symbolAtom);
+                        result.add(argumentAtom);
                         return this.result(result);
                     });
                 });
@@ -645,10 +495,10 @@ public class ParserBuilder {
         });
     }
 
-    private Monad<ArrayList<String>> atom(){
+    private Monad<ArrayList<Atom>> atom(){
         return new Parser<>(input->{
-            return this.or(this.redirection(),this.bind(this.argument(),argument->{
-                ArrayList<String> result = new ArrayList<>();
+            return this.or(this.redirection(),this.bind(this.parseArgument(),argument->{
+                ArrayList<Atom> result = new ArrayList<>();
                 result.add(argument);
                 return this.result(result);
             })).parse(input);
@@ -661,24 +511,44 @@ public class ParserBuilder {
         });
     }
 
-    private Monad<String> argument(){
+    private Monad<Atom> parseArgument(){
+        return this.bind(this.argument(),argument->{
+            Atom argumentAtom = new NonRedirectionString(argument);
+            return this.result(argumentAtom);
+        });
+    }
+
+    private Monad<ArrayList<String>> argument(){
         return new Parser<>(input->{
             return this.bind(this.many1(this.or(this.quoted(), this.unQuoted())),ls->{
-                StringBuilder builder = new StringBuilder();
-                for (String str:ls){
-                    builder.append(str);
-                }
-                return this.result(builder.toString());
+                ArrayList<String> list = new ArrayList<>(ls);
+                return this.result(list);
             }).parse(input);
         });
     }
+
+    /**
+     * takes in a double quoted string and returns a list of double quoted content and back quoted string
+     * @param input the input can be empty but not null, the outtermost douvle quote is already removed,
+     * when passed into the parser
+     */
+
+    public Monad<ArrayList<String>> decodeDoubleQuoted(){
+            return new Parser<>(input->{
+                ArrayList<Character> exception = new ArrayList<>();
+                exception.add('`');
+                exception.add('\"');
+                exception.add('\n');
+                Monad<Deque<String>> doubleQuotedContent = this.many(this.or(this.backQuoted(),this.quotedContent(exception)));
+                
+                ArrayList<String> result = new ArrayList<>(doubleQuotedContent.parse(input).getValue());
+                return this.result(result).parse(input);
+            });
+        }
+
     public static void main(String[] args) {
-        ParserBuilder p = new ParserBuilder();
-        Monad<ArrayList<Command>> sat = p.parseCommand();
-        //Monad<ArrayList<String>> sat = p.parseCall();
-        //System.out.println("Result: "+sat.parse("   < abc > abc abc sdf abc").getValue());
-        System.out.println("Input:    < abc > abc abc sdf abc;abc|bbc|abc;abc");
-        System.out.println("Result: "+sat.parse("cat test1.txt | > test5.txt").getValue());
-        System.out.println("Input Left: "+sat.parse("cat test1.txt | > test5.txt").getInputStream());
+        ParserBuilder b = new ParserBuilder();
+        ArrayList<String> l = b.decodeDoubleQuoted().parse("abc`echo 123`def").getValue();
+        System.out.println(l);
     }
 }
