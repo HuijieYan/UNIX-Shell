@@ -32,7 +32,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         }
 
         String appName = callArgs.get(0);
-        OutputStream bufferedStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream bufferedStream = new ByteArrayOutputStream();
         OutputStreamWriter innerWriter = new OutputStreamWriter(bufferedStream);
         ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, innerWriter).createApp();
         currentDirectory = myApp.exec(new ArrayList<>(callArgs.subList(1, callArgs.size())));
@@ -207,12 +207,14 @@ public class ActualCmdVisitor implements CommandVisitor {
                 bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
                 subStream.reset();
             }
-            if(callIndex == calls.size() - 1){
-                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, writer);
-            }else {
-                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, subStreamWriter);
-            }
+
+            currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, subStreamWriter);
         }
+
+        try {
+            writer.write(subStream.toString());
+            writer.flush();
+        }catch (IOException ignored){}
         return currentDirectory;
     }
 }

@@ -17,7 +17,7 @@ public class AppBuilder {
         this.writer = writer;
     }
 
-    public ShellApplication createApp() {
+    public ShellApplication createApp() throws RuntimeException {
         return new AppFactory(this.appName, this.currentDirectory,this.reader, this.writer).makeApp();
     }
 

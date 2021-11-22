@@ -19,49 +19,61 @@ public class AppFactory {
         this.writer = writer;
     }
 
-    public ShellApplication makeApp() {
+    public ShellApplication makeApp() throws RuntimeException {
+        ShellApplication myApp;
+        if(appName.startsWith("_")){
+            myApp = new Unsafe(chooseApp(appName.substring(1)));
+        }else {
+            myApp = chooseApp(appName);
+        }
+        if(myApp == null){
+            throw new RuntimeException(appName + ": unknown application");
+        }
+        return myApp;
+    }
 
+    private ShellApplication chooseApp(String appName){
         ShellApplication myApp;
 
         switch (appName) {
-        case "pwd":
-            myApp = new Pwd(currentDirectory, writer);
-            break;
-        case "cd":
-            myApp = new Cd(currentDirectory);
-            break;
-        case "ls":
-            myApp = new Ls(currentDirectory, writer);
-            break;
-        case "cat":
-            myApp = new Cat(currentDirectory, reader, writer);
-            break;
-        case "echo":
-            myApp = new Echo(currentDirectory, writer);
-            break;
-        case "head":
-            myApp = new Head(currentDirectory, reader, writer);
-            break;
-        case "tail":
-            myApp = new Tail(currentDirectory, reader, writer);
-            break;
-        case "grep":
-            myApp = new Grep(currentDirectory, reader, writer);
-            break;
-        case "cut":
-            myApp = new Cut(currentDirectory, reader, writer);
-            break;
-        case "find":
-            myApp = new Find(currentDirectory, writer);
-            break;
-        case "uniq":
-            myApp = new Uniq(currentDirectory, reader, writer);
-            break;
-        case "sort":
-            myApp = new Sort(currentDirectory, reader, writer);
-            break;
-        default:
-            throw new RuntimeException(appName + ": unknown application");
+            case "pwd":
+                myApp = new Pwd(currentDirectory, writer);
+                break;
+            case "cd":
+                myApp = new Cd(currentDirectory);
+                break;
+            case "ls":
+                myApp = new Ls(currentDirectory, writer);
+                break;
+            case "cat":
+                myApp = new Cat(currentDirectory, reader, writer);
+                break;
+            case "echo":
+                myApp = new Echo(currentDirectory, writer);
+                break;
+            case "head":
+                myApp = new Head(currentDirectory, reader, writer);
+                break;
+            case "tail":
+                myApp = new Tail(currentDirectory, reader, writer);
+                break;
+            case "grep":
+                myApp = new Grep(currentDirectory, reader, writer);
+                break;
+            case "cut":
+                myApp = new Cut(currentDirectory, reader, writer);
+                break;
+            case "find":
+                myApp = new Find(currentDirectory, writer);
+                break;
+            case "uniq":
+                myApp = new Uniq(currentDirectory, reader, writer);
+                break;
+            case "sort":
+                myApp = new Sort(currentDirectory, reader, writer);
+                break;
+            default:
+                myApp = null;
         }
 
         return myApp;

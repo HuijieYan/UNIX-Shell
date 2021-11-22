@@ -1,5 +1,7 @@
 package uk.ac.ucl.shell;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -27,10 +29,29 @@ public class Shell {
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
         // in seq
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        OutputStreamWriter bufferWriter = new OutputStreamWriter(buffer);
         for (Command curCmd: commandList) {
             //access visitor
-            currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
+            try {
+                currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, bufferWriter);
+            }catch (RuntimeException e){
+                if(e.getMessage().startsWith("ignore")){
+                    buffer.reset();
+                    try {
+                        bufferWriter.write(e.getMessage().substring(6) + System.getProperty("line.separator"));
+                        bufferWriter.flush();
+                    }catch (IOException ignored){}
+                }else {
+                    throw new RuntimeException(e.getMessage().substring(6));
+                }
+            }
         }
+
+        try {
+            writer.write(buffer.toString());
+            writer.flush();
+        }catch (IOException ignored){}
     }
 
     public static void main(String[] args) {
