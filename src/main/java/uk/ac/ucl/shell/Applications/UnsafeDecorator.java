@@ -4,10 +4,10 @@ import uk.ac.ucl.shell.ShellApplication;
 
 import java.util.List;
 
-public class Unsafe implements ShellApplication {
+public class UnsafeDecorator implements ShellApplication {
     private ShellApplication app;
 
-    public Unsafe(ShellApplication app){
+    public UnsafeDecorator(ShellApplication app){
         this.app = app;
     }
     @Override

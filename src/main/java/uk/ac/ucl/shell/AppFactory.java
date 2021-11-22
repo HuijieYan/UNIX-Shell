@@ -22,7 +22,7 @@ public class AppFactory {
     public ShellApplication makeApp() throws RuntimeException {
         ShellApplication myApp;
         if(appName.startsWith("_")){
-            myApp = new Unsafe(chooseApp(appName.substring(1)));
+            myApp = new UnsafeDecorator(chooseApp(appName.substring(1)));
         }else {
             myApp = chooseApp(appName);
         }

@@ -66,7 +66,7 @@ public class Shell {
             try {
                 Shell.eval(args[1], new OutputStreamWriter(System.out));
             } catch (Exception e) {
-                System.out.println("COMP0010 shell: " + e.getMessage());
+                System.out.print("");
             }
         } else {
             OutputStreamWriter writer = new OutputStreamWriter(System.out);
@@ -78,8 +78,7 @@ public class Shell {
                         String cmdline = input.nextLine();
                         Shell.eval(cmdline, writer);
                     } catch (Exception e) {
-                        System.out.println("COMP0010 shell: " + e.getMessage());
-                        e.printStackTrace();
+                        System.out.print("");
                         break;
                     }
                 }
