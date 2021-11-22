@@ -15,7 +15,7 @@ public class Tools {
             return file.toPath();
         }
         file = new File(fileName);
-        if(file.isFile()){
+        if(file.isFile() && file.isAbsolute()){
             return file.toPath();
         }
         throw new IOException();

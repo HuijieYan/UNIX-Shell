@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -8,6 +7,7 @@ import java.util.Scanner;
 import uk.ac.ucl.shell.Parser.Monad;
 import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
+import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
 public class Shell {
 
@@ -19,14 +19,13 @@ public class Shell {
         // Using monad Parser
         ParserBuilder myParser = new ParserBuilder();
         Monad<ArrayList<Command>> sat = myParser.parseCommand();
-        ArrayList<Command> commandList = sat.parse(cmdline).getValue();
+        MonadicValue<ArrayList<Command>, String> resultPair = sat.parse(cmdline);
+        ArrayList<Command> commandList = resultPair.getValue();
+        if(!resultPair.getInputStream().equals("")){
+            throw new RuntimeException("Error: the input does not satisfy the syntax");
+        }
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
-
-        //TBD: need to raise error when parsing is failed
-        String stuffLeft = sat.parse(cmdline).getInputStream();
-        //System.out.println("stuff left (should be empty if parese success) -> "+stuffLeft);
-
         // in seq
         for (Command curCmd: commandList) {
             //access visitor
@@ -49,8 +48,7 @@ public class Shell {
                 System.out.println("COMP0010 shell: " + e.getMessage());
             }
         } else {
-            Scanner input = new Scanner(System.in);
-            try {
+            try (Scanner input = new Scanner(System.in)) {
                 while (true) {
                     String prompt = currentDirectory + "> ";
                     System.out.print(prompt);
@@ -59,10 +57,10 @@ public class Shell {
                         Shell.eval(cmdline, System.out);
                     } catch (Exception e) {
                         System.out.println("COMP0010 shell: " + e.getMessage());
+                        e.printStackTrace();
+                        break;
                     }
                 }
-            } finally {
-                input.close();
             }
         }
     }

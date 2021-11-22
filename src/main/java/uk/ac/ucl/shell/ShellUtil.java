@@ -33,7 +33,7 @@ public class ShellUtil {
                 if(((RedirectionSymbol)arg).isTowardsNext()){
                     if(!hasSeveralInput){
                         if(argIndex + 1 < cmdArgs.size()){
-                            inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
+                            inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
                             cmdArgs.remove(argIndex);
                             cmdArgs.remove(argIndex);
                         }else {
@@ -47,7 +47,7 @@ public class ShellUtil {
                 } else {
                     if(!hasSeveralOutput){
                         if(argIndex + 1 < cmdArgs.size()){
-                            inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
+                            inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
                             cmdArgs.remove(argIndex);
                             cmdArgs.remove(argIndex);
                         }else {

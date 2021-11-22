@@ -33,9 +33,10 @@ public class ActualCmdVisitor implements CommandVisitor {
                 ArrayList<String> globbingResult = globbingHelper(evaluatedArg);
                 if(argIndex > 0 && cmdArgs.get(argIndex - 1) instanceof RedirectionSymbol && globbingResult.size() != 1){
                     StringBuilder target = new StringBuilder();
-                    for(String str : cmdArgs.get(argIndex).get()){
+                    /*for(String str : cmdArgs.get(argIndex).get()){
                         target.append(str);
-                    }
+                    }*/
+                    cmdArgs.get(argIndex).get().forEach(target::append);
                     throw new RuntimeException("Error : ambiguous redirect argument: " + target.toString());
                 }
                 evaluatedArg = new NonRedirectionString(globbingResult);
@@ -43,7 +44,9 @@ public class ActualCmdVisitor implements CommandVisitor {
             cmdArgs.set(argIndex, evaluatedArg);
         }
 
+
         ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(cmdArgs);
+
         if(inputAndOutputFile.get(0) != null){
             try {
                 bufferedReader = Files.newBufferedReader(Tools.getPath(currentDirectory, inputAndOutputFile.get(0)), StandardCharsets.UTF_8);
@@ -87,11 +90,8 @@ public class ActualCmdVisitor implements CommandVisitor {
     }
 
     private ArrayList<String> globbingHelper(Atom arg){
-        ArrayList<String> result = new ArrayList<>();
-        for(String str : arg.get()){
-            result.add(str);
-        }
-        return result;
+        //result.addAll(doGlobbing(waitForGlobbing));
+        return new ArrayList<>(arg.get());
     }
 
     private Atom evalArg(Atom arg) throws RuntimeException {
@@ -101,22 +101,26 @@ public class ActualCmdVisitor implements CommandVisitor {
 
         boolean canBeGlob = false;
         ArrayList<String> argumentStrings = arg.get();
-        StringBuilder builder = new StringBuilder();
+        ArrayList<StringBuilder> builders = new ArrayList<>();
+        builders.add(new StringBuilder());
         for (String str : argumentStrings){
             if (str.charAt(0) == '\"' || str.charAt(0) == '`'){
-                canBeGlob = commandSubstitution(str,builder);
+                canBeGlob = commandSubstitution(str, builders);
             }else{
                 if (str.charAt(0) == '\''){
                     str = removeQuote(str);
                 }else if(str.contains("*")){
                     canBeGlob = true;
                 }
-                builder.append(str);
+                builders.get(builders.size() - 1).append(str);
             }
         }
 
-        String[] subArgs = builder.toString().split(" ");
-        NonRedirectionString args = new NonRedirectionString(new ArrayList<>(Arrays.asList(subArgs)));
+        ArrayList<String> subArgs = new ArrayList<>();
+        for(StringBuilder builder : builders){
+            subArgs.add(builder.toString());
+        }
+        NonRedirectionString args = new NonRedirectionString(subArgs);
         if(canBeGlob){
             args.setCanBeGlob(true);
         }
@@ -127,7 +131,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         return str.substring(1,str.length()-1);
     }
 
-    private boolean commandSubstitution(String str, StringBuilder builder) throws RuntimeException {
+    private boolean commandSubstitution(String str, ArrayList<StringBuilder> builders) throws RuntimeException {
         ArrayList<String> contentList = new ArrayList<>();
         boolean canBeGlob = false;
         if (str.charAt(0) == '`'){
@@ -135,18 +139,27 @@ public class ActualCmdVisitor implements CommandVisitor {
             contentList.add(str);
         }else{
             str = removeQuote(str);
+            //System.out.println("here: " + str);
             contentList = parserBuilder.decodeDoubleQuoted().parse(str).getValue();
+            //System.out.println(contentList.toString());
+            //System.out.println(contentList.size());
             //"abc`echo 123`def" becomes [abc,`echo 123 234`,def]
         }
-        
+
         for (String content : contentList){
             if (content.charAt(0) != '`'){
-                builder.append(str);
+                builders.get(builders.size() - 1).append(content);
             }else{
-                content = removeQuote(content);
                 ByteArrayOutputStream subStream = new ByteArrayOutputStream();
-                Shell.eval(content, subStream);
-                builder.append(subStream.toString().replaceAll("\r\n|\r|\n|\t", " "));
+                Shell.eval(removeQuote(content), subStream);
+                String[] resultArgs = subStream.toString().replaceAll("\r\n|\r|\n|\t", " ").split(" ");
+                for(int argIndex = 0; argIndex < resultArgs.length; argIndex++){
+                    builders.get(builders.size() - 1).append(resultArgs[argIndex]);
+                    if(argIndex != resultArgs.length - 1){
+                        System.out.println("won't exec");
+                        builders.add(new StringBuilder());
+                    }
+                }
             }
         }
 
@@ -156,21 +169,19 @@ public class ActualCmdVisitor implements CommandVisitor {
     public String visit(Pipe myPipe, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws RuntimeException {
         ByteArrayOutputStream subStream;
         subStream = new ByteArrayOutputStream();
-        ArrayList<Command> parsedArgs = myPipe.getCommands();
+        ArrayList<Command> calls = myPipe.getCommands();
 
         //iterate size - 2 times
-        for (Command curCmd:parsedArgs) {
-            if (bufferedReader == null) {
-                currentDirectory = curCmd.accept(this, currentDirectory, bufferedReader, subStream);
-                bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
-            } else {
+
+        for(int callIndex = 0; callIndex < calls.size(); callIndex++){
+            if(callIndex > 0){
                 bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
                 subStream.reset();
-                if (parsedArgs.lastIndexOf(curCmd) == parsedArgs.size()-1) {
-                    currentDirectory = curCmd.accept(this, currentDirectory, bufferedReader, output);
-                } else {
-                    currentDirectory = curCmd.accept(this, currentDirectory, bufferedReader, subStream);
-                }
+            }
+            if(callIndex == calls.size() - 1){
+                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, output);
+            }else {
+                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, subStream);
             }
         }
 

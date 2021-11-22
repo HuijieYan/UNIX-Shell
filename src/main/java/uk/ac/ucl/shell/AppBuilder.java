@@ -22,7 +22,7 @@ public class AppBuilder {
         return new AppFactory(this.appName, this.currentDirectory,this.reader, this.writer).makeApp();
     }
 
-    public static class AppBuilderNested {
+    /*public static class AppBuilderNested {
         private String nestedAppName;
         private String nestedDirectory;
         private OutputStreamWriter nestedWriter;
@@ -48,7 +48,7 @@ public class AppBuilder {
         }
 
         //build final appBuilder
-    }
+    }*/
 
 
 }
