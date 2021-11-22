@@ -29,29 +29,21 @@ public class Shell {
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
         // in seq
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        OutputStreamWriter bufferWriter = new OutputStreamWriter(buffer);
         for (Command curCmd: commandList) {
             //access visitor
             try {
-                currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, bufferWriter);
+                currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
             }catch (RuntimeException e){
                 if(e.getMessage().startsWith("ignore")){
-                    buffer.reset();
                     try {
-                        bufferWriter.write(e.getMessage().substring(6) + System.getProperty("line.separator"));
-                        bufferWriter.flush();
+                        writer.write(e.getMessage().substring(6) + System.getProperty("line.separator"));
+                        writer.flush();
                     }catch (IOException ignored){}
                 }else {
-                    throw new RuntimeException(e.getMessage().substring(6));
+                    throw new RuntimeException(e.getMessage());
                 }
             }
         }
-
-        try {
-            writer.write(buffer.toString());
-            writer.flush();
-        }catch (IOException ignored){}
     }
 
     public static void main(String[] args) {
@@ -78,7 +70,7 @@ public class Shell {
                         String cmdline = input.nextLine();
                         Shell.eval(cmdline, writer);
                     } catch (Exception e) {
-                        System.out.print("");
+                        System.out.print(e.getMessage());
                         break;
                     }
                 }

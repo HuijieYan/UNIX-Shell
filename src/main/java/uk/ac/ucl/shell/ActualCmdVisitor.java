@@ -207,14 +207,12 @@ public class ActualCmdVisitor implements CommandVisitor {
                 bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
                 subStream.reset();
             }
-
-            currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, subStreamWriter);
+            if(callIndex == calls.size() - 1){
+                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, writer);
+            }else {
+                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, subStreamWriter);
+            }
         }
-
-        try {
-            writer.write(subStream.toString());
-            writer.flush();
-        }catch (IOException ignored){}
         return currentDirectory;
     }
 }
