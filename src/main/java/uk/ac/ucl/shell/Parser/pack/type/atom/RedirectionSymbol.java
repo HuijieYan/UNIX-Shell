@@ -5,11 +5,7 @@ public class RedirectionSymbol extends AtomAbstract{
     //indicates whether the symbol is > or <
 
     public RedirectionSymbol(char symbol){
-        if (symbol == '>'){
-            greaterThan = true;
-        }else{
-            greaterThan = false;
-        }
+        greaterThan = symbol == '>';
         content.add(Character.toString(symbol));
     }
 

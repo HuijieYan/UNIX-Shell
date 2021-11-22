@@ -11,6 +11,6 @@ public interface Command {
     public ArrayList<Command> getCommands();
 
     //visitor
-    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws IOException;
+    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws RuntimeException;
 
 }

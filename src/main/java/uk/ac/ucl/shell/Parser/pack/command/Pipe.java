@@ -2,7 +2,6 @@ package uk.ac.ucl.shell.Parser.pack.command;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
@@ -30,13 +29,13 @@ public class Pipe implements Command {
     }
 
     //visitorCall 
-    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws IOException {
+    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws RuntimeException {
         this.myVisitor = visitor;
         return visitor.visit(this, currentDirectory, bufferedReader, output);
     }
 
     //tbd
-    public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws IOException {
+    public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws RuntimeException {
         
         ByteArrayOutputStream subStream;
         subStream = new ByteArrayOutputStream();

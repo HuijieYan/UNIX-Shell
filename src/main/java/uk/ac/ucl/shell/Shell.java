@@ -14,7 +14,7 @@ public class Shell {
     private static String currentDirectory = System.getProperty("user.dir");
 
     //change to non-static at the moment
-    public static void eval(String cmdline, OutputStream output) throws IOException {
+    public static void eval(String cmdline, OutputStream output) throws RuntimeException {
 
         // Using monad Parser
         ParserBuilder myParser = new ParserBuilder();
@@ -30,12 +30,7 @@ public class Shell {
         // in seq
         for (Command curCmd: commandList) {
             //access visitor
-            try {
-                currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, output);
-            } catch (IOException e) {
-                System.out.println("IO error catched");
-            }
-
+            currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, output);
         }
     }
 

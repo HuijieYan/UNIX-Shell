@@ -120,12 +120,7 @@ public class ArgAutomata {
 
         //start subCMd
         ByteArrayOutputStream subStream = new ByteArrayOutputStream();
-        try {
-            Shell.eval(subCmd, subStream);
-        } catch (IOException e) {
-            //temp
-            e.printStackTrace();
-        }
+        Shell.eval(subCmd, subStream);
         //check exception
         String resultStr = subStream.toString();
         //tidy string since subShell has newLine at the end

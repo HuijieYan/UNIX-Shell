@@ -1,5 +1,8 @@
 package uk.ac.ucl.shell;
 
+import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
+import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -17,34 +20,50 @@ import java.util.stream.Collectors;
 
 public class ShellUtil {
 
-    public static ArrayList<String> checkRedirection(ArrayList<String> appArgs) throws RuntimeException {
+    public static ArrayList<String> checkRedirection(ArrayList<Atom> cmdArgs) throws RuntimeException {
         ArrayList<String> inputAndOutputFile = new ArrayList<>();
-        int inputIndex = appArgs.indexOf("<");
-        if(inputIndex == -1){
-            inputAndOutputFile.add(null);
-        }else {
-            appArgs.remove(inputIndex);
-            if(appArgs.contains("<")){
-                throw new RuntimeException("Error: several files are specified for input");
-            }else if(inputIndex >= appArgs.size()){
-                throw new RuntimeException("Error: no file is specified for input");
+        inputAndOutputFile.add(null);
+        inputAndOutputFile.add(null);
+
+        boolean hasSeveralInput = false;
+        boolean hasSeveralOutput = false;
+        for(int argIndex = 0; argIndex < cmdArgs.size();){
+            Atom arg = cmdArgs.get(argIndex);
+            if(arg instanceof RedirectionSymbol){
+                if(((RedirectionSymbol)arg).isTowardsNext()){
+                    if(!hasSeveralInput){
+                        if(argIndex + 1 < cmdArgs.size()){
+                            inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
+                            cmdArgs.remove(argIndex);
+                            cmdArgs.remove(argIndex);
+                        }else {
+                            throw new RuntimeException("Error: no file is specified for input");
+                        }
+                        hasSeveralInput = true;
+                    }else {
+                        throw new RuntimeException("Error: several files are specified for input");
+                    }
+
+                } else {
+                    if(!hasSeveralOutput){
+                        if(argIndex + 1 < cmdArgs.size()){
+                            inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
+                            cmdArgs.remove(argIndex);
+                            cmdArgs.remove(argIndex);
+                        }else {
+                            throw new RuntimeException("Error: no file is specified for output");
+                        }
+                        hasSeveralOutput = true;
+                    }else {
+                        throw new RuntimeException("Error: several files are specified for output");
+                    }
+
+                }
+            }else {
+                argIndex++;
             }
-            inputAndOutputFile.add(appArgs.remove(inputIndex));
         }
 
-        int outputIndex = appArgs.indexOf(">");
-        if(outputIndex == -1){
-            inputAndOutputFile.add(null);
-        }else {
-            appArgs.remove(outputIndex);
-            if(appArgs.contains(">")){
-                throw new RuntimeException("Error: several files are specified for output");
-            }else if(outputIndex >= appArgs.size()){
-                throw new RuntimeException("Error: no file is specified for output");
-            }
-
-            inputAndOutputFile.add(appArgs.remove(outputIndex));
-        }
         return inputAndOutputFile;
     }
 

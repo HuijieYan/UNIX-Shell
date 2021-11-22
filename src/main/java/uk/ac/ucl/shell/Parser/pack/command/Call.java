@@ -35,12 +35,10 @@ public class Call implements Command {
         return rawCommand;
     }
 
-    public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws IOException {
- 
-        
+    public String eval(String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer, OutputStream output) throws RuntimeException {
         ArrayList<String> cmdArgs = this.getArgs();
         String appName = cmdArgs.get(0);
-        ArrayList<String> appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+        ArrayList<String> appArgs = new ArrayList<>(cmdArgs.subList(1, cmdArgs.size()));
 
         //check redirection
         ArrayList<String> inputAndOutputFile = ShellUtil.checkRedirection(cmdArgs);
@@ -48,7 +46,7 @@ public class Call implements Command {
             try {
                 bufferedReader = Files.newBufferedReader(Tools.getPath(currentDirectory, inputAndOutputFile.get(0)), StandardCharsets.UTF_8);
             }catch (IOException e){
-                throw new RuntimeException("can not open the input redirection file: " + inputAndOutputFile.get(0));
+                throw new RuntimeException("can not open the input redirection file:" + inputAndOutputFile.get(0));
             }
         }
 
@@ -60,7 +58,7 @@ public class Call implements Command {
         
         cmdArgs = newArgs;
         appName = cmdArgs.get(0);
-        appArgs = new ArrayList<String>(cmdArgs.subList(1, cmdArgs.size()));
+        appArgs = new ArrayList<>(cmdArgs.subList(1, cmdArgs.size()));
 
 
         OutputStream bufferedStream = new ByteArrayOutputStream();
@@ -79,7 +77,7 @@ public class Call implements Command {
                 outputFile.flush();
                 outputFile.close();
             }catch (IOException e){
-                throw new RuntimeException("fail to write to the output redirection file: " + inputAndOutputFile.get(1));
+                throw new RuntimeException("fail to write to the output redirection file:" + inputAndOutputFile.get(1));
             }
         
         } else {
@@ -96,7 +94,7 @@ public class Call implements Command {
     }
 
     //visitor 
-    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws IOException {
+    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws RuntimeException {
         return visitor.visit(this, currentDirectory, bufferedReader, output);
     }
 
