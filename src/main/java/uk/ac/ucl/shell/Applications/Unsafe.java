@@ -2,7 +2,6 @@ package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
 
-import java.io.OutputStreamWriter;
 import java.util.List;
 
 public class Unsafe implements ShellApplication {
