@@ -1,7 +1,7 @@
 package uk.ac.ucl.shell.Parser.pack.command;
 
 import java.io.BufferedReader;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import uk.ac.ucl.shell.CommandVisitor;
@@ -23,8 +23,8 @@ public class Pipe implements Command {
     }
 
     //visitorCall 
-    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws RuntimeException {
-        return visitor.visit(this, currentDirectory, bufferedReader, output);
+    public String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException {
+        return visitor.visit(this, currentDirectory, bufferedReader, writer);
     }
 
 }

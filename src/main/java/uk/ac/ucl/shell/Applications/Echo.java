@@ -17,21 +17,21 @@ public class Echo implements ShellApplication {
 
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
-        if(appArgs.size() > 0){
-            try {
-                for(int index = 0; index < appArgs.size(); index++){
-                    writer.write(appArgs.get(index));
-                    if(index != appArgs.size() - 1){
-                        writer.write(" ");
-                    }
-                }
-                writer.write(System.getProperty("line.separator"));
-                writer.flush();
-            }catch (IOException e){
-                throw new RuntimeException("Echo: fail to print the arguments");
-            }
-        }else {
+        if(appArgs.size() < 1){
             throw new RuntimeException("Echo: application should at least has one argument");
+        }
+
+        try {
+            for(int index = 0; index < appArgs.size(); index++){
+                writer.write(appArgs.get(index));
+                if(index != appArgs.size() - 1){
+                    writer.write(" ");
+                }
+            }
+            writer.write(System.getProperty("line.separator"));
+            writer.flush();
+        }catch (IOException e){
+            throw new RuntimeException("Echo: fail to print the arguments");
         }
         return currentDirectory;
     }

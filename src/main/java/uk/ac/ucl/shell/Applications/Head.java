@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 public class Head implements ShellApplication {
     private String currentDirectory;
@@ -55,7 +56,7 @@ public class Head implements ShellApplication {
             }
         } else {
             try {
-                writeToBuffer(Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
+                writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
             }catch (IOException e){
                 throw new RuntimeException("head: cannot open " + fileName);
             }

@@ -1,6 +1,7 @@
 package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -36,7 +37,7 @@ public class Cut implements ShellApplication {
         Path path = null;
         if(appArgs.size() == 3){
             try {
-                path = Tools.getPath(currentDirectory, appArgs.get(2));
+                path = ShellUtil.getPath(currentDirectory, appArgs.get(2));
             }catch (IOException e){
                 throw new RuntimeException("cut: can not open file " + appArgs.get(2));
             }

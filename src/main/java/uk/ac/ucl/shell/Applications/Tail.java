@@ -1,6 +1,7 @@
 package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +57,7 @@ public class Tail implements ShellApplication{
             }
         } else {
             try {
-                writeToBuffer(Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
+                writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
             }catch (IOException e){
                 throw new RuntimeException("tail: cannot open " + fileName);
             }

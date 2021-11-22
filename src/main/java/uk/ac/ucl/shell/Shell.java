@@ -1,6 +1,6 @@
 package uk.ac.ucl.shell;
 
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -14,7 +14,7 @@ public class Shell {
     private static String currentDirectory = System.getProperty("user.dir");
 
     //change to non-static at the moment
-    public static void eval(String cmdline, OutputStream output) throws RuntimeException {
+    public static void eval(String cmdline, OutputStreamWriter writer) throws RuntimeException {
 
         // Using monad Parser
         ParserBuilder myParser = new ParserBuilder();
@@ -29,7 +29,7 @@ public class Shell {
         // in seq
         for (Command curCmd: commandList) {
             //access visitor
-            currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, output);
+            currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
         }
     }
 
@@ -43,18 +43,19 @@ public class Shell {
                 System.out.println("COMP0010 shell: " + args[0] + ": unexpected argument");
             }
             try {
-                Shell.eval(args[1], System.out);
+                Shell.eval(args[1], new OutputStreamWriter(System.out));
             } catch (Exception e) {
                 System.out.println("COMP0010 shell: " + e.getMessage());
             }
         } else {
+            OutputStreamWriter writer = new OutputStreamWriter(System.out);
             try (Scanner input = new Scanner(System.in)) {
                 while (true) {
                     String prompt = currentDirectory + "> ";
                     System.out.print(prompt);
                     try {
                         String cmdline = input.nextLine();
-                        Shell.eval(cmdline, System.out);
+                        Shell.eval(cmdline, writer);
                     } catch (Exception e) {
                         System.out.println("COMP0010 shell: " + e.getMessage());
                         e.printStackTrace();

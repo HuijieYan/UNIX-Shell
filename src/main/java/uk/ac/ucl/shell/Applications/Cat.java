@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 public class Cat implements ShellApplication {
     private String currentDirectory;
@@ -38,22 +39,10 @@ public class Cat implements ShellApplication {
         } else {
             Charset encoding = StandardCharsets.UTF_8;
             for(String file : appArgs){
-                if(file.contains("*")){
-                    try {
-                        ArrayList<String> files = Tools.globbingHelper(file, currentDirectory);
-                        for(String fileName : files){
-                            writeToBuffer(Files.newBufferedReader((new File(fileName)).toPath(), encoding));
-                        }
-                    }catch (IOException e){
-                        throw new RuntimeException("cat: can not open " + file);
-                    }
-
-                }else {
-                    try {
-                        writeToBuffer(Files.newBufferedReader(Tools.getPath(currentDirectory, file), encoding));
-                    }catch (IOException e){
-                        throw new RuntimeException("cat: can not open " + file);
-                    }
+                try {
+                    writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, file), encoding));
+                }catch (IOException e){
+                    throw new RuntimeException("cat: can not open " + file);
                 }
             }
 

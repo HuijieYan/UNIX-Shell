@@ -1,5 +1,6 @@
 package uk.ac.ucl.shell.Applications;
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -54,7 +55,7 @@ public class Uniq implements ShellApplication{
             reader = this.reader;
         }else {
             try {
-                reader = Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8);
+                reader = Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8);
             }catch (IOException e){
                 throw new RuntimeException("uniq: cannot open " + fileName);
             }

@@ -2,12 +2,12 @@ package uk.ac.ucl.shell.Applications;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 public class Grep implements ShellApplication {
     private String currentDirectory;
@@ -42,17 +42,7 @@ public class Grep implements ShellApplication {
             this.prefixed = (appArgs.size() - 1) > 1;
             for(int index = 1; index < appArgs.size(); index++){
                 try {
-                    if(appArgs.get(index).contains("*")){
-                        ArrayList<String> filenames = Tools.globbingHelper(appArgs.get(index), currentDirectory);
-                        if(filenames.size() > 1){
-                            this.prefixed = true;
-                        }
-                        for (String fileName : filenames){
-                            writeToBuffer(grepPattern, Files.newBufferedReader(Tools.getPath(currentDirectory, fileName), StandardCharsets.UTF_8), fileName);
-                        }
-                    }else {
-                        writeToBuffer(grepPattern, Files.newBufferedReader(Tools.getPath(currentDirectory, appArgs.get(index)), StandardCharsets.UTF_8), appArgs.get(index));
-                    }
+                    writeToBuffer(grepPattern, Files.newBufferedReader(ShellUtil.getPath(currentDirectory, appArgs.get(index)), StandardCharsets.UTF_8), appArgs.get(index));
                 }catch (IOException e){
                     throw new RuntimeException("grep: cannot open " + appArgs.get(index));
                 }
