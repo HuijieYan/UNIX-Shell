@@ -9,6 +9,7 @@ import java.util.Arrays;
 import uk.ac.ucl.shell.Applications.Tools;
 import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Call;
+import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.command.Pipe;
 import uk.ac.ucl.shell.Parser.pack.type.atom.*;
 
@@ -16,10 +17,7 @@ public class ActualCmdVisitor implements CommandVisitor {
     private ParserBuilder parserBuilder = new ParserBuilder();
 
     public String visit(Call myCall, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws RuntimeException {
-        
-        OutputStreamWriter writer = new OutputStreamWriter(output);
-
-        currentDirectory = myCall.eval(currentDirectory, bufferedReader, writer, output);
+        currentDirectory = this.eval(myCall,currentDirectory, bufferedReader, output);
         return currentDirectory;
     }
 
@@ -156,9 +154,26 @@ public class ActualCmdVisitor implements CommandVisitor {
     }
 
     public String visit(Pipe myPipe, String currentDirectory, BufferedReader bufferedReader, OutputStream output) throws RuntimeException {
-        OutputStreamWriter writer = new OutputStreamWriter(output);
+        ByteArrayOutputStream subStream;
+        subStream = new ByteArrayOutputStream();
+        ArrayList<Command> parsedArgs = myPipe.getCommands();
 
-        currentDirectory = myPipe.eval(currentDirectory, bufferedReader, writer, output);
+        //iterate size - 2 times
+        for (Command curCmd:parsedArgs) {
+            if (bufferedReader == null) {
+                currentDirectory = curCmd.accept(this, currentDirectory, bufferedReader, subStream);
+                bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
+            } else {
+                bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
+                subStream.reset();
+                if (parsedArgs.lastIndexOf(curCmd) == parsedArgs.size()-1) {
+                    currentDirectory = curCmd.accept(this, currentDirectory, bufferedReader, output);
+                } else {
+                    currentDirectory = curCmd.accept(this, currentDirectory, bufferedReader, subStream);
+                }
+            }
+        }
+
         return currentDirectory;
     }
     
