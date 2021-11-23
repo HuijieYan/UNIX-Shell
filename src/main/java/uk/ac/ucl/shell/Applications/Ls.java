@@ -5,6 +5,7 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 public class Ls implements ShellApplication {
     private String currentDirectory;
@@ -28,9 +29,7 @@ public class Ls implements ShellApplication {
                 currDir = new File(currentDirectory);
                 rootDirLength = currentDirectory.length() + 1;
             } else {
-                if(!(currDir = new File(currentDirectory, appArgs.get(0))).isDirectory() && (!(currDir = new File(appArgs.get(0))).isDirectory() || !currDir.isAbsolute())){
-                    throw new RuntimeException("ls: no such directory: " + appArgs.get(0));
-                }
+                currDir = ShellUtil.getDir(currentDirectory, appArgs.get(0));
                 rootDirLength = currDir.getCanonicalPath().length() + 1;
             }
 

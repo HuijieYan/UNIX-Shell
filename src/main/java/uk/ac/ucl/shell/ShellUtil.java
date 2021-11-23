@@ -17,4 +17,16 @@ public class ShellUtil {
         }
         throw new IOException();
     }
+
+    public static File getDir(String currentDirectory, String dir) throws RuntimeException {
+        File file = new File(currentDirectory + File.separator + dir);
+        if(file.isDirectory()){
+            return file;
+        }
+        file = new File(dir);
+        if(file.isDirectory() && file.isAbsolute()){
+            return file;
+        }
+        throw new RuntimeException("no such directory: " + dir);
+    }
 }

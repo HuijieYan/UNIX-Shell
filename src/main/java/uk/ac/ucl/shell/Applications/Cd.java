@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 public class Cd implements ShellApplication {
     private String currentDirectory;
@@ -21,11 +22,7 @@ public class Cd implements ShellApplication {
             throw new RuntimeException("cd: too many arguments");
         }
 
-        String dirString = appArgs.get(0);
-        File dir;
-        if (!(dir = new File(currentDirectory, dirString)).isDirectory() && (!(dir = new File(dirString)).isDirectory() || !dir.isAbsolute())) {
-            throw new RuntimeException("cd: " + dirString + " is not an existing directory");
-        }
+        File dir = ShellUtil.getDir(currentDirectory, appArgs.get(0));
 
         try {
             currentDirectory = dir.getCanonicalPath();
