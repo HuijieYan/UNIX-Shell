@@ -19,7 +19,7 @@ public class Shell {
     public static void eval(String cmdline, OutputStreamWriter writer) throws RuntimeException {
 
         // Using monad Parser
-        ParserBuilder myParser = new ParserBuilder();
+        ShellParser myParser = new ShellParser();
         Monad<ArrayList<Command>> sat = myParser.parseCommand();
         MonadicValue<ArrayList<Command>, String> resultPair = sat.parse(cmdline);
         ArrayList<Command> commandList = resultPair.getValue();
