@@ -1,10 +1,10 @@
 package uk.ac.ucl.parser;
-import uk.ac.ucl.shell.Parser.ParserBuilder;
 
 import org.junit.Test;
+import uk.ac.ucl.shell.ShellParser;
 
 public class parerTest {
-    private ParserBuilder parserBuilder = new ParserBuilder();
+    private ShellParser shellParser = new ShellParser();
     @Test
     public void TestBinding(){
         

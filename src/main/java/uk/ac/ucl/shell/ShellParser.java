@@ -18,8 +18,8 @@ import uk.ac.ucl.shell.Parser.ParserBuilder;
 
 
 public class ShellParser {
-    private ArrayList<Character> spaces = new ArrayList<>();
-    private ParserBuilder parserBuilder = new ParserBuilder();
+    private final ArrayList<Character> spaces = new ArrayList<>();
+    private final ParserBuilder parserBuilder = new ParserBuilder();
 
     public ShellParser(){
         spaces.add(' ');
