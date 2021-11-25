@@ -38,9 +38,6 @@ public class ShellParser {
         //assumes the content between symbols excludes the symbol
         return new Parser<>(input->{
             return parserBuilder.bind(parserBuilder.isChar(symbol), x->{
-                ArrayList<Character> exception = new ArrayList<>();
-                exception.add(symbol);
-                exception.add('\n');
                 return parserBuilder.bind(parser, y->{
                     return parserBuilder.bind(parserBuilder.isChar(symbol),z->{
                         StringBuilder builder = new StringBuilder();
