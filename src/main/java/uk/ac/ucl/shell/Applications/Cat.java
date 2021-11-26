@@ -1,13 +1,11 @@
 package uk.ac.ucl.shell.Applications;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
@@ -42,7 +40,7 @@ public class Cat implements ShellApplication {
                 try {
                     writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, file), encoding));
                 }catch (IOException e){
-                    throw new RuntimeException("cat: can not open " + file);
+                    throw new RuntimeException("cat: can not open: " + file);
                 }
             }
 

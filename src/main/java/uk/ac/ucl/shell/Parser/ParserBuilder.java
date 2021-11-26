@@ -550,5 +550,6 @@ public class ParserBuilder {
         ParserBuilder b = new ParserBuilder();
         ArrayList<String> l = b.decodeDoubleQuoted().parse("abc`echo 123`def").getValue();
         System.out.println(l);
+        System.out.println(b.isChar('q').parse("q").getValue());
     }
 }

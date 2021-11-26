@@ -18,14 +18,14 @@ public class Pwd implements ShellApplication {
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if(appArgs.size() > 0){
-            throw new RuntimeException("pwd: there can not be argument");
+            throw new RuntimeException("Pwd: there can not be argument");
         }
         try {
             writer.write(currentDirectory);
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }catch (IOException e){
-            throw new RuntimeException("pwd: fail to write to the output");
+            throw new RuntimeException("Pwd: fail to write to the output");
         }
         return currentDirectory;
     }

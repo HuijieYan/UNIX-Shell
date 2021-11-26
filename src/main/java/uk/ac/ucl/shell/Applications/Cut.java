@@ -39,7 +39,7 @@ public class Cut implements ShellApplication {
             try {
                 path = ShellUtil.getPath(currentDirectory, appArgs.get(2));
             }catch (IOException e){
-                throw new RuntimeException("cut: can not open file " + appArgs.get(2));
+                throw new RuntimeException("cut: can not open file: " + appArgs.get(2));
             }
         }
 

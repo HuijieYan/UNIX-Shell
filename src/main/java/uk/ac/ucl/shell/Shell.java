@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -12,11 +11,8 @@ import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
 public class Shell {
-
-    private static String currentDirectory = System.getProperty("user.dir");
-
     //change to non-static at the moment
-    public static void eval(String cmdline, OutputStreamWriter writer) throws RuntimeException {
+    public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {
 
         // Using monad Parser
         ParserBuilder myParser = new ParserBuilder();
@@ -44,9 +40,11 @@ public class Shell {
                 }
             }
         }
+        return currentDirectory;
     }
 
     public static void main(String[] args) {
+        String currentDirectory = System.getProperty("user.dir");
         if (args.length > 0) {
             if (args.length != 2) {
                 System.out.println("COMP0010 shell: wrong number of arguments");
@@ -56,7 +54,7 @@ public class Shell {
                 System.out.println("COMP0010 shell: " + args[0] + ": unexpected argument");
             }
             try {
-                Shell.eval(args[1], new OutputStreamWriter(System.out));
+                Shell.eval(args[1], new OutputStreamWriter(System.out), currentDirectory);
             } catch (Exception e) {
                 System.out.print("");
             }
@@ -68,7 +66,7 @@ public class Shell {
                     System.out.print(prompt);
                     try {
                         String cmdline = input.nextLine();
-                        Shell.eval(cmdline, writer);
+                        currentDirectory = Shell.eval(cmdline, writer, currentDirectory);
                     } catch (Exception e) {
                         System.out.print(e.getMessage());
                         break;

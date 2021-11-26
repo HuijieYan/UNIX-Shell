@@ -1,13 +1,12 @@
 package uk.ac.ucl.shell;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
 public class ShellUtil {
     public static Path getPath(String currentDirectory, String fileName) throws IOException {
-        File file = new File(currentDirectory + File.separator + fileName);
+        File file = new File(currentDirectory,fileName);
         if(file.isFile()){
             return file.toPath();
         }
@@ -19,7 +18,7 @@ public class ShellUtil {
     }
 
     public static File getDir(String currentDirectory, String dir) throws RuntimeException {
-        File file = new File(currentDirectory + File.separator + dir);
+        File file = new File(currentDirectory,dir);
         if(file.isDirectory()){
             return file;
         }
