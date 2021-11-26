@@ -23,7 +23,7 @@ import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
 import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
 
 public class ActualCmdVisitor implements CommandVisitor {
-    private ParserBuilder parserBuilder = new ParserBuilder();
+    private ShellParser shellParser = new ShellParser();
 
     public String visit(Call myCall, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException {
         ArrayList<Atom> cmdArgs = myCall.getArgs();
@@ -201,7 +201,7 @@ public class ActualCmdVisitor implements CommandVisitor {
             contentList.add(str);
         }else{
             str = removeQuote(str);
-            contentList = parserBuilder.decodeDoubleQuoted().parse(str).getValue();
+            contentList = shellParser.decodeDoubleQuoted().parse(str).getValue();
             //"abc`echo 123`def" becomes [abc,`echo 123 234`,def]
         }
 
