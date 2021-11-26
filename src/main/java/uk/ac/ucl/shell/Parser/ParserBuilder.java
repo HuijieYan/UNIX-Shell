@@ -3,13 +3,10 @@ package uk.ac.ucl.shell.Parser;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import uk.ac.ucl.shell.Parser.pack.command.*;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
-import uk.ac.ucl.shell.Parser.pack.type.atom.*;
 
 public class ParserBuilder {
 

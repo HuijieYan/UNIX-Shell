@@ -2,19 +2,17 @@ package uk.ac.ucl.shell;
 
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import uk.ac.ucl.shell.Parser.Monad;
 import uk.ac.ucl.shell.Parser.Parser;
 import uk.ac.ucl.shell.Parser.ParserBuilder;
-import uk.ac.ucl.shell.Parser.pack.command.*;
-import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
-import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
-import uk.ac.ucl.shell.Parser.pack.type.atom.*;
-import uk.ac.ucl.shell.Parser.Parser;
-import uk.ac.ucl.shell.Parser.ParserBuilder;
+import uk.ac.ucl.shell.Parser.pack.command.Call;
+import uk.ac.ucl.shell.Parser.pack.command.Command;
+import uk.ac.ucl.shell.Parser.pack.command.Pipe;
+import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
+import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
+import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
 
 
 public class ShellParser {
