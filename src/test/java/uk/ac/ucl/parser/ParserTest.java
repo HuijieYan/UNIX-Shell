@@ -24,19 +24,19 @@ public class ParserTest {
         tab.add('\t');
     }
 
-    @Test
-    public void testQuotedContentParserForSingleQuoted(){
-        ArrayList<Character> singleQuotedExceptions = new ArrayList<>(tab);
-        singleQuotedExceptions.add('\'');
-        String[] testFailCases = {"","'","a'b","adac\n"};
-        String[] testSuccessfulCases = {"abcd","a`b`c","abc abc\tabc","a\"b\"c","a`b`\"c\"d1234534!@#%","\"abc","`abc","`abc\""};
-        for (String str:testSuccessfulCases){
-            Assert.assertEquals(str,shellParser.quotedContent(singleQuotedExceptions).parse(str).getValue());
-        }
-        for (String str:testFailCases){
-            Assert.assertNull(shellParser.quotedContent(singleQuotedExceptions).parse(str).getValue());
-        }
-    }
+    // @Test
+    // public void testQuotedContentParserForSingleQuoted(){
+    //     ArrayList<Character> singleQuotedExceptions = new ArrayList<>(tab);
+    //     singleQuotedExceptions.add('\'');
+    //     String[] testFailCases = {"","'","a'b","adac\n"};
+    //     String[] testSuccessfulCases = {"abcd","a`b`c","abc abc\tabc","a\"b\"c","a`b`\"c\"d1234534!@#%","\"abc","`abc","`abc\""};
+    //     for (String str:testSuccessfulCases){
+    //         Assert.assertEquals(str,shellParser.quotedContent(singleQuotedExceptions).parse(str).getValue());
+    //     }
+    //     for (String str:testFailCases){
+    //         Assert.assertNull(shellParser.quotedContent(singleQuotedExceptions).parse(str).getValue());
+    //     }
+    // }
 
     @Test
     public void testSingleQuotedParser(){
