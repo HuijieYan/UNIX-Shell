@@ -135,7 +135,7 @@ public class ActualCmdVisitor implements CommandVisitor {
 
     private List<String> doGlobbing(String curString, String currentDirectory) {
         try {
-            return Globbing.exec(curString, currentDirectory);
+            return Globbing.exec(currentDirectory, curString);
         } catch (IOException e) {
             return new ArrayList<>();
         }
