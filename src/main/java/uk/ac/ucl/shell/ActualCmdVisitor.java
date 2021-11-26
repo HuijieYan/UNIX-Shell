@@ -1,15 +1,26 @@
 package uk.ac.ucl.shell;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.command.Pipe;
-import uk.ac.ucl.shell.Parser.pack.type.atom.*;
+import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
+import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
+import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
 
 public class ActualCmdVisitor implements CommandVisitor {
     private ParserBuilder parserBuilder = new ParserBuilder();
@@ -122,9 +133,27 @@ public class ActualCmdVisitor implements CommandVisitor {
         }
     }
 
-    private ArrayList<String> globbingHelper(Atom arg, String currentDirectory){
-        //result.addAll(doGlobbing(waitForGlobbing));
-        return new ArrayList<>(arg.get());
+    private List<String> doGlobbing(String curString, String currentDirectory) {
+        try {
+            return Globbing.exec(curString, currentDirectory);
+        } catch (IOException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    private ArrayList<String> globbingHelper(Atom arg, String currentDirectory) {
+
+        ArrayList<String> result = new ArrayList<>();
+
+        for (String curString : arg.get()) {
+                if (curString.contains("*")) {
+                    ArrayList<String> globbingResult = (ArrayList<String>)doGlobbing(curString, currentDirectory);
+                    result.addAll(globbingResult);
+                } else {
+                    result.add(curString);
+                }                
+        }
+        return result;
     }
 
     private Atom evalArg(Atom arg) throws RuntimeException {
