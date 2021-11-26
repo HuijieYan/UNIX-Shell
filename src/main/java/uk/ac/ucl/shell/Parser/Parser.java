@@ -10,8 +10,8 @@ import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
  * This class is an implementation of the Monad
  * 
  * @param <T> the type of parsed value after parsing
- * @param parseFunction the function of parsing, must be delcared when 
- * delcaring a new Parser
+ * @param parseFunction the function of parsing, must be declared when
+ * declaring a new Parser
  */
 public class Parser<T> implements Monad<T>{
     private Function<String,MonadicValue<T,String>> parseFunction;

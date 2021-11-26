@@ -410,10 +410,4 @@ public class ShellParser {
             return parserBuilder.result(result).parse(input);
         });
     }
-
-    public static void main(String[] args) {
-        ShellParser b = new ShellParser();
-        ArrayList<String> l = b.decodeDoubleQuoted().parse("abc`echo 123`def").getValue();
-        System.out.println(l);
-    }
 }
