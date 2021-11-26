@@ -114,7 +114,7 @@ public class ActualCmdVisitor implements CommandVisitor {
 
     private void eval(ArrayList<Atom> cmdArgs, String currentDirectory) throws RuntimeException {
         for (int argIndex = 0; argIndex < cmdArgs.size(); argIndex++){
-            Atom evaluatedArg = this.evalArg(cmdArgs.get(argIndex));
+            Atom evaluatedArg = this.evalArg(cmdArgs.get(argIndex), currentDirectory);
 
             if(!evaluatedArg.isRedirectionSymbol() && ((NonRedirectionString)evaluatedArg).canBeGlob()){
                 ArrayList<String> globbingResult = this.globbingHelper(evaluatedArg, currentDirectory);
@@ -152,7 +152,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         return result;
     }
 
-    private Atom evalArg(Atom arg) throws RuntimeException {
+    private Atom evalArg(Atom arg, String currentDirectory) throws RuntimeException {
         if (arg.isRedirectionSymbol()){
             return arg;
         }
@@ -163,7 +163,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         builders.add(new StringBuilder());
         for (String str : argumentStrings){
             if (str.charAt(0) == '\"' || str.charAt(0) == '`'){
-                canBeGlob = this.commandSubstitution(str, builders);
+                canBeGlob = this.commandSubstitution(str, builders, currentDirectory);
             }else{
                 if (str.charAt(0) == '\''){
                     str = removeQuote(str);
@@ -189,7 +189,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         return str.substring(1,str.length()-1);
     }
 
-    private boolean commandSubstitution(String str, ArrayList<StringBuilder> builders) throws RuntimeException {
+    private boolean commandSubstitution(String str, ArrayList<StringBuilder> builders, String currentDirectory) throws RuntimeException {
         ArrayList<String> contentList = new ArrayList<>();
         boolean canBeGlob = false;
         if (str.charAt(0) == '`'){
@@ -207,7 +207,7 @@ public class ActualCmdVisitor implements CommandVisitor {
             }else{
                 ByteArrayOutputStream subStream = new ByteArrayOutputStream();
                 OutputStreamWriter subStreamWriter = new OutputStreamWriter(subStream);
-                Shell.eval(removeQuote(content), subStreamWriter);
+                Shell.eval(removeQuote(content), subStreamWriter, currentDirectory);
                 String[] resultArgs = subStream.toString().replaceAll("\r\n|\r|\n|\t", " ").split(" ");
                 for(int argIndex = 0; argIndex < resultArgs.length; argIndex++){
                     builders.get(builders.size() - 1).append(resultArgs[argIndex]);
