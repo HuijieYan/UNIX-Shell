@@ -1,13 +1,11 @@
 package uk.ac.ucl.shell;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import uk.ac.ucl.shell.Parser.Monad;
-import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
