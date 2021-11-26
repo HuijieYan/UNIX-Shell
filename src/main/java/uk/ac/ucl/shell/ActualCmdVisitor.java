@@ -1,18 +1,25 @@
 package uk.ac.ucl.shell;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
-import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.command.Pipe;
-import uk.ac.ucl.shell.Parser.pack.type.atom.*;
+import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
+import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
+import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
 
 public class ActualCmdVisitor implements CommandVisitor {
-    private ParserBuilder parserBuilder = new ParserBuilder();
+    private ShellParser shellParser = new ShellParser();
 
     public String visit(Call myCall, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException {
         ArrayList<Atom> cmdArgs = myCall.getArgs();
@@ -107,7 +114,7 @@ public class ActualCmdVisitor implements CommandVisitor {
 
     private void eval(ArrayList<Atom> cmdArgs, String currentDirectory) throws RuntimeException {
         for (int argIndex = 0; argIndex < cmdArgs.size(); argIndex++){
-            Atom evaluatedArg = this.evalArg(cmdArgs.get(argIndex), currentDirectory);
+            Atom evaluatedArg = this.evalArg(cmdArgs.get(argIndex));
 
             if(!evaluatedArg.isRedirectionSymbol() && ((NonRedirectionString)evaluatedArg).canBeGlob()){
                 ArrayList<String> globbingResult = this.globbingHelper(evaluatedArg, currentDirectory);
@@ -122,19 +129,30 @@ public class ActualCmdVisitor implements CommandVisitor {
         }
     }
 
-    private ArrayList<String> globbingHelper(Atom arg, String currentDirectory){
-        ArrayList<String> result = new ArrayList<>();
-        for(String str : arg.get()){
-            if(str.contains("*")){
-                //result.addAll(doGlob(str, currentDirectory));
-            }else {
-                result.add(str);
-            }
+    private List<String> doGlobbing(String curString, String currentDirectory) {
+        try {
+            return Globbing.exec(currentDirectory, curString);
+        } catch (IOException e) {
+            return new ArrayList<>();
         }
-        return new ArrayList<>(arg.get());
     }
 
-    private Atom evalArg(Atom arg, String currentDirectory) throws RuntimeException {
+    private ArrayList<String> globbingHelper(Atom arg, String currentDirectory) {
+
+        ArrayList<String> result = new ArrayList<>();
+
+        for (String curString : arg.get()) {
+                if (curString.contains("*")) {
+                    ArrayList<String> globbingResult = (ArrayList<String>)doGlobbing(curString, currentDirectory);
+                    result.addAll(globbingResult);
+                } else {
+                    result.add(curString);
+                }                
+        }
+        return result;
+    }
+
+    private Atom evalArg(Atom arg) throws RuntimeException {
         if (arg.isRedirectionSymbol()){
             return arg;
         }
@@ -145,7 +163,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         builders.add(new StringBuilder());
         for (String str : argumentStrings){
             if (str.charAt(0) == '\"' || str.charAt(0) == '`'){
-                canBeGlob = this.commandSubstitution(str, builders, currentDirectory);
+                canBeGlob = this.commandSubstitution(str, builders);
             }else{
                 if (str.charAt(0) == '\''){
                     str = removeQuote(str);
@@ -171,7 +189,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         return str.substring(1,str.length()-1);
     }
 
-    private boolean commandSubstitution(String str, ArrayList<StringBuilder> builders, String currentDirectory) throws RuntimeException {
+    private boolean commandSubstitution(String str, ArrayList<StringBuilder> builders) throws RuntimeException {
         ArrayList<String> contentList = new ArrayList<>();
         boolean canBeGlob = false;
         if (str.charAt(0) == '`'){
@@ -179,7 +197,7 @@ public class ActualCmdVisitor implements CommandVisitor {
             contentList.add(str);
         }else{
             str = removeQuote(str);
-            contentList = parserBuilder.decodeDoubleQuoted().parse(str).getValue();
+            contentList = shellParser.decodeDoubleQuoted().parse(str).getValue();
             //"abc`echo 123`def" becomes [abc,`echo 123 234`,def]
         }
 
@@ -189,7 +207,7 @@ public class ActualCmdVisitor implements CommandVisitor {
             }else{
                 ByteArrayOutputStream subStream = new ByteArrayOutputStream();
                 OutputStreamWriter subStreamWriter = new OutputStreamWriter(subStream);
-                Shell.eval(removeQuote(content), subStreamWriter, currentDirectory);
+                Shell.eval(removeQuote(content), subStreamWriter);
                 String[] resultArgs = subStream.toString().replaceAll("\r\n|\r|\n|\t", " ").split(" ");
                 for(int argIndex = 0; argIndex < resultArgs.length; argIndex++){
                     builders.get(builders.size() - 1).append(resultArgs[argIndex]);

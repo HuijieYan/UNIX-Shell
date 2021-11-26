@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import uk.ac.ucl.shell.Parser.Monad;
-import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
@@ -15,7 +14,7 @@ public class Shell {
     public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {
 
         // Using monad Parser
-        ParserBuilder myParser = new ParserBuilder();
+        ShellParser myParser = new ShellParser();
         Monad<ArrayList<Command>> sat = myParser.parseCommand();
         MonadicValue<ArrayList<Command>, String> resultPair = sat.parse(cmdline);
         ArrayList<Command> commandList = resultPair.getValue();
