@@ -63,7 +63,6 @@ public class Cat implements ShellApplication {
             }
 
         }
-
         return currentDirectory;
     }
 
