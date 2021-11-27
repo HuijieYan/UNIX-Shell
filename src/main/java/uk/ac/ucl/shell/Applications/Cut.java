@@ -17,12 +17,29 @@ public class Cut implements ShellApplication {
     private BufferedReader reader;
     private OutputStreamWriter writer;
 
+    /**
+     * Constructor of Cut application
+     * @param currentDirectory currentDirectory of the Shell
+     * @param reader Source of reading content
+     * @param writer Destination of writing content
+     **/
     public Cut(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.reader = reader;
         this.writer = writer;
     }
 
+    /**
+     * exec function of "cut" application.
+     * @param appArgs list of application arguments stored in List<String>
+     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is throwed due to following reasons:
+     * - "cut: wrong argument number" // if number of arguments are less than 2 or greater than 3
+     * - "cut: incorrect option input " + appArgs.get(0) // When first element of appArg is not equal to "-b"
+     * - "cut: no data from pipe or redirection and can not find file to read" // When argument size is 2 and reader object is null
+     * - "cut: can not open file: " + appArgs.get(2) // When argument size is 3 and filePath is invalid or IOException is catched from OS
+     * - 
+     **/
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.size() < 2 || appArgs.size() > 3) {
@@ -35,14 +52,13 @@ public class Cut implements ShellApplication {
             throw new RuntimeException("cut: no data from pipe or redirection and can not find file to read");
         }
         Path path = null;
-        if(appArgs.size() == 3){
+        if(appArgs.size() == 3) {
             try {
                 path = ShellUtil.getPath(currentDirectory, appArgs.get(2));
             }catch (IOException e){
-                throw new RuntimeException("cut: can not open file " + appArgs.get(2));
+                throw new RuntimeException("cut: can not open file: " + appArgs.get(2));
             }
         }
-
 
         String[] args = appArgs.get(1).split(",");
 
@@ -138,12 +154,9 @@ public class Cut implements ShellApplication {
                         range.add(upperBound);
                     }
                     ranges.add(range);
-
                 }
-
             }
         }
-
 
         if(appArgs.size() == 2){
             try {

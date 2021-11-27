@@ -15,12 +15,29 @@ public class Grep implements ShellApplication {
     private OutputStreamWriter writer;
     private boolean prefixed;
 
+    /**
+     * Constructor of Grep application
+     * @param currentDirectory currentDirectory of the Shell
+     * @param reader Source of reading content
+     * @param writer Destination of writing content
+     **/
     public Grep(String currentDirectory, BufferedReader reader, OutputStreamWriter writer){
         this.currentDirectory = currentDirectory;
         this.reader = reader;
         this.writer = writer;
     }
 
+
+    /**
+     * exec function of "Grep" application.
+     * @param appArgs list of application arguments stored in List<String>
+     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is throwed due to following reasons:
+     * - "grep: wrong number of arguments" // if argument size is less than 1
+     * - "grep: no data from pipe or redirection and can not find file to read" // if appArg has size 1 and reader object is null.
+     * - "grep: fail to read from pipe or redirection" // if appArg size is 1 and IOException is catched from reader.
+     * - "grep: cannot open " + appArgs.get(index) // Failed to write content into buffer
+     **/
     @Override
     public String exec(List<String> appArgs) throws RuntimeException{
         if (appArgs.size() < 1) {
@@ -30,13 +47,13 @@ public class Grep implements ShellApplication {
         Pattern grepPattern = Pattern.compile(appArgs.get(0).replaceAll("\\*", ".*"));
         if(appArgs.size() == 1){
             if(this.reader == null){
-                throw new RuntimeException("Grep: no data from pipe or redirection and can not find file to read");
+                throw new RuntimeException("grep: no data from pipe or redirection and can not find file to read");
             }
             this.prefixed = false;
             try {
                 writeToBuffer(grepPattern, this.reader, "");
             }catch (IOException e){
-                throw new RuntimeException("Grep: fail to read from pipe or redirection");
+                throw new RuntimeException("grep: fail to read from pipe or redirection");
             }
         }else {
             this.prefixed = (appArgs.size() - 1) > 1;
@@ -52,6 +69,14 @@ public class Grep implements ShellApplication {
         return currentDirectory;
     }
 
+    /*
+     * help function of exec()
+     * The function writes matched content from reader into wrtier
+     * @param grepPattern //Grep pattern
+     * @param reader //Source of reading content
+     * @param fileName //name of the file
+     * @throws IOException The exception is throwed from writer object.
+     */
     private void writeToBuffer(Pattern grepPattern, BufferedReader reader, String fileName) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
