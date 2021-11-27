@@ -36,7 +36,7 @@ public class Tail implements ShellApplication{
             try {
                 tailLines = Integer.parseInt(appArgs.get(1));
             } catch (NumberFormatException e) {
-                throw new RuntimeException("tail: wrong argument " + appArgs.get(1));
+                throw new RuntimeException("tail: " + appArgs.get(1) + " is not a integer");
             }
 
             if(argSize == 3){
@@ -59,7 +59,7 @@ public class Tail implements ShellApplication{
             try {
                 writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
             }catch (IOException e){
-                throw new RuntimeException("tail: cannot open " + fileName);
+                throw new RuntimeException("tail: cannot open: " + fileName);
             }
         }
 

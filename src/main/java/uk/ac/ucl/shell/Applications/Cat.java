@@ -40,7 +40,7 @@ public class Cat implements ShellApplication {
                 try {
                     writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, file), encoding));
                 }catch (IOException e){
-                    throw new RuntimeException("cat: can not open " + file);
+                    throw new RuntimeException("cat: can not open: " + file);
                 }
             }
 

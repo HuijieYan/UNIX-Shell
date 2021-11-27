@@ -35,7 +35,7 @@ public class Head implements ShellApplication {
             try {
                 headLines = Integer.parseInt(appArgs.get(1));
             } catch (NumberFormatException e) {
-                throw new RuntimeException("head: wrong argument " + appArgs.get(1));
+                throw new RuntimeException("head: " + appArgs.get(1) + " is not a integer");
             }
 
             if(argSize == 3){
@@ -58,7 +58,7 @@ public class Head implements ShellApplication {
             try {
                 writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8));
             }catch (IOException e){
-                throw new RuntimeException("head: cannot open " + fileName);
+                throw new RuntimeException("head: cannot open: " + fileName);
             }
         }
         

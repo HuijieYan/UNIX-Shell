@@ -97,7 +97,7 @@ public class Globbing {
                     processedList.add(relativePath.toString());
                 } else {
                     String curStr = curElem.toString();
-                    processedList.add(curStr.toString());
+                    processedList.add(curStr);
                 }                
             }
 
