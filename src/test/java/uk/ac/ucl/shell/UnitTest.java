@@ -8,6 +8,7 @@ import uk.ac.ucl.shell.Applications.*;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -26,9 +27,9 @@ public class UnitTest {
         File tempFile1 = tempFolder.newFile("file1.txt");
         File tempFile2 = tempFolder.newFile("file2.txt");
         File tempFile3 = tempFolder.newFile("file3.txt");
-        File subDir = tempFolder.newFolder("subDir");
+        tempFolder.newFolder("subDir");
         tempFolder.newFolder(".subDir");
-        currentDir = subDir.getParent();
+        currentDir = tempFolder.getRoot().getCanonicalPath();
 
         File subTempFile1 = tempFolder.newFile("subDir/file1.txt");
         File subTempFile2 = tempFolder.newFile("subDir/file2.txt");
@@ -47,6 +48,14 @@ public class UnitTest {
         writer.write(content);
         writer.flush();
         writer.close();
+    }
+
+    public void assertEqualSet(String expected, String result){
+        String[] expectedList = expected.split("\r\n|\r|\n|\t");
+        Arrays.sort(expectedList);
+        String[] resultList = result.split("\r\n|\r|\n|\t");
+        Arrays.sort(resultList);
+        assertArrayEquals(expectedList, resultList);
     }
 
 
@@ -106,8 +115,7 @@ public class UnitTest {
     @Test
     public void testCd_parentPath(){
         ArrayList<String> argList = new ArrayList<>();
-        argList.add("subDir");
-        argList.set(0, "..");
+        argList.add("..");
         assertEquals(currentDir, new Cd(currentDir + File.separator + "subDir").exec(argList));
     }
 
@@ -138,12 +146,12 @@ public class UnitTest {
         Ls ls = new Ls(currentDir, writer);
         String result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir" + System.getProperty("line.separator");
         ls.exec(argList);
-        assertEquals(result, out.toString());
+        this.assertEqualSet(result, out.toString());
 
         out.reset();
         argList.add(".");
         ls.exec(argList);
-        assertEquals(result, out.toString());
+        this.assertEqualSet(result, out.toString());
     }
 
     @Test
@@ -154,13 +162,13 @@ public class UnitTest {
         argList.add("subDir");
         String result = "file1.txt\tfile2.txt\tfile3.txt" + System.getProperty("line.separator");
         ls.exec(argList);
-        assertEquals(result, out.toString());
+        this.assertEqualSet(result, out.toString());
 
         out.reset();
         argList.set(0, File.separator + "subDir" + File.separator + "..");
         result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir" + System.getProperty("line.separator");
         ls.exec(argList);
-        assertEquals(result, out.toString());
+        this.assertEqualSet(result, out.toString());
 
     }
 
@@ -198,7 +206,7 @@ public class UnitTest {
     }
 
     @Test
-    public void testCat_multiFile(){
+    public void testCat_absoluteAndRelativePath(){
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
         argList.add(File.separator + "." + File.separator + "file1.txt");
@@ -225,7 +233,7 @@ public class UnitTest {
     }
 
     @Test
-    public void testCat_absoluteAndRelativePath(){
+    public void testCat_multiFile(){
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
         argList.add("file1.txt");
@@ -507,7 +515,7 @@ public class UnitTest {
         }
 
         try {
-            argList.set(1, "-1-b");
+            argList.set(1, "b1-");
             cut.exec(argList);
             fail();
         }catch (RuntimeException e){
@@ -546,7 +554,7 @@ public class UnitTest {
         argList.add("-name");
         argList.add("*1.txt");
         new Find(currentDir, writer).exec(argList);
-        assertEquals("." + File.separator + "file1.txt" + System.getProperty("line.separator")+ "." + File.separator
+        this.assertEqualSet("." + File.separator + "file1.txt" + System.getProperty("line.separator")+ "." + File.separator
                 + "subDir" + File.separator + "file1.txt" + System.getProperty("line.separator"), out.toString());
     }
 
@@ -559,14 +567,14 @@ public class UnitTest {
         argList.add("-name");
         argList.add("*1.txt");
         new Find(currentDir, writer).exec(argList);
-        assertEquals(prefix + File.separator + "file1.txt" + System.getProperty("line.separator") + prefix + File.separator
+        this.assertEqualSet(prefix + File.separator + "file1.txt" + System.getProperty("line.separator") + prefix + File.separator
                 + "subDir" + File.separator + "file1.txt" + System.getProperty("line.separator"), out.toString());
 
         out.reset();
         prefix = currentDir;
         argList.set(0, prefix);
         new Find(currentDir, writer).exec(argList);
-        assertEquals(prefix + File.separator + "file1.txt" + System.getProperty("line.separator") + prefix + File.separator
+        this.assertEqualSet(prefix + File.separator + "file1.txt" + System.getProperty("line.separator") + prefix + File.separator
                 + "subDir" + File.separator + "file1.txt" + System.getProperty("line.separator"), out.toString());
     }
 
