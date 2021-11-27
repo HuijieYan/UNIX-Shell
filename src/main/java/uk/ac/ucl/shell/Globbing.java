@@ -54,6 +54,7 @@ public class Globbing {
     
         @Override
         public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+            
             if (pathMatcher.matches(path)) {
                 matchedFiles.add(path);
             }
@@ -81,6 +82,12 @@ public class Globbing {
         ArrayList<String> processedList = new ArrayList<>();
         try {
             String pattern = Paths.get(rootDirectory)+ FileSystems.getDefault().getSeparator() + glob;
+
+            //if on windows
+            if (pattern.contains("\\")) {
+                pattern = pattern.replace("\\", "\\\\");
+            }
+
             List<Path> matchedRes = getFiles(Paths.get(rootDirectory), pattern);
             if (matchedRes.size() == 0) {
                 processedList.add(glob);

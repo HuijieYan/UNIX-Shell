@@ -11,5 +11,4 @@ public interface Command {
 
     //visitor
     String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException;
-
 }

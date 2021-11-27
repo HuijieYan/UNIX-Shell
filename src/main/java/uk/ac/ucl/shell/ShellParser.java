@@ -10,9 +10,11 @@ import uk.ac.ucl.shell.Parser.ParserBuilder;
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.command.Pipe;
+import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
 import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
 import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
+import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
 
 
 public class ShellParser {
@@ -160,7 +162,7 @@ public class ShellParser {
         });
     }
 
-    private Monad<String> unQuoted(){
+    public Monad<String> unQuoted(){
     //parses a string containing any characters except for white spaces,newlines, quotes, less than,
     // greater than, semicolons and vertical bars
         return new Parser<>(input->{
@@ -271,24 +273,37 @@ public class ShellParser {
     public Monad<ArrayList<Command>> call(){
         return new Parser<>(input->{
             return parserBuilder.bind(parserBuilder.many(parserBuilder.or(quoted(), nonKeyword())),strings->{
-                StringBuilder builder = new StringBuilder();
                 ArrayList<Command> arr = new ArrayList<>();
-                for (String str:strings){
-                    builder.append(str);
+                ArrayList<Atom> value = callGetAtoms(strings);
+                if (value == null){
+                    return parserBuilder.zero();
                 }
 
-                ArrayList<Atom> result = this.parseCall().parse(builder.toString()).getValue();
-                if (result == null){
-                    Monad<ArrayList<Command>> zero = parserBuilder.zero();
-                    return zero;
-                }
-
-                Command call = new Call(result);
+                Command call = new Call(value);
                 arr.add(call);
 
                 return parserBuilder.result(arr);
             }).parse(input);
         });
+    }
+
+    private ArrayList<Atom> callGetAtoms(Deque<String> strings){
+        StringBuilder builder = new StringBuilder();
+        for (String str:strings){
+            builder.append(str);
+        }
+
+        MonadicValue<ArrayList<Atom>,String> result = this.parseCall().parse(builder.toString());
+        ArrayList<Atom> value = result.getValue();
+        String restOfInput = result.getInputStream();
+        if (value == null || restOfInput.length() > 0){
+            //We cannot tolerate call commands that are not being fully parsed because the string
+            //provided to the parser suits the grammar <call> ::= ( <non-keyword> | <quoted> ) *.
+            //When we still have input left, this means parsing has failed.
+            return null;
+        }
+
+        return value;
     }
 
     /**
@@ -308,7 +323,7 @@ public class ShellParser {
             return parserBuilder.bind(this.manySpaces(), emptySpaces1->{
                 return parserBuilder.bind(this.redirectionWithSpaces(), redirections->{
                     return parserBuilder.bind(this.parseArgument(), argument->{
-                        return parserBuilder.bind(parserBuilder.many(parserBuilder.bind(this.manySpaces(),spaces4->{return this.atom();})), atoms->{
+                        return parserBuilder.bind(this.atomWithSpaces(), atoms->{
                             return parserBuilder.bind(this.manySpaces(), emptySpaces2->{
                                 ArrayList<Atom> result = new ArrayList<>();
                                 for (ArrayList<Atom> redirection:redirections){
@@ -330,16 +345,24 @@ public class ShellParser {
         });
     }
 
-    private Monad<Deque<ArrayList<Atom>>> redirectionWithSpaces(){
-    //represents [<redirection> <whitespace>] in BNF
-        return parserBuilder.many(parserBuilder.bind(this.redirection(),x->{
-            return parserBuilder.bind(this.manySpaces(),spaces->{
+    private Monad<Deque<ArrayList<Atom>>> atomWithSpaces(){
+        return parserBuilder.many(parserBuilder.bind(this.many1Spaces(),spaces->{
+            return parserBuilder.bind(this.atom(),x->{
                 return parserBuilder.result(x);
             });
         }));
     }
 
-    private Monad<ArrayList<Atom>> redirection(){
+    private Monad<Deque<ArrayList<Atom>>> redirectionWithSpaces(){
+    //represents [<redirection> <whitespace>] in BNF
+        return parserBuilder.many(parserBuilder.bind(this.redirection(),x->{
+            return parserBuilder.bind(this.many1Spaces(),spaces->{
+                return parserBuilder.result(x);
+            });
+        }));
+    }
+
+    public Monad<ArrayList<Atom>> redirection(){
     //represents <redirection> ::= "<" [ <whitespace> ] <argument> in BNF
         return new Parser<>(input->{
             return parserBuilder.bind(parserBuilder.or(parserBuilder.isChar('<'),parserBuilder.isChar('>')), symbol->{
@@ -359,7 +382,7 @@ public class ShellParser {
         });
     }
 
-    private Monad<ArrayList<Atom>> atom(){
+    public Monad<ArrayList<Atom>> atom(){
     //represents <atom> ::= <redirection> | <argument> in BNF
         return new Parser<>(input->{
             return parserBuilder.or(this.redirection(),parserBuilder.bind(this.parseArgument(),argument->{
@@ -371,6 +394,12 @@ public class ShellParser {
         });
     }
 
+    private Monad<Deque<Character>> many1Spaces(){
+        return new Parser<>(input->{
+            return parserBuilder.many1(parserBuilder.or(parserBuilder.isChar(' '),parserBuilder.isChar('\t'))).parse(input);
+        });
+    }
+
     private Monad<Deque<Character>> manySpaces(){
     //parses multiple spaces formed by whitespaces and tabs(\t)
         return new Parser<>(input->{
@@ -378,7 +407,7 @@ public class ShellParser {
         });
     }
 
-    private Monad<Atom> parseArgument(){
+    public Monad<Atom> parseArgument(){
         return parserBuilder.bind(this.argument(),argument->{
             Atom argumentAtom = new NonRedirectionString(argument);
             return parserBuilder.result(argumentAtom);
