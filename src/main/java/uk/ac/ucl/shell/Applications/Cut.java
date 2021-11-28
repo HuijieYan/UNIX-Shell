@@ -49,7 +49,6 @@ public class Cut implements ShellApplication {
         }
 
         String[] args = appArgs.get(1).split(",");
-
         ArrayList<Integer> singleIndexes = new ArrayList<>();
         ArrayList<ArrayList<Integer>> ranges = new ArrayList<>();
 

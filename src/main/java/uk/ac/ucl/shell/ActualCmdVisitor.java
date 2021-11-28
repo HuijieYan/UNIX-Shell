@@ -44,6 +44,7 @@ public class ActualCmdVisitor implements CommandVisitor {
                 writer.flush();
             }catch (Exception ignored){}
         }
+
         return currentDirectory;
     }
 
