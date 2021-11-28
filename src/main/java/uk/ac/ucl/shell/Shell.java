@@ -43,6 +43,7 @@ public class Shell {
 
     public static void main(String[] args) {
         String currentDirectory = System.getProperty("user.dir");
+        OutputStreamWriter writer = new OutputStreamWriter(System.out);
         if (args.length > 0) {
             if (args.length != 2) {
                 System.out.println("COMP0010 shell: wrong number of arguments");
@@ -52,12 +53,11 @@ public class Shell {
                 System.out.println("COMP0010 shell: " + args[0] + ": unexpected argument");
             }
             try {
-                Shell.eval(args[1], new OutputStreamWriter(System.out), currentDirectory);
+                Shell.eval(args[1], writer, currentDirectory);
             } catch (Exception e) {
                 System.out.print("");
             }
         } else {
-            OutputStreamWriter writer = new OutputStreamWriter(System.out);
             try (Scanner input = new Scanner(System.in)) {
                 while (true) {
                     String prompt = currentDirectory + "> ";

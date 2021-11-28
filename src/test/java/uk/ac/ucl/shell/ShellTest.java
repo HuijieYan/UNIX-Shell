@@ -1055,6 +1055,8 @@ public class ShellTest {
         Shell.main(new String[]{"-cc", ""});
         Shell.main(new String[]{"-c", "echo 123"});
         Shell.main(new String[]{"-c", "_knownApp 123"});
+
+        Shell.main(new String[]{"-c", "tail dir1/file.txt"});
     }
 
     @Test
