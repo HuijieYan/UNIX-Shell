@@ -28,12 +28,12 @@ public class Shell {
             //access visitor
             try {
                 currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
-            }catch (RuntimeException e){
+            }catch (Exception e){
                 if(e.getMessage().startsWith("ignore")){
                     try {
                         writer.write(e.getMessage().substring(6) + System.getProperty("line.separator"));
                         writer.flush();
-                    }catch (IOException ignored){}
+                    }catch (Exception ignored){}
                 }else {
                     throw new RuntimeException(e.getMessage());
                 }

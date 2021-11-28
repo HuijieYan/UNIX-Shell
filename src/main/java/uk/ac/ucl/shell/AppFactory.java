@@ -26,9 +26,6 @@ public class AppFactory {
         }else {
             myApp = chooseApp(appName);
         }
-        if(myApp == null){
-            throw new RuntimeException(appName + ": unknown application");
-        }
         return myApp;
     }
 
@@ -73,7 +70,7 @@ public class AppFactory {
                 myApp = new Sort(currentDirectory, reader, writer);
                 break;
             default:
-                myApp = null;
+                throw new RuntimeException("unknown application");
         }
 
         return myApp;

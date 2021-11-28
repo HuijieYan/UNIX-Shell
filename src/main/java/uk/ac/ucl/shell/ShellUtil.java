@@ -11,7 +11,7 @@ public class ShellUtil {
             return file.toPath();
         }
         file = new File(fileName);
-        if(file.isFile() && file.isAbsolute()){
+        if(file.isAbsolute() && file.isFile()){
             return file.toPath();
         }
         throw new IOException();
@@ -23,7 +23,7 @@ public class ShellUtil {
             return file;
         }
         file = new File(dir);
-        if(file.isDirectory() && file.isAbsolute()){
+        if(file.isAbsolute() && file.isDirectory()){
             return file;
         }
         throw new RuntimeException("no such directory: " + dir);

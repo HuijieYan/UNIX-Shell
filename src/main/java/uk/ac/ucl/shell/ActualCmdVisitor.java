@@ -1,13 +1,9 @@
 package uk.ac.ucl.shell;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +43,11 @@ public class ActualCmdVisitor implements CommandVisitor {
 
         if(inputAndOutputFile.get(1) != null) {
             try {
-                FileWriter outputFile = new FileWriter(inputAndOutputFile.get(1));
+                File file = new File(inputAndOutputFile.get(1));
+                if(!file.isAbsolute()){
+                    file = new File(currentDirectory, inputAndOutputFile.get(1));
+                }
+                FileWriter outputFile = new FileWriter(file);
                 outputFile.write(bufferedStream.toString());
                 outputFile.flush();
                 outputFile.close();
@@ -58,9 +58,7 @@ public class ActualCmdVisitor implements CommandVisitor {
             try {
                 writer.write(bufferedStream.toString());
                 writer.flush();
-            }catch (IOException e){
-                throw new RuntimeException("fail to print to the shell command line");
-            }
+            }catch (Exception ignored){}
         }
 
         return currentDirectory;
@@ -87,7 +85,7 @@ public class ActualCmdVisitor implements CommandVisitor {
                         }
                         hasSeveralInput = true;
                     }else {
-                        throw new RuntimeException("Error: several files are specified for input");
+                        throw new RuntimeException("Error: several files are specified for output");
                     }
 
                 } else {
@@ -101,7 +99,7 @@ public class ActualCmdVisitor implements CommandVisitor {
                         }
                         hasSeveralOutput = true;
                     }else {
-                        throw new RuntimeException("Error: several files are specified for output");
+                        throw new RuntimeException("Error: several files are specified for input");
                     }
 
                 }
@@ -138,16 +136,15 @@ public class ActualCmdVisitor implements CommandVisitor {
     }
 
     private ArrayList<String> globbingHelper(Atom arg, String currentDirectory) {
-
         ArrayList<String> result = new ArrayList<>();
 
         for (String curString : arg.get()) {
-                if (curString.contains("*")) {
-                    ArrayList<String> globbingResult = (ArrayList<String>)doGlobbing(curString, currentDirectory);
-                    result.addAll(globbingResult);
-                } else {
-                    result.add(curString);
-                }                
+            if (curString.contains("*")) {
+                ArrayList<String> globbingResult = (ArrayList<String>)doGlobbing(curString, currentDirectory);
+                result.addAll(globbingResult);
+            } else {
+                result.add(curString);
+            }
         }
         return result;
     }

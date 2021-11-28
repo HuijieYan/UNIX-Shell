@@ -25,25 +25,22 @@ public class Uniq implements ShellApplication{
         }
 
         String option;
-        if(appArgs.size() > 0){
-            option = appArgs.get(0);
+        if(appArgs.size() == 0){
+            execFromStream("", null);
         }else {
-            option = "";
-        }
-
-        if (appArgs.size() == 2){
-            if (!option.equals("-i")){
-                throw new RuntimeException("uniq: invalid option " + option);
+            option = appArgs.get(0);
+            if (appArgs.size() == 2) {
+                if (!option.equals("-i")) {
+                    throw new RuntimeException("uniq: invalid option " + option);
+                }
+                execFromStream(option, appArgs.get(1));
+            } else {
+                if (option.equals("-i")) {
+                    execFromStream(option, null);
+                } else {
+                    execFromStream("", appArgs.get(0));
+                }
             }
-            execFromStream(option, appArgs.get(1));
-        }else if(appArgs.size() == 1){
-            if(option.equals("-i")){
-                execFromStream(option, null);
-            }else {
-                execFromStream("", appArgs.get(0));
-            }
-        } else {
-            execFromStream(option, null);
         }
 
         return currentDirectory;
@@ -52,6 +49,9 @@ public class Uniq implements ShellApplication{
     private void execFromStream(String option, String fileName) {
         BufferedReader reader;
         if(fileName == null){
+            if(this.reader == null){
+                throw new RuntimeException("uniq: no data from pipe or redirection and can not find file to read");
+            }
             reader = this.reader;
         }else {
             try {
@@ -61,12 +61,9 @@ public class Uniq implements ShellApplication{
             }
         }
 
-        if(reader == null){
-            throw new RuntimeException("uniq: no data from pipe or redirection and can not find file to read");
-        }
         try {
             this.writeToBuffer(option, reader);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("uniq: fail to read or write");
         }
     }

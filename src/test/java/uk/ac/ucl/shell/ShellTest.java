@@ -7,6 +7,8 @@ import org.junit.rules.TemporaryFolder;
 import uk.ac.ucl.shell.Applications.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -18,6 +20,8 @@ public class ShellTest {
     public String currentDir;
     ByteArrayOutputStream out;
     OutputStreamWriter writer;
+    String lineSep = System.getProperty("line.separator");
+    String fileSep = File.separator;
 
     @Before
     public void setUp() throws Exception {
@@ -28,6 +32,7 @@ public class ShellTest {
         File tempFile2 = tempFolder.newFile("file2.txt");
         File tempFile3 = tempFolder.newFile("file3.txt");
         tempFolder.newFolder("subDir");
+        tempFolder.newFolder("emptyFolder");
         tempFolder.newFolder(".subDir");
         currentDir = tempFolder.getRoot().getCanonicalPath();
 
@@ -39,7 +44,7 @@ public class ShellTest {
         writeToFile(tempFile2, "CCC\nDDD");
         writeToFile(tempFile3, "*.txt");
         writeToFile(subTempFile1, "AAA\nBBB\nbbb\nCCC\nccc");
-        writeToFile(subTempFile2, "CCC\nccc\nDDD\nddd");
+        writeToFile(subTempFile2, "CCC\nCCC\nccc\nDDD\nddd");
         writeToFile(subTempFile3, "abc\n123\n789\n456\n666");
     }
 
@@ -62,14 +67,21 @@ public class ShellTest {
     @Test
     public void testPwd(){
         new Pwd(currentDir, writer).exec(new ArrayList<>());
-        assertEquals(currentDir + System.getProperty("line.separator"), out.toString());
+        assertEquals(currentDir + lineSep, out.toString());
         out.reset();
     }
 
     @Test
     public void testPwd_exception(){
+        ArrayList<String> argList = new ArrayList<>();
         try {
-            ArrayList<String> argList = new ArrayList<>();
+            new Pwd(currentDir, null).exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("Pwd: fail to write to the output", e.getMessage());
+        }
+
+        try {
             argList.add("arg");
             new Pwd(currentDir, writer).exec(argList);
             fail();
@@ -82,13 +94,13 @@ public class ShellTest {
     public void testCd_relativePath(){
         ArrayList<String> argList = new ArrayList<>();
         argList.add("subDir");
-        assertEquals(currentDir + File.separator +"subDir", new Cd(currentDir).exec(argList));
+        assertEquals(currentDir + fileSep +"subDir", new Cd(currentDir).exec(argList));
     }
 
     @Test
     public void testCd_absolutePath(){
         ArrayList<String> argList = new ArrayList<>();
-        String path = currentDir + File.separator + "subDir";
+        String path = currentDir + fileSep + "subDir";
         argList.add(path);
         assertEquals(path, new Cd(currentDir).exec(argList));
     }
@@ -101,7 +113,7 @@ public class ShellTest {
             new Cd(currentDir).exec(argList);
             fail();
         }catch (RuntimeException e){
-            assertEquals("no such directory: subDir2", e.getMessage());
+            assertEquals("cd: can not switch to such directory subDir2", e.getMessage());
         }
     }
 
@@ -116,7 +128,7 @@ public class ShellTest {
     public void testCd_parentPath(){
         ArrayList<String> argList = new ArrayList<>();
         argList.add("..");
-        assertEquals(currentDir, new Cd(currentDir + File.separator + "subDir").exec(argList));
+        assertEquals(currentDir, new Cd(currentDir + fileSep + "subDir").exec(argList));
     }
 
     @Test
@@ -144,7 +156,7 @@ public class ShellTest {
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
         Ls ls = new Ls(currentDir, writer);
-        String result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir" + System.getProperty("line.separator");
+        String result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir\temptyFolder" + System.getProperty("line.separator");
         ls.exec(argList);
         this.assertEqualSet(result, out.toString());
 
@@ -160,16 +172,25 @@ public class ShellTest {
         ArrayList<String> argList = new ArrayList<>();
         Ls ls = new Ls(currentDir, writer);
         argList.add("subDir");
-        String result = "file1.txt\tfile2.txt\tfile3.txt" + System.getProperty("line.separator");
+        String result = "file1.txt\tfile2.txt\tfile3.txt" + lineSep;
         ls.exec(argList);
         this.assertEqualSet(result, out.toString());
 
         out.reset();
-        argList.set(0, File.separator + "subDir" + File.separator + "..");
-        result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir" + System.getProperty("line.separator");
+        argList.set(0, fileSep + "subDir" + fileSep + "..");
+        result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir\temptyFolder" + lineSep;
         ls.exec(argList);
         this.assertEqualSet(result, out.toString());
 
+    }
+
+    @Test
+    public void testLs_emptyDir(){
+        out.reset();
+        ArrayList<String> argList = new ArrayList<>();
+        argList.add("emptyFolder");
+        new Ls(currentDir, writer).exec(argList);
+        assertEquals("", out.toString());
     }
 
     @Test
@@ -200,35 +221,40 @@ public class ShellTest {
         ArrayList<String> argList = new ArrayList<>();
         argList.add("file1.txt");
         new Cat(currentDir, null, writer).exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc" + lineSep, out.toString());
     }
 
     @Test
     public void testCat_absoluteAndRelativePath(){
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
-        argList.add(File.separator + "." + File.separator + "file1.txt");
-        argList.add(currentDir + File.separator + "file3.txt");
-        argList.add(currentDir + File.separator + "subDir" + File.separator + ".." + File.separator + "file3.txt");
+        argList.add(fileSep + "." + fileSep + "file1.txt");
+        argList.add(currentDir + fileSep + "file3.txt");
+        argList.add(currentDir + fileSep + "subDir" + fileSep + ".." + fileSep + "file3.txt");
         new Cat(currentDir, null, writer).exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator") + "*.txt" + System.getProperty("line.separator")
-                + "*.txt" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc"
+                + lineSep + "*.txt" + lineSep + "*.txt" + lineSep, out.toString());
     }
 
     @Test
     public void testCat_exception(){
         out.reset();
+        ArrayList<String> argList = new ArrayList<>();
+        Cat cat = new Cat(currentDir, null, writer);
         try {
-            ArrayList<String> argList = new ArrayList<>();
             argList.add("file4.txt");
-            new Cat(currentDir, null, writer).exec(argList);
+            cat.exec(argList);
             fail();
         }catch (RuntimeException e){
             assertEquals("cat: can not open: file4.txt", e.getMessage());
+        }
+
+        try {
+            argList.remove(0);
+            cat.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("cat: no data from pipe or redirection and can not find file to read", e.getMessage());
         }
     }
 
@@ -239,9 +265,8 @@ public class ShellTest {
         argList.add("file1.txt");
         argList.add("file3.txt");
         new Cat(currentDir, null, writer).exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator") + "*.txt" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep
+                + "ccc" + lineSep + "*.txt" + lineSep, out.toString());
     }
 
     @Test
@@ -251,7 +276,7 @@ public class ShellTest {
         ArrayList<String> argList = new ArrayList<>();
         argList.add(arg);
         new Echo(currentDir, writer).exec(argList);
-        assertEquals("Hello" + System.getProperty("line.separator"), out.toString());
+        assertEquals("Hello" + lineSep, out.toString());
     }
 
     @Test
@@ -263,16 +288,25 @@ public class ShellTest {
         argList.add(arg);
         argList.add(arg);
         new Echo(currentDir, writer).exec(argList);
-        assertEquals("Hello Hello Hello" + System.getProperty("line.separator"), out.toString());
+        assertEquals("Hello Hello Hello" + lineSep, out.toString());
     }
 
     @Test
     public void testEcho_exception(){
-        out.reset();
+        ArrayList<String> argList = new ArrayList<>();
         try {
-            new Echo(currentDir, writer).exec(new ArrayList<>());
+            new Echo(currentDir, writer).exec(argList);
+            fail();
         }catch (RuntimeException e){
             assertEquals("Echo: application should at least has one argument", e.getMessage());
+        }
+
+        try {
+            argList.add("hello");
+            new Echo(currentDir, null).exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("Echo: fail to print the arguments", e.getMessage());
         }
     }
 
@@ -283,22 +317,18 @@ public class ShellTest {
         Head head = new Head(currentDir, null, writer);
         argList.add("file1.txt");
         head.exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc" + lineSep, out.toString());
 
         out.reset();
         argList.add(0, "-n");
         argList.add(1, "2");
         head.exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep, out.toString());
 
         out.reset();
         argList.set(1, "18");
         head.exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc" + lineSep, out.toString());
     }
 
     @Test
@@ -316,8 +346,22 @@ public class ShellTest {
         }
 
         try {
+            app.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals(appName + ": no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
             argList.add("-n");
             argList.add("2");
+            app.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals(appName + ": no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
             argList.add("file1.txt");
             argList.add("file2.txt");
             app.exec(argList);
@@ -336,6 +380,15 @@ public class ShellTest {
         }
 
         try {
+            argList.remove(2);
+            app.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals(appName + ": wrong argument -tag should be -n", e.getMessage());
+        }
+
+        try {
+            argList.add("file1.txt");
             argList.set(0, "-n");
             argList.set(1, "b");
             app.exec(argList);
@@ -361,22 +414,18 @@ public class ShellTest {
         Tail tail = new Tail(currentDir, null, writer);
         argList.add("file1.txt");
         tail.exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc" + lineSep, out.toString());
 
         out.reset();
         argList.add(0, "-n");
         argList.add(1, "2");
         tail.exec(argList);
-        assertEquals("CCC" + System.getProperty("line.separator") + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("CCC" + lineSep + "ccc" + lineSep, out.toString());
 
         out.reset();
         argList.set(1, "18");
         tail.exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc" + lineSep, out.toString());
     }
 
     @Test
@@ -385,15 +434,25 @@ public class ShellTest {
     }
 
     @Test
-    public void testGrep(){
+    public void testGrep_noPrefix(){
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
         argList.add("AAA");
         argList.add("file1.txt");
-        argList.add("subDir" + File.separator + "file1.txt");
         new Grep(currentDir, null, writer).exec(argList);
-        assertEquals(argList.get(1) + ":" + argList.get(0) + System.getProperty("line.separator")
-                + argList.get(2) + ":" + argList.get(0) + System.getProperty("line.separator"), out.toString());
+        assertEquals(argList.get(0) + lineSep, out.toString());
+    }
+
+    @Test
+    public void testGrep_hasPrefix(){
+        out.reset();
+        ArrayList<String> argList = new ArrayList<>();
+        argList.add("AAA");
+        argList.add("file1.txt");
+        argList.add("subDir" + fileSep + "file1.txt");
+        new Grep(currentDir, null, writer).exec(argList);
+        assertEquals(argList.get(1) + ":" + argList.get(0) + lineSep + argList.get(2)
+                + ":" + argList.get(0) + lineSep, out.toString());
     }
 
     @Test
@@ -409,6 +468,13 @@ public class ShellTest {
 
         try {
             argList.add("AAA");
+            grep.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("Grep: no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
             argList.add("file4.txt");
             grep.exec(argList);
             fail();
@@ -425,9 +491,7 @@ public class ShellTest {
         argList.add("1,3");
         argList.add("file1.txt");
         new Cut(currentDir, null, writer).exec(argList);
-        assertEquals("AA" + System.getProperty("line.separator") + "BB" + System.getProperty("line.separator")
-                + "bb" + System.getProperty("line.separator") + "CC" + System.getProperty("line.separator")
-                + "cc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AA" + lineSep + "BB" + lineSep + "bb" + lineSep + "CC" + lineSep + "cc" + lineSep, out.toString());
     }
 
     @Test
@@ -438,9 +502,7 @@ public class ShellTest {
         argList.add("-1,3-");
         argList.add("file1.txt");
         new Cut(currentDir, null, writer).exec(argList);
-        assertEquals("AA" + System.getProperty("line.separator") + "BB" + System.getProperty("line.separator")
-                + "bb" + System.getProperty("line.separator") + "CC" + System.getProperty("line.separator")
-                + "cc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AA" + lineSep + "BB" + lineSep + "bb" + lineSep + "CC" + lineSep + "cc" + lineSep, out.toString());
     }
 
     @Test
@@ -451,9 +513,7 @@ public class ShellTest {
         argList.add("1-3");
         argList.add("file1.txt");
         new Cut(currentDir, null, writer).exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc" + lineSep, out.toString());
     }
 
     @Test
@@ -464,9 +524,7 @@ public class ShellTest {
         argList.add("1-4,7,9,-1,10-");
         argList.add("file1.txt");
         new Cut(currentDir, null, writer).exec(argList);
-        assertEquals("AAA" + System.getProperty("line.separator") + "BBB" + System.getProperty("line.separator")
-                + "bbb" + System.getProperty("line.separator") + "CCC" + System.getProperty("line.separator")
-                + "ccc" + System.getProperty("line.separator"), out.toString());
+        assertEquals("AAA" + lineSep + "BBB" + lineSep + "bbb" + lineSep + "CCC" + lineSep + "ccc" + lineSep, out.toString());
     }
 
     @Test
@@ -474,7 +532,7 @@ public class ShellTest {
         ArrayList<String> argList = new ArrayList<>();
         Cut cut = new Cut(currentDir, null, writer);
         try {
-            argList.add("-n");
+            argList.add("-b");
             cut.exec(argList);
             fail();
         }catch (RuntimeException e){
@@ -486,16 +544,48 @@ public class ShellTest {
             cut.exec(argList);
             fail();
         }catch (RuntimeException e){
+            assertEquals("cut: no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
+            argList.set(0, "-n");
+            cut.exec(argList);
+            fail();
+        }catch (RuntimeException e){
             assertEquals("cut: incorrect option input " + argList.get(0), e.getMessage());
         }
 
         try {
             argList.set(0, "-b");
-            argList.add("file4.txt");
             cut.exec(argList);
             fail();
         }catch (RuntimeException e){
-            assertEquals("cut: can not open file: " + argList.get(2), e.getMessage());
+            assertEquals("cut: no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
+            argList.add("file5.txt");
+            cut.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("cut: can not open file " + argList.get(2), e.getMessage());
+        }
+
+        try {
+            argList.add("fourth arg");
+            cut.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("cut: wrong argument number", e.getMessage());
+        }
+
+        try {
+            argList.remove(2);
+            argList.remove(2);
+            new Cut(currentDir, null, null).exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("cut: no data from pipe or redirection and can not find file to read", e.getMessage());
         }
     }
 
@@ -504,46 +594,30 @@ public class ShellTest {
         ArrayList<String> argList = new ArrayList<>();
         Cut cut = new Cut(currentDir, null, writer);
         argList.add("-b");
+        argList.add("1");
         argList.add("file1.txt");
 
+        this.testCut_invalidIndex("-1-3", argList, cut);
+        this.testCut_invalidIndex("0", argList, cut);
+        this.testCut_invalidIndex("---11", argList, cut);
+        this.testCut_invalidIndex("-0", argList, cut);
+        this.testCut_invalidIndex("1--", argList, cut);
+        this.testCut_invalidIndex("0-", argList, cut);
+        this.testCut_invalidIndex("1-0", argList, cut);
+        this.testCut_invalidIndex("0-1", argList, cut);
+        this.testCut_invalidIndex("1--0", argList, cut);
+        this.testCut_invalidIndex("2-1", argList, cut);
+        this.testCut_invalidIndex("", argList, cut);
+        this.testCut_invalidIndex("-", argList, cut);
+    }
+
+    public void testCut_invalidIndex(String element, ArrayList<String> argList, Cut cut){
         try {
-            argList.add(1, "-1-3");
+            argList.set(1, element);
             cut.exec(argList);
             fail();
         }catch (RuntimeException e){
             assertEquals("cut: invalid argument " + argList.get(1), e.getMessage());
-        }
-
-        try {
-            argList.set(1, "b1-");
-            cut.exec(argList);
-            fail();
-        }catch (RuntimeException e){
-            assertEquals("cut: invalid argument " + argList.get(1), e.getMessage());
-        }
-
-        try {
-            argList.set(1, "1-0");
-            cut.exec(argList);
-            fail();
-        }catch (RuntimeException e){
-            assertEquals("cut: invalid argument " + argList.get(1), e.getMessage());
-        }
-
-        try {
-            argList.set(1, "0-1");
-            cut.exec(argList);
-            fail();
-        }catch (RuntimeException e){
-            assertEquals("cut: invalid argument " + argList.get(1), e.getMessage());
-        }
-
-        try {
-            argList.set(1, "2-1");
-            cut.exec(argList);
-            fail();
-        }catch (RuntimeException e){
-            assertEquals("cut: invalid decreasing range " + argList.get(1), e.getMessage());
         }
     }
 
@@ -554,28 +628,28 @@ public class ShellTest {
         argList.add("-name");
         argList.add("*1.txt");
         new Find(currentDir, writer).exec(argList);
-        this.assertEqualSet("." + File.separator + "file1.txt" + System.getProperty("line.separator")+ "." + File.separator
-                + "subDir" + File.separator + "file1.txt" + System.getProperty("line.separator"), out.toString());
+        this.assertEqualSet("." + fileSep + "file1.txt" + lineSep+ "." + fileSep + "subDir"
+                + fileSep + "file1.txt" + lineSep, out.toString());
     }
 
     @Test
     public void testFind_absoluteOrRelativePath(){
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
-        String prefix = "subDir" + File.separator + "..";
+        String prefix = "subDir" + fileSep + "..";
         argList.add(prefix);
         argList.add("-name");
         argList.add("*1.txt");
         new Find(currentDir, writer).exec(argList);
-        this.assertEqualSet(prefix + File.separator + "file1.txt" + System.getProperty("line.separator") + prefix + File.separator
-                + "subDir" + File.separator + "file1.txt" + System.getProperty("line.separator"), out.toString());
+        this.assertEqualSet(prefix + fileSep + "file1.txt" + lineSep + prefix + fileSep + "subDir"
+                + fileSep + "file1.txt" + lineSep, out.toString());
 
         out.reset();
         prefix = currentDir;
         argList.set(0, prefix);
         new Find(currentDir, writer).exec(argList);
-        this.assertEqualSet(prefix + File.separator + "file1.txt" + System.getProperty("line.separator") + prefix + File.separator
-                + "subDir" + File.separator + "file1.txt" + System.getProperty("line.separator"), out.toString());
+        this.assertEqualSet(prefix + fileSep + "file1.txt" + lineSep + prefix + fileSep + "subDir"
+                + fileSep + "file1.txt" + lineSep, out.toString());
     }
 
     @Test
@@ -598,6 +672,22 @@ public class ShellTest {
         }catch (RuntimeException e){
             assertEquals("find: no such root directory subDir1", e.getMessage());
         }
+
+        try {
+            argList.set(0, "subDir");
+            new Find(currentDir, null).exec(argList);
+            fail();
+        }catch (Exception e){
+            assertEquals("find: fail to write to the output", e.getMessage());
+        }
+
+        try {
+            argList.add("fourth arg");
+            new Find(currentDir, writer).exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("find: Wrong number of arguments", e.getMessage());
+        }
     }
 
     @Test
@@ -606,8 +696,7 @@ public class ShellTest {
         ArrayList<String> argList = new ArrayList<>();
         argList.add("subDir/file2.txt");
         new Uniq(currentDir, null, writer).exec(argList);
-        assertEquals("CCC" + System.getProperty("line.separator") + "ccc" + System.getProperty("line.separator")
-                + "DDD" + System.getProperty("line.separator") + "ddd" + System.getProperty("line.separator"), out.toString());
+        assertEquals("CCC" + lineSep + "ccc" + lineSep + "DDD" + lineSep + "ddd" + lineSep, out.toString());
     }
 
     @Test
@@ -617,15 +706,31 @@ public class ShellTest {
         argList.add("-i");
         argList.add("subDir/file2.txt");
         new Uniq(currentDir, null, writer).exec(argList);
-        assertEquals("CCC" + System.getProperty("line.separator") + "DDD" + System.getProperty("line.separator"), out.toString());
+        assertEquals("CCC" + lineSep + "DDD" + lineSep, out.toString());
     }
 
     @Test
     public void testUniq_exception(){
         ArrayList<String> argList = new ArrayList<>();
         Uniq uniq = new Uniq(currentDir, null, writer);
+
         try {
-            argList.add("-iii");
+            uniq.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("uniq: no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
+            argList.add("-i");
+            uniq.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("uniq: no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
+            argList.set(0, "-iii");
             argList.add("file4.txt");
             uniq.exec(argList);
             fail();
@@ -643,6 +748,14 @@ public class ShellTest {
 
         try {
             argList.set(1, "file1.txt");
+            new Uniq(currentDir, null, null).exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("uniq: fail to read or write", e.getMessage());
+        }
+
+        try {
+            argList.set(1, "file1.txt");
             argList.add("file2.txt");
             uniq.exec(argList);
             fail();
@@ -655,11 +768,9 @@ public class ShellTest {
     public void testSort(){
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
-        argList.add("subDir" + File.separator + "file3.txt");
+        argList.add("subDir" + fileSep + "file3.txt");
         new Sort(currentDir, null, writer).exec(argList);
-        assertEquals("123" + System.getProperty("line.separator") + "456" + System.getProperty("line.separator")
-                + "666" + System.getProperty("line.separator") + "789" + System.getProperty("line.separator") + "abc"
-                + System.getProperty("line.separator"), out.toString());
+        assertEquals("123" + lineSep + "456" + lineSep + "666" + lineSep + "789" + lineSep + "abc" + lineSep, out.toString());
     }
 
     @Test
@@ -667,11 +778,9 @@ public class ShellTest {
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
         argList.add("-r");
-        argList.add("subDir" + File.separator + "file3.txt");
+        argList.add("subDir" + fileSep + "file3.txt");
         new Sort(currentDir, null, writer).exec(argList);
-        assertEquals("abc" + System.getProperty("line.separator") + "789" + System.getProperty("line.separator")
-                + "666" + System.getProperty("line.separator") + "456" + System.getProperty("line.separator") + "123"
-                + System.getProperty("line.separator"), out.toString());
+        assertEquals("abc" + lineSep + "789" + lineSep + "666" + lineSep + "456" + lineSep + "123" + lineSep, out.toString());
     }
 
     @Test
@@ -681,8 +790,23 @@ public class ShellTest {
         Sort sort = new Sort(currentDir, null, writer);
 
         try {
-            argList.add("-a");
-            argList.add("subDir" + File.separator + "file4.txt");
+            sort.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("sort: no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
+            argList.add("-r");
+            sort.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("sort: no data from pipe or redirection and can not find file to read", e.getMessage());
+        }
+
+        try {
+            argList.set(0, "-a");
+            argList.add("subDir" + fileSep + "file4.txt");
             sort.exec(argList);
             fail();
         }catch (RuntimeException e){
@@ -705,6 +829,14 @@ public class ShellTest {
         }catch (RuntimeException e){
             assertEquals("sort: cannot open " + argList.get(0), e.getMessage());
         }
+
+        try {
+            argList.set(0, "file3.txt");
+            new Sort(currentDir, null, null).exec(argList);
+            fail();
+        }catch (Exception e){
+            assertEquals("sort: fail to read or write", e.getMessage());
+        }
     }
 
     @Test
@@ -722,10 +854,10 @@ public class ShellTest {
     @Test
     public void openFileTest_relativePath(){
         try {
-            assertEquals("file1.txt", ShellUtil.getPath(currentDir, "subDir" + File.separator + ".."
-                    + File.separator + "file1.txt").getFileName().toString());
+            assertEquals("file1.txt", ShellUtil.getPath(currentDir, "subDir" + fileSep + ".."
+                    + fileSep + "file1.txt").getFileName().toString());
 
-            ShellUtil.getPath(currentDir, "subDir1" + File.separator + "file1.txt");
+            ShellUtil.getPath(currentDir, "subDir1" + fileSep + "file1.txt");
             fail();
         }catch (IOException e){
             assertNull(e.getMessage());
@@ -737,10 +869,216 @@ public class ShellTest {
         try {
             assertEquals("file1.txt", ShellUtil.getPath(currentDir, currentDir).getFileName().toString());
 
-            ShellUtil.getPath(currentDir, currentDir + File.separator + "subDir1" + File.separator + "file1.txt");
+            ShellUtil.getPath(currentDir, currentDir + fileSep + "subDir1" + fileSep + "file1.txt");
             fail();
         }catch (IOException e){
             assertNull(e.getMessage());
         }
+
+        try {
+            assertEquals("file1.txt", ShellUtil.getPath(currentDir, currentDir).getFileName().toString());
+
+            ShellUtil.getPath(currentDir, currentDir + fileSep + "subDir1" + fileSep + "file1.txt");
+            fail();
+        }catch (IOException e){
+            assertNull(e.getMessage());
+        }
+    }
+
+    @Test
+    public void openFolderTest_exception(){
+        try {
+            Shell.eval("cd subDir; cd subDir", writer, currentDir);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("cd: can not switch to such directory subDir", e.getMessage());
+        }
+
+        try {
+            Shell.eval("cd " + currentDir + fileSep + "subDir" + fileSep + "noExist", writer, currentDir);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("cd: can not switch to such directory " + currentDir + fileSep + "subDir" + fileSep + "noExist", e.getMessage());
+        }
+    }
+
+
+
+    public void systemTest_resultChecker(String result, String cmdLine){
+        out.reset();
+        Shell.eval(cmdLine, writer, currentDir);
+        assertEquals(result, out.toString());
+    }
+
+    public void systemTest_fileContentChecker(String content, String fileName){
+        try {
+            BufferedReader reader = Files.newBufferedReader(Paths.get(currentDir, fileName));
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null){
+                builder.append(line);
+            }
+            assertEquals(content, builder.toString());
+        }catch (Exception e){
+            fail();
+        }
+    }
+
+    @Test
+    public void systemTest_pipe(){
+        this.systemTest_resultChecker("1234 5678" + lineSep, "echo 1234   5678 | cat");
+        this.systemTest_resultChecker("AAA" + lineSep, "cat file1.txt | head -n 1");
+        this.systemTest_resultChecker("ccc" + lineSep, "cat file1.txt | tail -n 1");
+        this.systemTest_resultChecker("", "cat file1.txt | grep aaa");
+        this.systemTest_resultChecker("*" + lineSep, "cat file3.txt | cut -b 1");
+        this.systemTest_resultChecker("CCC" + lineSep + "DDD" + lineSep, "cat subDir/file2.txt | uniq -i");
+        this.systemTest_resultChecker("DDD" + lineSep + "CCC" + lineSep, "cat subDir/file2.txt | uniq -i | sort -r");
+        this.systemTest_resultChecker(currentDir + fileSep + "subDir" + fileSep + "file1.txt" + lineSep,
+                "cd subDir;find " + currentDir + fileSep + "subDir" + " -name file1.txt");
+        this.systemTest_resultChecker("CCC" + lineSep + "ccc" + lineSep + "DDD" + lineSep
+                + "ddd" + lineSep, "cat subDir/file2.txt | uniq");
+        this.systemTest_resultChecker("CCC" + lineSep + "CCC" + lineSep + "DDD" + lineSep
+                + "ccc" + lineSep + "ddd" + lineSep, "cat subDir/file2.txt | sort");
+    }
+
+    @Test
+    public void systemTest_redirection(){
+        out.reset();
+        Shell.eval("cat < file3.txt", writer, currentDir);
+        assertEquals("*.txt" + System.getProperty("line.separator"), out.toString());
+
+        out.reset();
+        Shell.eval("cat < file3.txt > file100.txt", writer, currentDir);
+        this.systemTest_fileContentChecker("*.txt", "file100.txt");
+
+        /*out.reset();
+        Shell.eval("cat < file3.txt > " + currentDir +"file105.txt", writer, currentDir);
+        this.systemTest_fileContentChecker("*.txt", currentDir +"file105.txt");*/
+    }
+
+    @Test
+    public void systemTest_redirection_exception(){
+        try {
+            Shell.eval("cat < file111.txt", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("can not open the input redirection file: file111.txt", e.getMessage());
+        }
+
+        try {
+            Shell.eval("sort -r < file222.txt < file333.txt", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("Error: several files are specified for input", e.getMessage());
+        }
+
+        try {
+            Shell.eval("echo 1234 > file222.txt > file333.txt", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("Error: several files are specified for output", e.getMessage());
+        }
+
+        try {
+            Shell.eval("cat < notExist.txt ", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("can not open the input redirection file: notExist.txt", e.getMessage());
+        }
+
+        /*try {
+            Shell.eval("echo 1234 > \"<>.txt\"", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("fail to write to the output redirection file: <>.txt", e.getMessage());
+        }*/
+    }
+
+    @Test
+    public void systemTest_testApp(){
+        try {
+            this.systemTest_resultChecker("", "_cdd file1.txt");
+            fail();
+        }catch (Exception e){
+            assertEquals("unknown application", e.getMessage());
+        }
+
+        systemTest_resultChecker(currentDir + System.getProperty("line.separator"), "pwd");
+        systemTest_resultChecker("subDir" + fileSep + "file1.txt" + System.getProperty("line.separator"), "find subDir -name \"*1.txt\"");
+        systemTest_resultChecker("", "ls '.subDir'");
+    }
+
+    @Test
+    public void systemTest_unsafe(){
+        this.systemTest_resultChecker("cat: can not open: file999.txt" + System.getProperty("line.separator"), "_cat file999.txt");
+        this.systemTest_resultChecker("123" + System.getProperty("line.separator"), "_echo 123");
+    }
+
+    @Test
+    public void systemTest_exception(){
+        out.reset();
+        try {
+            Shell.eval("cd subDir;find .subDir -name file1.txt", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("find: no such root directory .subDir", e.getMessage());
+        }
+
+        try {
+            Shell.eval("cd subDir;find .subDir2 -name file1.txt", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("find: no such root directory .subDir2", e.getMessage());
+        }
+
+        try {
+            Shell.eval("cd subDir;find .subDir2 -name file1.txt", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("find: no such root directory .subDir2", e.getMessage());
+        }
+    }
+
+    //just for pass the coverage test for class only has static method
+    @Test
+    public void shellUtilTest(){
+        new ShellUtil();
+        new Shell();
+
+        Shell.main(new String[]{"", "", ""});
+        Shell.main(new String[]{"-cc", ""});
+        Shell.main(new String[]{"-c", "echo 123"});
+        Shell.main(new String[]{"-c", "_ecco 123"});
+    }
+
+    @Test
+    public void commandSubstitution(){
+        systemTest_resultChecker("1234" + lineSep, "echo `echo 1234`");
+        systemTest_resultChecker("11234" + lineSep, "echo 1`echo 1234`");
+        systemTest_resultChecker("11234" + lineSep, "echo \"1\"`echo 1234`");
+        systemTest_resultChecker("11234" + lineSep, "echo '1'`echo 1234`");
+
+        try {
+            Shell.eval("cat < `echo 1.txt 2.txt`", writer, currentDir);
+        }catch (Exception e){
+            assertEquals("Error : ambiguous redirect argument: `echo 1.txt 2.txt`", e.getMessage());
+        }
+    }
+
+    @Test
+    public void parserException(){
+        try {
+            Shell.eval("echo ````", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("Error: the input does not satisfy the syntax", e.getMessage());
+        }
+    }
+
+    @Test
+    public void globbingTest(){
+        this.systemTest_resultChecker("*.txt" + lineSep, "cat < `echo file3.txt`");
+        //this.systemTest_resultChecker("*.txt" + lineSep, "cat < `echo *1.txt`");
+        //systemTest_resultChecker("file1.txt\\file1.txt" + System.getProperty("line.separator"), "echo *'1.txt'");
     }
 }

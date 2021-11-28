@@ -29,25 +29,22 @@ public class Sort implements ShellApplication {
         }
 
         String option;
-        if(appArgs.size() > 0){
+        if(appArgs.size() == 0){
+            execFromStream("", null);
+        }else {
             option = appArgs.get(0);
-        }else {
-            option = "";
-        }
-
-        if (appArgs.size() == 2){
-            if (!option.equals("-r")){
-                throw new RuntimeException("sort: invalid option "+option);
-            }
-            execFromStream(option, appArgs.get(1));
-        }else if(appArgs.size() == 1){
-            if(option.equals("-r")){
-                execFromStream(option, null);
+            if (appArgs.size() == 2) {
+                if (!option.equals("-r")) {
+                    throw new RuntimeException("sort: invalid option " + option);
+                }
+                execFromStream(option, appArgs.get(1));
             }else {
-                execFromStream("", appArgs.get(0));
+                if (option.equals("-r")) {
+                    execFromStream(option, null);
+                } else {
+                    execFromStream("", appArgs.get(0));
+                }
             }
-        }else {
-            execFromStream(option, null);
         }
 
         return currentDirectory;
@@ -56,6 +53,9 @@ public class Sort implements ShellApplication {
     private void execFromStream(String option, String fileName) {
         BufferedReader reader;
         if(fileName == null){
+            if(this.reader == null){
+                throw new RuntimeException("sort: no data from pipe or redirection and can not find file to read");
+            }
             reader = this.reader;
         }else {
             try {
@@ -65,14 +65,11 @@ public class Sort implements ShellApplication {
             }
         }
 
-        if(reader == null){
-            throw new RuntimeException("sort: no data from pipe or redirection and can not find file to read");
-        }
         try {
             ArrayList<String> lines = readFromReader(reader);
             sort(option, lines);
             writeToBuffer(lines);
-        }catch (IOException e){
+        }catch (Exception e){
             throw new RuntimeException("sort: fail to read or write");
         }
     }
