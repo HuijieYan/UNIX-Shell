@@ -1,6 +1,7 @@
 package uk.ac.ucl.shell.Applications;
 
 import uk.ac.ucl.shell.ShellApplication;
+import uk.ac.ucl.shell.ShellUtil;
 
 import java.io.*;
 import java.util.List;
@@ -51,15 +52,19 @@ public class Find implements ShellApplication {
             if(rootDirectory.isDirectory()){
                 this.rootDirLength = currentDirectory.length() + 1;
                 this.isChildDir = true;
-            } else if(!(rootDirectory = new File(appArgs.get(0))).isDirectory() || !rootDirectory.isAbsolute()){
-                throw new RuntimeException("find: no such root directory " + appArgs.get(0));
+            } else {
+                try {
+                    rootDirectory = ShellUtil.getDir(currentDirectory, appArgs.get(0));
+                }catch (RuntimeException e){
+                    throw new RuntimeException("find: no such root directory " + appArgs.get(0));
+                }
             }
         }
 
         Pattern findPattern = Pattern.compile(appArgs.get(appArgs.size() - 1).replaceAll("\\*", ".*"));
         try {
             findFilesInDir(rootDirectory, findPattern);
-        }catch (IOException e){
+        }catch (Exception e){
             throw new RuntimeException("find: fail to write to the output");
         }
         return currentDirectory;
@@ -72,24 +77,21 @@ public class Find implements ShellApplication {
      * @param findPattern pattern to match files (eg. *.txt)
      */    
     private void findFilesInDir(File currDirectory, Pattern findPattern) throws IOException {
-        try {
-            File[] listFiles = currDirectory.listFiles();
-            for (File file : listFiles) {
-                if (file.isDirectory()) {
-                    findFilesInDir(file, findPattern);
-                } else if (findPattern.matcher(file.getName()).matches()) {
-                    if(this.rootDirLength == -1){
-                        writer.write(file.getAbsolutePath());
-                    }else if(isChildDir){
-                        writer.write(file.getAbsolutePath().substring(this.rootDirLength));
-                    } else {
-                        writer.write("." + file.getAbsolutePath().substring(this.rootDirLength));
-                    }
-                    writer.write(System.getProperty("line.separator"));
+        File[] listFiles = currDirectory.listFiles();
+        for (File file : listFiles) {
+            if (file.isDirectory()) {
+                findFilesInDir(file, findPattern);
+            } else if (findPattern.matcher(file.getName()).matches()) {
+                if(this.rootDirLength == -1){
+                    writer.write(file.getAbsolutePath());
+                }else if(isChildDir){
+                    writer.write(file.getAbsolutePath().substring(this.rootDirLength));
+                } else {
+                    writer.write("." + file.getAbsolutePath().substring(this.rootDirLength));
                 }
+                writer.write(System.getProperty("line.separator"));
             }
-            writer.flush();
-        }catch (NullPointerException ignored){
         }
+        writer.flush();
     }
 }

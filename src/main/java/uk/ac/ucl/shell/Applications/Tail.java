@@ -66,13 +66,10 @@ public class Tail implements ShellApplication{
         }
 
         if(fileName == null){
-            if(this.reader == null){
-                throw new RuntimeException("tail: no data from pipe or redirection and can not find file to read");
-            }
             try {
                 writeToBuffer(this.reader);
-            }catch (IOException e){
-                throw new RuntimeException("tail: fail to read from pipe or redirection");
+            }catch (Exception e){
+                throw new RuntimeException("tail: no data from pipe or redirection and can not find file to read");
             }
         } else {
             try {

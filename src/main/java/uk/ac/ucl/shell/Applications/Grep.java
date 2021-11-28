@@ -46,14 +46,11 @@ public class Grep implements ShellApplication {
 
         Pattern grepPattern = Pattern.compile(appArgs.get(0).replaceAll("\\*", ".*"));
         if(appArgs.size() == 1){
-            if(this.reader == null){
-                throw new RuntimeException("grep: no data from pipe or redirection and can not find file to read");
-            }
             this.prefixed = false;
             try {
                 writeToBuffer(grepPattern, this.reader, "");
-            }catch (IOException e){
-                throw new RuntimeException("grep: fail to read from pipe or redirection");
+            }catch (Exception e){
+                throw new RuntimeException("Grep: no data from pipe or redirection and can not find file to read");
             }
         }else {
             this.prefixed = (appArgs.size() - 1) > 1;

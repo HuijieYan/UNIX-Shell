@@ -42,13 +42,10 @@ public class Cat implements ShellApplication {
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.isEmpty()) {
-            if(this.reader == null){
-                throw new RuntimeException("cat: no data from pipe or redirection and can not find file to read");
-            }
             try {
                 writeToBuffer(this.reader);
             }catch (Exception e){
-                throw new RuntimeException("cat: fail to read from pipe or redirection");
+                throw new RuntimeException("cat: no data from pipe or redirection and can not find file to read");
             }
 
         } else {

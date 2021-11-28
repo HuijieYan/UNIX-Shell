@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell.Applications;
 
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class Echo implements ShellApplication {
             }
             writer.write(System.getProperty("line.separator"));
             writer.flush();
-        }catch (IOException e){
+        }catch (Exception e){
             throw new RuntimeException("Echo: fail to print the arguments");
         }
         return currentDirectory;

@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell;
 
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -18,7 +17,7 @@ public class Shell {
         Monad<ArrayList<Command>> sat = myParser.parseCommand();
         MonadicValue<ArrayList<Command>, String> resultPair = sat.parse(cmdline);
         ArrayList<Command> commandList = resultPair.getValue();
-        if(!resultPair.getInputStream().equals("")){
+        if(!resultPair.getInputStream().equals("") || commandList == null){
             throw new RuntimeException("Error: the input does not satisfy the syntax");
         }
 
@@ -28,12 +27,12 @@ public class Shell {
             //access visitor
             try {
                 currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
-            }catch (RuntimeException e){
+            }catch (Exception e){
                 if(e.getMessage().startsWith("ignore")){
                     try {
                         writer.write(e.getMessage().substring(6) + System.getProperty("line.separator"));
                         writer.flush();
-                    }catch (IOException ignored){}
+                    }catch (Exception ignored){}
                 }else {
                     throw new RuntimeException(e.getMessage());
                 }
@@ -44,6 +43,7 @@ public class Shell {
 
     public static void main(String[] args) {
         String currentDirectory = System.getProperty("user.dir");
+        OutputStreamWriter writer = new OutputStreamWriter(System.out);
         if (args.length > 0) {
             if (args.length != 2) {
                 System.out.println("COMP0010 shell: wrong number of arguments");
@@ -53,24 +53,20 @@ public class Shell {
                 System.out.println("COMP0010 shell: " + args[0] + ": unexpected argument");
             }
             try {
-                Shell.eval(args[1], new OutputStreamWriter(System.out), currentDirectory);
+                Shell.eval(args[1], writer, currentDirectory);
             } catch (Exception e) {
                 System.out.print("");
             }
         } else {
-            OutputStreamWriter writer = new OutputStreamWriter(System.out);
             try (Scanner input = new Scanner(System.in)) {
                 while (true) {
                     String prompt = currentDirectory + "> ";
                     System.out.print(prompt);
-                    try {
-                        String cmdline = input.nextLine();
-                        currentDirectory = Shell.eval(cmdline, writer, currentDirectory);
-                    } catch (Exception e) {
-                        System.out.print(e.getMessage());
-                        break;
-                    }
+                    String cmdline = input.nextLine();
+                    currentDirectory = Shell.eval(cmdline, writer, currentDirectory);
                 }
+            }catch (Exception e){
+                System.out.println(e.getMessage());
             }
         }
     }

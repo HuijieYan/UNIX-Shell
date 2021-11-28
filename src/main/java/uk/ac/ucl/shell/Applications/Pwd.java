@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell.Applications;
 
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class Pwd implements ShellApplication {
             writer.write(currentDirectory);
             writer.write(System.getProperty("line.separator"));
             writer.flush();
-        }catch (IOException e){
+        }catch (Exception e){
             throw new RuntimeException("Pwd: fail to write to the output");
         }
         return currentDirectory;

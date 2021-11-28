@@ -46,15 +46,15 @@ public class Ls implements ShellApplication {
             }
 
             File[] listOfFiles = currDir.listFiles();
-            for(int index = 0; index < listOfFiles.length; index++){
-                if (!listOfFiles[index].getName().startsWith(".")) {
-                    writer.write(listOfFiles[index].getCanonicalPath().substring(rootDirLength));
-                    if(index != listOfFiles.length - 1){
-                        writer.write("\t");
+            if (listOfFiles.length > 0) {
+                for(int index = 0; index < listOfFiles.length; index++){
+                    if (!listOfFiles[index].getName().startsWith(".")) {
+                        writer.write(listOfFiles[index].getCanonicalPath().substring(rootDirLength));
+                        if(index != listOfFiles.length - 1){
+                            writer.write("\t");
+                        }
                     }
                 }
-            }
-            if (listOfFiles.length > 0) {
                 writer.write(System.getProperty("line.separator"));
             }
             writer.flush();
