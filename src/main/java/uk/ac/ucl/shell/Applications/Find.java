@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell.Applications;
 
-import uk.ac.ucl.shell.Shell;
 import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
 

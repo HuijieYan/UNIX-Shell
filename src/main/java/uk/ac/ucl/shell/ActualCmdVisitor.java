@@ -3,7 +3,6 @@ package uk.ac.ucl.shell;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,13 +75,9 @@ public class ActualCmdVisitor implements CommandVisitor {
             if(arg instanceof RedirectionSymbol){
                 if(((RedirectionSymbol)arg).isTowardsNext()){
                     if(!hasSeveralInput){
-                        if(argIndex + 1 < cmdArgs.size()){
-                            inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
-                            cmdArgs.remove(argIndex);
-                            cmdArgs.remove(argIndex);
-                        }else {
-                            throw new RuntimeException("Error: no file is specified for input");
-                        }
+                        inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
+                        cmdArgs.remove(argIndex);
+                        cmdArgs.remove(argIndex);
                         hasSeveralInput = true;
                     }else {
                         throw new RuntimeException("Error: several files are specified for output");
@@ -90,13 +85,9 @@ public class ActualCmdVisitor implements CommandVisitor {
 
                 } else {
                     if(!hasSeveralOutput){
-                        if(argIndex + 1 < cmdArgs.size()){
-                            inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
-                            cmdArgs.remove(argIndex);
-                            cmdArgs.remove(argIndex);
-                        }else {
-                            throw new RuntimeException("Error: no file is specified for output");
-                        }
+                        inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
+                        cmdArgs.remove(argIndex);
+                        cmdArgs.remove(argIndex);
                         hasSeveralOutput = true;
                     }else {
                         throw new RuntimeException("Error: several files are specified for input");

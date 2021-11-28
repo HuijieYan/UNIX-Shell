@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell;
 
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -18,7 +17,7 @@ public class Shell {
         Monad<ArrayList<Command>> sat = myParser.parseCommand();
         MonadicValue<ArrayList<Command>, String> resultPair = sat.parse(cmdline);
         ArrayList<Command> commandList = resultPair.getValue();
-        if(!resultPair.getInputStream().equals("")){
+        if(!resultPair.getInputStream().equals("") || commandList == null){
             throw new RuntimeException("Error: the input does not satisfy the syntax");
         }
 
@@ -63,14 +62,11 @@ public class Shell {
                 while (true) {
                     String prompt = currentDirectory + "> ";
                     System.out.print(prompt);
-                    try {
-                        String cmdline = input.nextLine();
-                        currentDirectory = Shell.eval(cmdline, writer, currentDirectory);
-                    } catch (Exception e) {
-                        System.out.print(e.getMessage());
-                        break;
-                    }
+                    String cmdline = input.nextLine();
+                    currentDirectory = Shell.eval(cmdline, writer, currentDirectory);
                 }
+            }catch (Exception e){
+                System.out.println(e.getMessage());
             }
         }
     }

@@ -1,6 +1,5 @@
 package uk.ac.ucl.shell.Applications;
 
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 

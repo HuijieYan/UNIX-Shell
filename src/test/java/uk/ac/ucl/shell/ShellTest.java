@@ -951,9 +951,9 @@ public class ShellTest {
         Shell.eval("cat < file3.txt > file100.txt", writer, currentDir);
         this.systemTest_fileContentChecker("*.txt", "file100.txt");
 
-        /*out.reset();
-        Shell.eval("cat < file3.txt > " + currentDir +"file105.txt", writer, currentDir);
-        this.systemTest_fileContentChecker("*.txt", currentDir +"file105.txt");*/
+        out.reset();
+        Shell.eval("cat < file3.txt > " + currentDir + fileSep + "file105.txt", writer, currentDir);
+        this.systemTest_fileContentChecker("*.txt",  "file105.txt");
     }
 
     @Test
@@ -1016,7 +1016,6 @@ public class ShellTest {
 
     @Test
     public void systemTest_exception(){
-        out.reset();
         try {
             Shell.eval("cd subDir;find .subDir -name file1.txt", writer, currentDir);
             fail();
@@ -1037,6 +1036,13 @@ public class ShellTest {
         }catch (Exception e){
             assertEquals("find: no such root directory .subDir2", e.getMessage());
         }
+
+        try {
+            Shell.eval("cat <", writer, currentDir);
+            fail();
+        }catch (Exception e){
+            assertEquals("Error: the input does not satisfy the syntax", e.getMessage());
+        }
     }
 
     //just for pass the coverage test for class only has static method
@@ -1048,7 +1054,7 @@ public class ShellTest {
         Shell.main(new String[]{"", "", ""});
         Shell.main(new String[]{"-cc", ""});
         Shell.main(new String[]{"-c", "echo 123"});
-        Shell.main(new String[]{"-c", "_ecco 123"});
+        Shell.main(new String[]{"-c", "_knownApp 123"});
     }
 
     @Test

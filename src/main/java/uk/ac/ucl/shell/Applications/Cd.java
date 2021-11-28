@@ -1,7 +1,6 @@
 package uk.ac.ucl.shell.Applications;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
