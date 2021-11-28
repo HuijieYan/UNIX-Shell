@@ -22,14 +22,14 @@ public class Cut implements ShellApplication {
      * @param currentDirectory currentDirectory of the Shell
      * @param reader Source of reading content
      * @param writer Destination of writing content
-     **/
+     */
     public Cut(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.reader = reader;
         this.writer = writer;
     }
 
-    /**
+    /** TBD
      * exec function of "cut" application.
      * @param appArgs list of application arguments stored in List<String>
      * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
@@ -39,7 +39,7 @@ public class Cut implements ShellApplication {
      * - "cut: no data from pipe or redirection and can not find file to read" // When argument size is 2 and reader object is null
      * - "cut: can not open file: " + appArgs.get(2) // When argument size is 3 and filePath is invalid or IOException is catched from OS
      * - 
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.size() < 2 || appArgs.size() > 3) {

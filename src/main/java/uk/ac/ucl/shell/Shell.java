@@ -10,7 +10,7 @@ import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
 public class Shell {
-    //change to non-static at the moment
+
     public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {
 
         // Using monad Parser

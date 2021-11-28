@@ -14,7 +14,7 @@ public class Pwd implements ShellApplication {
      * Constructor of Pwd application
      * @param currentDirectory currentDirectory of the Shell
      * @param writer Destination of writing content
-     **/
+     */
     public Pwd(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.writer = writer;
@@ -28,7 +28,7 @@ public class Pwd implements ShellApplication {
      * @throws RuntimeException The exception is throwed due to following reasons:
      * - "Pwd: there can not be argument" // When appArgs is greater than 0
      * - "Pwd: fail to write to the output" // When IOException is catched from writer
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if(appArgs.size() > 0){

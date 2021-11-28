@@ -15,13 +15,12 @@ public class Ls implements ShellApplication {
      * Constructor of Ls application
      * @param currentDirectory currentDirectory of the Shell
      * @param writer Destination of writing content
-     **/
+     */
     public Ls(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.writer = writer;
     }
     
-
     /**
      * exec function of "Ls" application.
      * @param appArgs list of application arguments stored in List<String>
@@ -29,7 +28,7 @@ public class Ls implements ShellApplication {
      * @throws RuntimeException The exception is throwed due to following reasons:
      * - "ls: too many arguments" // When app argument has size more than 1.
      * - "ls: no such directory: " + appArgs.get(0) // Failed to open directory given from argument
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if(appArgs.size() > 1){
@@ -62,7 +61,6 @@ public class Ls implements ShellApplication {
         } catch (Exception e) {
             throw new RuntimeException("ls: no such directory: " + appArgs.get(0));
         }
-
         return currentDirectory;
     }
 

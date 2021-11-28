@@ -13,7 +13,7 @@ public class Cd implements ShellApplication {
     /**
      * Constructor of Cd application
      * @param currentDirectory currentDirectory of the Shell
-     **/
+     */
     public Cd(String currentDirectory) {
         this.currentDirectory = currentDirectory;
     }
@@ -28,7 +28,7 @@ public class Cd implements ShellApplication {
      * - "cd: missing argument" // When appArgs is empty
      * - "cd: too many arguments" // When appArgs has more than one arguments
      * - "cd: fail to change the directory" // When directory is not valid or can not be opened
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.isEmpty()) {

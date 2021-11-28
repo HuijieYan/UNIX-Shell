@@ -25,28 +25,6 @@ import java.util.Random;
  */
 public class ParserTest {
     private ShellParser shellParser = new ShellParser();
-<<<<<<< HEAD
-    private ArrayList<Character> tab;
-    public ParserTest(){
-        tab = new ArrayList<>();
-        tab.add('\n');
-    }
-
-    @Test
-    public void testQuotedContentParserForSingleQuoted(){
-        ArrayList<Character> singleQuotedExceptions = new ArrayList<>(tab);
-        singleQuotedExceptions.add('\'');
-        String[] testFailCases = {"","'","\n"};
-        String[] testSuccessfulCases = {"abcd","a`b`c","abc abc\tabc","a\"b\"c","a`b`\"c\"d1234534!@#%","\"abc","`abc","`abc\""};
-        for (String str:testSuccessfulCases){
-            Assert.assertEquals(str,shellParser.quotedContent(singleQuotedExceptions).parse(str).getValue());
-        }
-        for (String str:testFailCases){
-            Assert.assertNull(shellParser.quotedContent(singleQuotedExceptions).parse(str).getValue());
-        }
-    }
-=======
->>>>>>> 562045746b19a584bc39574937f885ae98460e21
 
     @Test
     public void testSingleQuotedParser(){

@@ -14,7 +14,7 @@ public class Echo implements ShellApplication {
      * Constructor of Cat application
      * @param currentDirectory currentDirectory of the Shell
      * @param writer Destination of writing content
-     **/
+     */
     public Echo(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.writer = writer;
@@ -28,7 +28,7 @@ public class Echo implements ShellApplication {
      * @throws RuntimeException The exception is throwed due to following reasons:
      * - "Echo: application should at least has one argument" // if argument size is less than 1
      * - "Echo: fail to print the arguments" // if an IOException is cathed from wrtier object
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if(appArgs.size() < 1){

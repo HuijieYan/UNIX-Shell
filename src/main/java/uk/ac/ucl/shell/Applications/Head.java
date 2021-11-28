@@ -19,7 +19,7 @@ public class Head implements ShellApplication {
      * @param currentDirectory currentDirectory of the Shell
      * @param reader Source of reading content
      * @param writer Destination of writing content
-     **/
+     */
     public Head(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.reader = reader;
@@ -37,7 +37,7 @@ public class Head implements ShellApplication {
      * - "head: no data from pipe or redirection and can not find file to read" // When fileName is null & reader object is null
      * - "head: fail to read from pipe or redirection" // When IOException is catched from reader
      * - "head: cannot open: " + fileName // When fileName is not null & IOException catched from reader
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         headLines = 10;
@@ -82,7 +82,6 @@ public class Head implements ShellApplication {
         
         return currentDirectory;
     }
-
 
     /*
      * helper function of exec()

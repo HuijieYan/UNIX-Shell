@@ -21,7 +21,7 @@ public class Cat implements ShellApplication {
      * @param currentDirectory currentDirectory of the Shell
      * @param reader Source of reading content
      * @param writer Destination of writing content
-     **/
+     */
     public Cat(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.reader = reader;
@@ -38,7 +38,7 @@ public class Cat implements ShellApplication {
      * - "cat: no data from pipe or redirection and can not find file to read" // When appArgs is empty & reader object is null
      * - "cat: fail to read from pipe or redirection" // When appArgs is empty & failed to read from pipe or redirection
      * - "cat: can not open " + file // When file can not be opened
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.isEmpty()) {
@@ -70,7 +70,7 @@ public class Cat implements ShellApplication {
      * writeToBuffer fuction
      * The function takes a BufferedReader then write content from reader into a writer 
      * @param reader A BufferedReader which tells function the source of the content 
-    */
+     */
     private void writeToBuffer(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {

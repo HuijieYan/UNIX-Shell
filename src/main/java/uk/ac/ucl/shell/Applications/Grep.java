@@ -20,7 +20,7 @@ public class Grep implements ShellApplication {
      * @param currentDirectory currentDirectory of the Shell
      * @param reader Source of reading content
      * @param writer Destination of writing content
-     **/
+     */
     public Grep(String currentDirectory, BufferedReader reader, OutputStreamWriter writer){
         this.currentDirectory = currentDirectory;
         this.reader = reader;
@@ -37,7 +37,7 @@ public class Grep implements ShellApplication {
      * - "grep: no data from pipe or redirection and can not find file to read" // if appArg has size 1 and reader object is null.
      * - "grep: fail to read from pipe or redirection" // if appArg size is 1 and IOException is catched from reader.
      * - "grep: cannot open " + appArgs.get(index) // Failed to write content into buffer
-     **/
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException{
         if (appArgs.size() < 1) {
