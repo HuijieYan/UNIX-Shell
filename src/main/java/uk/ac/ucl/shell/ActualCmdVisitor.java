@@ -1,15 +1,9 @@
 package uk.ac.ucl.shell;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.List;
 
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
@@ -25,12 +19,9 @@ public class ActualCmdVisitor implements CommandVisitor {
         ArrayList<Atom> cmdArgs = myCall.getArgs();
         this.eval(cmdArgs,currentDirectory);
         ArrayList<String> inputAndOutputFile = this.checkRedirection(cmdArgs);
+
         if(inputAndOutputFile.get(0) != null){
-            try {
-                bufferedReader = Files.newBufferedReader(ShellUtil.getPath(currentDirectory, inputAndOutputFile.get(0)), StandardCharsets.UTF_8);
-            }catch (IOException e){
-                throw new RuntimeException("can not open the input redirection file: " + inputAndOutputFile.get(0));
-            }
+            bufferedReader = openInputFile(currentDirectory, inputAndOutputFile.get(0));
         }
 
         ArrayList<String> callArgs = new ArrayList<>();
@@ -46,24 +37,40 @@ public class ActualCmdVisitor implements CommandVisitor {
 
 
         if(inputAndOutputFile.get(1) != null) {
-            try {
-                FileWriter outputFile = new FileWriter(inputAndOutputFile.get(1));
-                outputFile.write(bufferedStream.toString());
-                outputFile.flush();
-                outputFile.close();
-            }catch (IOException e){
-                throw new RuntimeException("fail to write to the output redirection file: " + inputAndOutputFile.get(1));
-            }
+            writeToOutputFile(currentDirectory, inputAndOutputFile.get(1), bufferedStream);
         } else {
             try {
                 writer.write(bufferedStream.toString());
                 writer.flush();
-            }catch (IOException e){
-                throw new RuntimeException("fail to print to the shell command line");
-            }
+            }catch (Exception ignored){}
         }
 
         return currentDirectory;
+    }
+
+    private void writeToOutputFile(String currentDirectory, String fileName, ByteArrayOutputStream bufferedStream) {
+        try {
+            File file = new File(fileName);
+            if(!file.isAbsolute()){
+                file = new File(currentDirectory, fileName);
+            }
+            FileWriter outputFile = new FileWriter(file);
+            outputFile.write(bufferedStream.toString());
+            outputFile.flush();
+            outputFile.close();
+        }catch (IOException e){
+            throw new RuntimeException("fail to write to the output redirection file: " + fileName);
+        }
+    }
+
+    private BufferedReader openInputFile(String currentDirectory, String fileName) {
+        BufferedReader bufferedReader;
+        try {
+            bufferedReader = Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8);
+        }catch (IOException e){
+            throw new RuntimeException("can not open the input redirection file: " + fileName);
+        }
+        return bufferedReader;
     }
 
     private ArrayList<String> checkRedirection(ArrayList<Atom> cmdArgs) throws RuntimeException {
@@ -78,30 +85,22 @@ public class ActualCmdVisitor implements CommandVisitor {
             if(arg instanceof RedirectionSymbol){
                 if(((RedirectionSymbol)arg).isTowardsNext()){
                     if(!hasSeveralInput){
-                        if(argIndex + 1 < cmdArgs.size()){
-                            inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
-                            cmdArgs.remove(argIndex);
-                            cmdArgs.remove(argIndex);
-                        }else {
-                            throw new RuntimeException("Error: no file is specified for input");
-                        }
+                        inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
+                        cmdArgs.remove(argIndex);
+                        cmdArgs.remove(argIndex);
                         hasSeveralInput = true;
                     }else {
-                        throw new RuntimeException("Error: several files are specified for input");
+                        throw new RuntimeException("Error: several files are specified for output");
                     }
 
                 } else {
                     if(!hasSeveralOutput){
-                        if(argIndex + 1 < cmdArgs.size()){
-                            inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
-                            cmdArgs.remove(argIndex);
-                            cmdArgs.remove(argIndex);
-                        }else {
-                            throw new RuntimeException("Error: no file is specified for output");
-                        }
+                        inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
+                        cmdArgs.remove(argIndex);
+                        cmdArgs.remove(argIndex);
                         hasSeveralOutput = true;
                     }else {
-                        throw new RuntimeException("Error: several files are specified for output");
+                        throw new RuntimeException("Error: several files are specified for input");
                     }
 
                 }
@@ -129,25 +128,16 @@ public class ActualCmdVisitor implements CommandVisitor {
         }
     }
 
-    private List<String> doGlobbing(String curString, String currentDirectory) {
-        try {
-            return Globbing.exec(currentDirectory, curString);
-        } catch (IOException e) {
-            return new ArrayList<>();
-        }
-    }
-
     private ArrayList<String> globbingHelper(Atom arg, String currentDirectory) {
-
         ArrayList<String> result = new ArrayList<>();
 
         for (String curString : arg.get()) {
-                if (curString.contains("*")) {
-                    ArrayList<String> globbingResult = (ArrayList<String>)doGlobbing(curString, currentDirectory);
-                    result.addAll(globbingResult);
-                } else {
-                    result.add(curString);
-                }                
+            if (curString.contains("*")) {
+                ArrayList<String> globbingResult = (ArrayList<String>)Globbing.exec(currentDirectory, curString);
+                result.addAll(globbingResult);
+            } else {
+                result.add(curString);
+            }
         }
         return result;
     }
