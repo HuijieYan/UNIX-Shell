@@ -16,7 +16,13 @@ import java.util.List;
 
 public class Globbing {
 
-    public static List<String> exec(String pathShell, String pattern) throws IOException {
+    /**
+     * execution function of Globbing
+     * @param pathShell currentDirectory of Shell
+     * @param pattern pattern to do globing (eg. *.txt, *//*.txt)
+     * @return globbed result in a list of string.
+     */
+    public static List<String> exec(String pathShell, String pattern) {
 
         int index = pattern.indexOf("*");
         ArrayList<String> resultList = new ArrayList<>();
@@ -25,6 +31,7 @@ public class Globbing {
             return resultList;
         }
         
+        //Split pattern into path and actual glob content
         String targetDir = pattern.substring(0, index);
         String glob = pattern.substring(index, pattern.length());
  
@@ -36,10 +43,17 @@ public class Globbing {
     }
 
     //file visitor
+    /**
+     * getFiles does the recursive search from given path
+     * The function returns list of matched path.
+     * @param directory Root directory to start the search
+     * @param glob glob pattern (eg. *.txt)
+     * @return List of matched path
+     * @throws IOException if an I/O error occurs
+     */
     public static List<Path> getFiles(final Path directory, final String glob) throws IOException {
         final var myFileVisitor = new GlobFileVisitor(glob);
         Files.walkFileTree(directory, myFileVisitor);
-    
         return myFileVisitor.getMatchedFiles();
     }
     
@@ -48,26 +62,40 @@ public class Globbing {
         private final PathMatcher pathMatcher;
         private List<Path> matchedFiles = new ArrayList<>();
     
+        /**
+         * Constructor of GlobFileVisitor
+         * @param glob pattern to be globed
+         */
         public GlobFileVisitor(final String glob) {
             this.pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
         }
     
         @Override
         public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
-            
             if (pathMatcher.matches(path)) {
                 matchedFiles.add(path);
             }
             return FileVisitResult.CONTINUE;
         }
     
+        /**
+         * Function gets the list that contains mathced path
+         * @return list of matched path.
+         */
         public List<Path> getMatchedFiles() {
             return matchedFiles;
         }
     }
     //
 
-    public static String findRootPath(String currentDirectory, String dir) {
+    /*
+     * Help function of exec() that change Path into given directory
+     * @param currentDirectory currentDirecotry of Shell
+     * @param target direcotry
+     * @return New path changed from current Shell directory
+     * @throw RuntimeException When faild to change the directory
+     */
+    private static String findRootPath(String currentDirectory, String dir) {
         try {
             File myFile = ShellUtil.getDir(currentDirectory, dir);
             currentDirectory = myFile.getPath();
@@ -77,10 +105,22 @@ public class Globbing {
         }
     }
 
-    public static List<String> processGlobbing(String pathMask, String rootDirectory, boolean isAbsolute, String glob) {
+    /*
+     * Help function of exec() that process the actual globbing
+     * The function will do the actual globbing and add each matched result as an element into a list in proper format (relative/absolute)
+     * IF no result is matched, add the original pattern into list
+     * @param pathMask currentDirecotry of Shell
+     * @param rootDirectory Root directory for the actual recursive search.
+     * @param isAbsolute True if this globbing pattern is using absolute path, false if using relative
+     * @param glob pattern of globbing
+     * @return List of matched result
+     * @throw RuntimeException When faild to change the directory
+     */    
+    private static List<String> processGlobbing(String pathMask, String rootDirectory, boolean isAbsolute, String glob) {
 
         ArrayList<String> processedList = new ArrayList<>();
         try {
+            // Build the path pattern with glob syntax for further matching inside PathMatcher
             String pattern = Paths.get(rootDirectory)+ FileSystems.getDefault().getSeparator() + glob;
 
             //if on windows
@@ -95,7 +135,7 @@ public class Globbing {
             }
 
             for (Path curElem : matchedRes) {
-                //if using relative
+                //if using relative path
                 if (!isAbsolute) {
                     Path relativePath = Paths.get(pathMask).relativize(curElem);
                     if (!relativePath.toFile().isFile()) {

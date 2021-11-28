@@ -13,12 +13,27 @@ public class Uniq implements ShellApplication{
     private BufferedReader reader;
     private OutputStreamWriter writer;
 
+    /**
+     * Constructor of Uniq application
+     * @param currentDirectory currentDirectory of the Shell
+     * @param reader Source of reading content
+     * @param writer Destination of writing content
+     */
     public Uniq(String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.reader = reader;
         this.writer = writer;
     }
 
+
+    /**
+     * exec function of "cut" application.
+     * @param appArgs list of application arguments stored in List<String>
+     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is throwed due to following reasons:
+     * - "uniq: too many argument number" // if number of arguments are more than 2
+     * - "uniq: invalid option " + option // When argument size is 2 and option not equal to "-i"
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if(appArgs.size() > 2){
@@ -47,6 +62,12 @@ public class Uniq implements ShellApplication{
         return currentDirectory;
     }
 
+    /*
+     * execFromStream
+     * helper function of exec() which does the execution from stream.
+     * @param option // if "-i" then ignores case when doing comparison (case insensitive)
+     * @param fileName //file to read
+     */
     private void execFromStream(String option, String fileName) {
         BufferedReader reader;
         if(fileName == null){
@@ -69,6 +90,13 @@ public class Uniq implements ShellApplication{
         }
     }
 
+
+    /*
+     * writeToBuffer
+     * helper function of execFromStream() which reads content & write into writer(destination stream)
+     * @param option // if "-i" then ignores case when doing comparison (case insensitive)
+     * @param reader // Source stream of reading content
+     */
     private void writeToBuffer(String option, BufferedReader reader) throws IOException {
         String lastLine = null;
         String currentLine;
@@ -81,6 +109,13 @@ public class Uniq implements ShellApplication{
         writer.flush();
     }
 
+    /*
+     * notEqual
+     * helper funciton of writeToBuffer
+     * The function compares current line and previous line
+     * @param option // if "-i" then ignores case when doing comparison (case insensitive)
+     * @return boolean // true when not equal, vice versa.
+     */
     private boolean notEqual(String option, String currentLine, String lastLine){
         if(lastLine == null){
             return true;

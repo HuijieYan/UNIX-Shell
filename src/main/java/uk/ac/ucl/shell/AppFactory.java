@@ -12,6 +12,13 @@ public class AppFactory {
     private  BufferedReader reader;
     private OutputStreamWriter writer;
 
+    /**
+     * Constructor function of AppFactory class
+     * @param appName name of the application
+     * @param currentDirectory currentDirectory of the Shell
+     * @param reader Source of reading content
+     * @param writer Destination of writing content
+     */
     public AppFactory(String appName, String currentDirectory, BufferedReader reader, OutputStreamWriter writer) {
         this.appName = appName;
         this.currentDirectory = currentDirectory;
@@ -19,6 +26,13 @@ public class AppFactory {
         this.writer = writer;
     }
 
+    /**
+     * This application make the actual app object and return it.
+     * if appName start with "_" then make the unsafeApplication
+     * @return myApp //Application object 
+     * @throws RuntimeException The exception is throwed due to following reasons:
+     * appName + ": unknown application" // When appName is not valid (app not exist)
+     */
     public ShellApplication makeApp() throws RuntimeException {
         ShellApplication myApp;
         if(appName.startsWith("_")){
@@ -29,9 +43,12 @@ public class AppFactory {
         return myApp;
     }
 
+    /*
+     * helper function which make the application object depending on appName
+     * @param appName application name. 
+     */
     private ShellApplication chooseApp(String appName){
         ShellApplication myApp;
-
         switch (appName) {
             case "pwd":
                 myApp = new Pwd(currentDirectory, writer);
@@ -72,7 +89,6 @@ public class AppFactory {
             default:
                 throw new RuntimeException("unknown application");
         }
-
         return myApp;
     }
 

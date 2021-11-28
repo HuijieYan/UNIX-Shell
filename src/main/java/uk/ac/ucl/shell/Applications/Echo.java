@@ -9,11 +9,25 @@ public class Echo implements ShellApplication {
     private String currentDirectory;
     private OutputStreamWriter writer;
 
+    /**
+     * Constructor of Cat application
+     * @param currentDirectory currentDirectory of the Shell
+     * @param writer Destination of writing content
+     */
     public Echo(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.writer = writer;
     }
 
+    /**
+     * exec function of "Echo" application.
+     * This Application writes the arguments from user into writer(destination).
+     * @param appArgs list of application arguments stored in List<String>
+     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is throwed due to following reasons:
+     * - "Echo: application should at least has one argument" // if argument size is less than 1
+     * - "Echo: fail to print the arguments" // if an IOException is cathed from wrtier object
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if(appArgs.size() < 1){

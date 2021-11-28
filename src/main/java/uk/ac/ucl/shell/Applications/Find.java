@@ -13,11 +13,27 @@ public class Find implements ShellApplication {
     private int rootDirLength = -1;
     private boolean isChildDir = false;
 
+    /**
+     * Constructor of Find application
+     * @param currentDirectory currentDirectory of the Shell
+     * @param writer Destination of writing content
+     */
     public Find(String currentDirectory, OutputStreamWriter writer) {
         this.currentDirectory = currentDirectory;
         this.writer = writer;
     }
 
+
+    /**
+     * exec function of "Find" application.
+     * @param appArgs list of application arguments stored in List<String>
+     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is throwed due to following reasons:
+     * - "find: Wrong number of arguments" // if number of arguments are not equal to 2 and not equal to 3
+     * - "find: can not find -name argument or lack of pattern" // "-name" is not exist in app argument at appArgs.size()-2.
+     * - "find: no such root directory " + appArgs.get(0) // When (root directory) is invalid
+     * - "find: fail to write to the output" // When IOException is catched from writer object
+     */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
         if (appArgs.size() != 2 && appArgs.size() != 3) {
@@ -54,6 +70,12 @@ public class Find implements ShellApplication {
         return currentDirectory;
     }
 
+
+    /*
+     * helper functioin which write matched files into writer
+     * @param currentDirecory directory for recursive search
+     * @param findPattern pattern to match files (eg. *.txt)
+     */    
     private void findFilesInDir(File currDirectory, Pattern findPattern) throws IOException {
         File[] listFiles = currDirectory.listFiles();
         for (File file : listFiles) {
