@@ -37,6 +37,26 @@ public class Cut implements ShellApplication {
         ArrayList<Integer> singleIndexes = new ArrayList<>();
         ArrayList<ArrayList<Integer>> ranges = new ArrayList<>();
 
+        findIndexRange(args, singleIndexes, ranges);
+
+        if (appArgs.size() == 2) {
+            try {
+                this.writeToBuffer(this.reader, singleIndexes, ranges);
+            }catch (Exception e){
+                throw new RuntimeException("cut: no data from pipe or redirection and can not find file to read");
+            }
+        } else {
+            try {
+            this.writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, appArgs.get(2)), StandardCharsets.UTF_8), singleIndexes, ranges);
+            }catch (Exception e){
+                throw new RuntimeException("cut: can not open file " + appArgs.get(2));
+            }
+        }
+
+        return currentDirectory;
+    }
+
+    private void findIndexRange(String[] args, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) {
         for (String arg : args) {
             if (!Pattern.matches("[0-9]*-*[0-9]*", arg) || arg.equals("") || arg.equals("-")) {
                 throw new RuntimeException("cut: invalid argument " + arg);
@@ -107,23 +127,6 @@ public class Cut implements ShellApplication {
 
             }
         }
-
-
-        if (appArgs.size() == 2) {
-            try {
-                this.writeToBuffer(this.reader, singleIndexes, ranges);
-            }catch (Exception e){
-                throw new RuntimeException("cut: no data from pipe or redirection and can not find file to read");
-            }
-        } else {
-            try {
-            this.writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, appArgs.get(2)), StandardCharsets.UTF_8), singleIndexes, ranges);
-            }catch (Exception e){
-                throw new RuntimeException("cut: can not open file " + appArgs.get(2));
-            }
-        }
-
-        return currentDirectory;
     }
 
     private void writeToBuffer(BufferedReader reader, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) throws IOException{

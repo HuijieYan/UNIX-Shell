@@ -20,12 +20,9 @@ public class ActualCmdVisitor implements CommandVisitor {
         ArrayList<Atom> cmdArgs = myCall.getArgs();
         this.eval(cmdArgs,currentDirectory);
         ArrayList<String> inputAndOutputFile = this.checkRedirection(cmdArgs);
+
         if(inputAndOutputFile.get(0) != null){
-            try {
-                bufferedReader = Files.newBufferedReader(ShellUtil.getPath(currentDirectory, inputAndOutputFile.get(0)), StandardCharsets.UTF_8);
-            }catch (IOException e){
-                throw new RuntimeException("can not open the input redirection file: " + inputAndOutputFile.get(0));
-            }
+            bufferedReader = openInputFile(currentDirectory, inputAndOutputFile.get(0));
         }
 
         ArrayList<String> callArgs = new ArrayList<>();
@@ -41,26 +38,39 @@ public class ActualCmdVisitor implements CommandVisitor {
 
 
         if(inputAndOutputFile.get(1) != null) {
-            try {
-                File file = new File(inputAndOutputFile.get(1));
-                if(!file.isAbsolute()){
-                    file = new File(currentDirectory, inputAndOutputFile.get(1));
-                }
-                FileWriter outputFile = new FileWriter(file);
-                outputFile.write(bufferedStream.toString());
-                outputFile.flush();
-                outputFile.close();
-            }catch (IOException e){
-                throw new RuntimeException("fail to write to the output redirection file: " + inputAndOutputFile.get(1));
-            }
+            writeToOutputFile(currentDirectory, inputAndOutputFile.get(1), bufferedStream);
         } else {
             try {
                 writer.write(bufferedStream.toString());
                 writer.flush();
             }catch (Exception ignored){}
         }
-
         return currentDirectory;
+    }
+
+    private void writeToOutputFile(String currentDirectory, String fileName, ByteArrayOutputStream bufferedStream) {
+        try {
+            File file = new File(fileName);
+            if(!file.isAbsolute()){
+                file = new File(currentDirectory, fileName);
+            }
+            FileWriter outputFile = new FileWriter(file);
+            outputFile.write(bufferedStream.toString());
+            outputFile.flush();
+            outputFile.close();
+        }catch (IOException e){
+            throw new RuntimeException("fail to write to the output redirection file: " + fileName);
+        }
+    }
+
+    private BufferedReader openInputFile(String currentDirectory, String fileName) {
+        BufferedReader bufferedReader;
+        try {
+            bufferedReader = Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8);
+        }catch (IOException e){
+            throw new RuntimeException("can not open the input redirection file: " + fileName);
+        }
+        return bufferedReader;
     }
 
     private ArrayList<String> checkRedirection(ArrayList<Atom> cmdArgs) throws RuntimeException {
