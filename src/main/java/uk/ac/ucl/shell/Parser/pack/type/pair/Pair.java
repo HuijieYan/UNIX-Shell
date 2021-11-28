@@ -16,10 +16,6 @@ public class Pair<V,I> implements MonadicValue<V,I>{
     public V getValue(){return value;}
     public I getInputStream(){return inputStream;}
     public Boolean isEmpty(){
-        try{
-            return (value == null);
-        }catch(Exception e){
-            return false;
-        }
+        return (value == null);
     }
 }

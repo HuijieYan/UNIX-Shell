@@ -349,7 +349,7 @@ public class ParserTest {
             if (command instanceof Call){
                 result.addAll(getResultList(((Call) command).getArgs()));
             }else if (command instanceof Pipe){
-                result.addAll(getResultListFromCommand(command.getCommands()));
+                result.addAll(getResultListFromCommand(((Pipe)command).getCommands()));
             }
         }
 

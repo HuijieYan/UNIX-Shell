@@ -14,10 +14,6 @@ public class Pipe implements Command {
         parsedArgs.addAll(listOfCalls);
     }
 
-    public Pipe(ArrayList<Command> parsedArgs){    
-        this.parsedArgs = parsedArgs;
-    }
-
     public ArrayList<Command> getCommands(){
         return parsedArgs;
     }

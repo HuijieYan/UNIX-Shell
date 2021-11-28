@@ -16,10 +16,6 @@ public class Call implements Command {
         selfList.add(this);
     }
 
-    public ArrayList<Command> getCommands(){
-        return selfList;
-    }
-
     public ArrayList<Atom> getArgs(){
         return rawCommand;
     }

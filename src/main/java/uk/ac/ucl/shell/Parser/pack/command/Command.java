@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import uk.ac.ucl.shell.CommandVisitor;
 
 public interface Command {
-    ArrayList<Command> getCommands();
-
     //visitor
     String accept(CommandVisitor visitor, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException;
 }

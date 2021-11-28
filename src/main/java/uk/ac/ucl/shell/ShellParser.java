@@ -242,7 +242,7 @@ public class ShellParser {
     public Monad<ArrayList<Command>> pipe(){
         return new Parser<>(input->{
             Monad<ArrayList<Command>> callThenPipe = this.sepBySymbol(this.call(), this.pipe(), '|',(commandList1,commandList2)->{
-                Command pipe = new Pipe(commandList1,commandList2.get(0).getCommands());
+                Command pipe = new Pipe(commandList1, ((Pipe)commandList2.get(0)).getCommands());
                 // commandList2 is a list with Pipe command only, so we get the list of calls in the Pipe object and then
                 // put it into the constructor to create a new Pipe object
                 ArrayList<Command> arr = new ArrayList<>();

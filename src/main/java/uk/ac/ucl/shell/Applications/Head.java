@@ -53,7 +53,7 @@ public class Head implements ShellApplication {
             try {
                 headLines = Integer.parseInt(appArgs.get(1));
             } catch (NumberFormatException e) {
-                throw new RuntimeException("head: " + appArgs.get(1) + " is not a integer");
+                throw new RuntimeException("head: " + appArgs.get(1) + " is not an integer");
             }
 
             if(argSize == 3){

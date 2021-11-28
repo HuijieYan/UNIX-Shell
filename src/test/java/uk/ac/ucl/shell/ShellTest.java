@@ -394,7 +394,7 @@ public class ShellTest {
             app.exec(argList);
             fail();
         }catch (RuntimeException e){
-            assertEquals(appName + ": b is not a integer", e.getMessage());
+            assertEquals(appName + ": b is not an integer", e.getMessage());
         }
 
         try {
@@ -986,12 +986,12 @@ public class ShellTest {
             assertEquals("can not open the input redirection file: notExist.txt", e.getMessage());
         }
 
-        /*try {
-            Shell.eval("echo 1234 > \"<>.txt\"", writer, currentDir);
+        try {
+            Shell.eval("echo 1234 > \"\\/.txt\"", writer, currentDir);
             fail();
         }catch (Exception e){
-            assertEquals("fail to write to the output redirection file: <>.txt", e.getMessage());
-        }*/
+            assertEquals("fail to write to the output redirection file: \\/.txt", e.getMessage());
+        }
     }
 
     @Test
