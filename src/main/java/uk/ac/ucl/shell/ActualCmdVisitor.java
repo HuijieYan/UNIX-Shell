@@ -4,7 +4,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.List;
 
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
@@ -118,20 +117,12 @@ public class ActualCmdVisitor implements CommandVisitor {
         }
     }
 
-    private List<String> doGlobbing(String curString, String currentDirectory) {
-        try {
-            return Globbing.exec(currentDirectory, curString);
-        } catch (IOException e) {
-            return new ArrayList<>();
-        }
-    }
-
     private ArrayList<String> globbingHelper(Atom arg, String currentDirectory) {
         ArrayList<String> result = new ArrayList<>();
 
         for (String curString : arg.get()) {
             if (curString.contains("*")) {
-                ArrayList<String> globbingResult = (ArrayList<String>)doGlobbing(curString, currentDirectory);
+                ArrayList<String> globbingResult = (ArrayList<String>)Globbing.exec(currentDirectory, curString);
                 result.addAll(globbingResult);
             } else {
                 result.add(curString);

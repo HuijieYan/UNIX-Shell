@@ -10,6 +10,14 @@ import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
 public class Shell {
 
+    /**
+     * The main eval function of Shell program
+     * @param cmdline commandline from user
+     * @param writer Destination of writing content
+     * @param currentDirectory currentDirectory of the Shell
+     * @return currentDirecotry of Shell
+     * @throws RuntimeException
+     */
     public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {
 
         // Using monad Parser
@@ -41,6 +49,10 @@ public class Shell {
         return currentDirectory;
     }
 
+    /**
+     * Entry of the Shell Program
+     * @param args
+     */
     public static void main(String[] args) {
         String currentDirectory = System.getProperty("user.dir");
         OutputStreamWriter writer = new OutputStreamWriter(System.out);
