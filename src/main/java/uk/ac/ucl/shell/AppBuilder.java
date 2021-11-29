@@ -5,10 +5,10 @@ import java.io.OutputStreamWriter;
 
 public class AppBuilder {
     
-    private String appName;
-    private String currentDirectory;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String appName;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor function of AppBuilder class

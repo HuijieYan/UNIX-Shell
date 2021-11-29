@@ -14,7 +14,6 @@ import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
 import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
 import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
-import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
 
 
 public class ShellParser {

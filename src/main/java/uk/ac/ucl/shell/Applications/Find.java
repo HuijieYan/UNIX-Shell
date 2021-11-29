@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class Find implements ShellApplication {
-    private String currentDirectory;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final OutputStreamWriter writer;
     private int rootDirLength = -1;
     private boolean isChildDir = false;
 
@@ -72,8 +72,8 @@ public class Find implements ShellApplication {
 
 
     /*
-     * helper functioin which write matched files into writer
-     * @param currentDirecory directory for recursive search
+     * helper function which write matched files into writer
+     * @param currentDirectory directory for recursive search
      * @param findPattern pattern to match files (eg. *.txt)
      */    
     private void findFilesInDir(File currDirectory, Pattern findPattern) throws IOException {

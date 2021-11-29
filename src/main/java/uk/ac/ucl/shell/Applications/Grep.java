@@ -10,9 +10,9 @@ import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
 
 public class Grep implements ShellApplication {
-    private String currentDirectory;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
     private boolean prefixed;
 
     /**
@@ -31,11 +31,11 @@ public class Grep implements ShellApplication {
     /**
      * exec function of "Grep" application.
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "grep: wrong number of arguments" // if argument size is less than 1
      * - "grep: no data from pipe or redirection and can not find file to read" // if appArg has size 1 and reader object is null.
-     * - "grep: fail to read from pipe or redirection" // if appArg size is 1 and IOException is catched from reader.
+     * - "grep: fail to read from pipe or redirection" // if appArg size is 1 and IOException is caught from reader.
      * - "grep: cannot open " + appArgs.get(index) // Failed to write content into buffer
      */
     @Override
@@ -68,11 +68,11 @@ public class Grep implements ShellApplication {
 
     /*
      * help function of exec()
-     * The function writes matched content from reader into wrtier
+     * The function writes matched content from reader into writer
      * @param grepPattern //Grep pattern
      * @param reader //Source of reading content
      * @param fileName //name of the file
-     * @throws IOException The exception is throwed from writer object.
+     * @throws IOException The exception is thrown from writer object.
      */
     private void writeToBuffer(Pattern grepPattern, BufferedReader reader, String fileName) throws IOException {
         String line;

@@ -8,7 +8,7 @@ public class ShellUtil {
     
     /**
      * getPath
-     * @param currentDirectory direcotory of the target Pah
+     * @param currentDirectory directory of the target Pah
      * @param fileName target fileName
      * @return Target path object
      * @throws IOException IO error from OS
@@ -27,7 +27,7 @@ public class ShellUtil {
 
     /**
      * getDir
-     * @param currentDirectory direcotory of Shell
+     * @param currentDirectory directory of Shell
      * @param dir target directory
      * @return File object of target directory
      * @throws RuntimeException "no such directory: " + dir // Invalid directory or IO error

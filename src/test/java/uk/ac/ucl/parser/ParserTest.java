@@ -2,18 +2,14 @@ package uk.ac.ucl.parser;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.Assert.*;
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.command.Pipe;
 import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
-import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
-import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
 import uk.ac.ucl.shell.ShellParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 
 /**
@@ -24,7 +20,7 @@ import java.util.Random;
  * unquoted, atom, argument and redirection.
  */
 public class ParserTest {
-    private ShellParser shellParser = new ShellParser();
+    private final ShellParser shellParser = new ShellParser();
 
     @Test
     public void testSingleQuotedParser(){

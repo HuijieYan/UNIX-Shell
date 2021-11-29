@@ -16,12 +16,12 @@ import static org.junit.Assert.*;
 
 public class ShellTest {
     @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    public final TemporaryFolder tempFolder = new TemporaryFolder();
     public String currentDir;
     ByteArrayOutputStream out;
     OutputStreamWriter writer;
-    String lineSep = System.getProperty("line.separator");
-    String fileSep = File.separator;
+    final String lineSep = System.getProperty("line.separator");
+    final String fileSep = File.separator;
 
     @Before
     public void setUp() throws Exception {

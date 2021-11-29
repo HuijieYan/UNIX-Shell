@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tail implements ShellApplication{
-    private String currentDirectory;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
     private int tailLines;
 
     /**
@@ -31,14 +31,14 @@ public class Tail implements ShellApplication{
     /**
      * exec function of "Tail" application.
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "tail: wrong argument number" // If argument size is greater than 3
      * - "tail: wrong argument " + appArgs.get(0) + " should be -n" // if first argument is not "-n"
-     * - "tail: " + appArgs.get(1) + " is not a integer" // When NumberFormatException is catched & 2nd element in app argument is not integer
+     * - "tail: " + appArgs.get(1) + " is not a integer" // When NumberFormatException is caught & 2nd element in app argument is not integer
      * - "tail: no data from pipe or redirection and can not find file to read" // If file name & reader object is null
-     * - "tail: fail to read from pipe or redirection" // IOException is catched from writer
-     * - "tail: cannot open: " + fileName // IOException is catched due to invalid file or file can't be opened
+     * - "tail: fail to read from pipe or redirection" // IOException is caught from writer
+     * - "tail: cannot open: " + fileName // IOException is caught due to invalid file or file can't be opened
      */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {

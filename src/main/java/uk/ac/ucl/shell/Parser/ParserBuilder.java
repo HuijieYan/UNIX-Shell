@@ -66,7 +66,7 @@ public class ParserBuilder {
      * Parser sat takes a string and checks whether the first character satisfies
      * given requirement, the string cannot be null but can be empty.
      *  
-     * @param validation the given requirement which the first cahracter of the 
+     * @param validation the given requirement which the first character of the
      * input string must satisfy.
      */   
     public Monad<Character> sat(final Function<Character,Boolean> validation){
