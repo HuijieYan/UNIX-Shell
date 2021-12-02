@@ -15,7 +15,7 @@ public class Shell {
      * @param cmdline commandline from user
      * @param writer Destination of writing content
      * @param currentDirectory currentDirectory of the Shell
-     * @return currentDirecotry of Shell
+     * @return currentDirectory of Shell
      * @throws RuntimeException
      */
     public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {

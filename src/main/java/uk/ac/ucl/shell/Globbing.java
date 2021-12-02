@@ -20,7 +20,7 @@ public class Globbing {
      * execution function of Globbing
      * @param pathShell currentDirectory of Shell
      * @param pattern pattern to do globing (eg. *.txt, *//*.txt)
-     * @return globbed result in a list of string.
+     * @return globed result in a list of string.
      */
     public static List<String> exec(String pathShell, String pattern) {
 
@@ -60,7 +60,7 @@ public class Globbing {
     public static class GlobFileVisitor extends SimpleFileVisitor<Path> {
     
         private final PathMatcher pathMatcher;
-        private List<Path> matchedFiles = new ArrayList<>();
+        private final List<Path> matchedFiles = new ArrayList<>();
     
         /**
          * Constructor of GlobFileVisitor
@@ -71,7 +71,7 @@ public class Globbing {
         }
     
         @Override
-        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) {
             if (pathMatcher.matches(path)) {
                 matchedFiles.add(path);
             }
@@ -79,7 +79,7 @@ public class Globbing {
         }
     
         /**
-         * Function gets the list that contains mathced path
+         * Function gets the list that contains matched path
          * @return list of matched path.
          */
         public List<Path> getMatchedFiles() {
@@ -90,10 +90,10 @@ public class Globbing {
 
     /*
      * Help function of exec() that change Path into given directory
-     * @param currentDirectory currentDirecotry of Shell
-     * @param target direcotry
+     * @param currentDirectory currentDirectory of Shell
+     * @param target directory
      * @return New path changed from current Shell directory
-     * @throw RuntimeException When faild to change the directory
+     * @throw RuntimeException When failed to change the directory
      */
     private static String findRootPath(String currentDirectory, String dir) {
         try {
@@ -109,12 +109,12 @@ public class Globbing {
      * Help function of exec() that process the actual globbing
      * The function will do the actual globbing and add each matched result as an element into a list in proper format (relative/absolute)
      * IF no result is matched, add the original pattern into list
-     * @param pathMask currentDirecotry of Shell
+     * @param pathMask currentDirectory of Shell
      * @param rootDirectory Root directory for the actual recursive search.
      * @param isAbsolute True if this globbing pattern is using absolute path, false if using relative
      * @param glob pattern of globbing
      * @return List of matched result
-     * @throw RuntimeException When faild to change the directory
+     * @throw RuntimeException When failed to change the directory
      */    
     private static List<String> processGlobbing(String pathMask, String rootDirectory, boolean isAbsolute, String glob) {
 

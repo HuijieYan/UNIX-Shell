@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import uk.ac.ucl.shell.CommandVisitor;
 
 public class Pipe implements Command {
-    private ArrayList<Command> parsedArgs;
+    private final ArrayList<Command> parsedArgs;
 
     public Pipe(ArrayList<Command> call, ArrayList<Command> listOfCalls){
         parsedArgs = call;

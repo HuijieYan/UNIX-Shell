@@ -5,11 +5,11 @@ import uk.ac.ucl.shell.ShellApplication;
 import java.util.List;
 
 public class UnsafeDecorator implements ShellApplication {
-    private ShellApplication app;
+    private final ShellApplication app;
 
     /**
      * Constructor of UnsafeDecorator
-     * @param app application object to be decoratored
+     * @param app application object to be decorated
      */
     public UnsafeDecorator(ShellApplication app){
         this.app = app;
@@ -18,9 +18,9 @@ public class UnsafeDecorator implements ShellApplication {
     /**
      * exec function of UnsafeDecorator
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
-     * - "ignore" + e.getMessage() // Exception catched from inner applicatioin
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
+     * - "ignore" + e.getMessage() // Exception caught from inner application
      */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {

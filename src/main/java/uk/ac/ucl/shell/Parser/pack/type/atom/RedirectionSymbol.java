@@ -1,7 +1,7 @@
 package uk.ac.ucl.shell.Parser.pack.type.atom;
 
 public class RedirectionSymbol extends AtomAbstract{
-    private boolean greaterThan;
+    private final boolean greaterThan;
     //indicates whether the symbol is > or <
 
     public RedirectionSymbol(char symbol){

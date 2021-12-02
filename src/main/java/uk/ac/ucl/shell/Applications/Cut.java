@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class Cut implements ShellApplication {
-    private String currentDirectory;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor of Cut application
@@ -28,16 +28,15 @@ public class Cut implements ShellApplication {
         this.writer = writer;
     }
 
-    /** TBD
+    /**
      * exec function of "cut" application.
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "cut: wrong argument number" // if number of arguments are less than 2 or greater than 3
      * - "cut: incorrect option input " + appArgs.get(0) // When first element of appArg is not equal to "-b"
      * - "cut: no data from pipe or redirection and can not find file to read" // When argument size is 2 and reader object is null
-     * - "cut: can not open file: " + appArgs.get(2) // When argument size is 3 and filePath is invalid or IOException is catched from OS
-     * - 
+     * - "cut: can not open file: " + appArgs.get(2) // When argument size is 3 and filePath is invalid or IOException is caught from OS
      */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
@@ -71,6 +70,13 @@ public class Cut implements ShellApplication {
         return currentDirectory;
     }
 
+    /*
+     * helper function of exec() to find the indexRange from arguments
+     * @param args Application arguments
+     * @param singleIndexes stores cut(single index) information for cutting content (eg. 7)
+     * @param ranges stores range information for cutting content (eg. 7-10)
+     * @throws RuntimeException // When argument is invalid
+     */
     private void findIndexRange(String[] args, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) {
         for (String arg : args) {
             if (!Pattern.matches("[0-9]*-*[0-9]*", arg) || arg.equals("") || arg.equals("-")) {
@@ -85,7 +91,6 @@ public class Cut implements ShellApplication {
                 }else {
                     singleIndexes.add(index);
                 }
-
             } else {
                 if(arg.indexOf('-') != arg.lastIndexOf('-')){
                     throw new RuntimeException("cut: invalid argument " + arg);
@@ -126,7 +131,6 @@ public class Cut implements ShellApplication {
                         range.add(lowerBound);
                     }
 
-
                     bound = arg.substring(rangeSymbolIndex+1);
                     int upperBound = Integer.parseInt(bound);
                     if (upperBound < 1) {
@@ -142,6 +146,12 @@ public class Cut implements ShellApplication {
         }
     }
 
+    /* helper function to write required content into destination stream
+     * @param source bufferedReader for reading content
+     * @param singleIndexes stores cut(single index) information for cutting content (eg. 7)
+     * @param ranges stores range information for cutting content (eg. 7-10)
+     * @throws IOException When IO error caught from OS.
+     */
     private void writeToBuffer(BufferedReader reader, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) throws IOException{
         Charset charset = StandardCharsets.UTF_8;
         String line;

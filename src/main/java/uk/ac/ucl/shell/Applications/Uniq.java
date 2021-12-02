@@ -9,9 +9,9 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class Uniq implements ShellApplication{
-    private String currentDirectory;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor of Uniq application
@@ -29,8 +29,8 @@ public class Uniq implements ShellApplication{
     /**
      * exec function of "cut" application.
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "uniq: too many argument number" // if number of arguments are more than 2
      * - "uniq: invalid option " + option // When argument size is 2 and option not equal to "-i"
      */
@@ -111,7 +111,7 @@ public class Uniq implements ShellApplication{
 
     /*
      * notEqual
-     * helper funciton of writeToBuffer
+     * helper function of writeToBuffer
      * The function compares current line and previous line
      * @param option // if "-i" then ignores case when doing comparison (case insensitive)
      * @return boolean // true when not equal, vice versa.

@@ -7,10 +7,10 @@ import uk.ac.ucl.shell.Applications.*;
 
 public class AppFactory {
 
-    private String appName;
-    private String currentDirectory;
-    private  BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String appName;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor function of AppFactory class
@@ -30,7 +30,7 @@ public class AppFactory {
      * This application make the actual app object and return it.
      * if appName start with "_" then make the unsafeApplication
      * @return myApp //Application object 
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * appName + ": unknown application" // When appName is not valid (app not exist)
      */
     public ShellApplication makeApp() throws RuntimeException {

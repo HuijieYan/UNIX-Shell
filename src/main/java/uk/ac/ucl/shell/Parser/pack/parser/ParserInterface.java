@@ -6,5 +6,5 @@ import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
 */
 //The actual parser
 public interface ParserInterface<V,I>{
-    public Pair<V,I> parse(I inputStream);
+    Pair<V,I> parse(I inputStream);
 }

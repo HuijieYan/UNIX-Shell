@@ -8,16 +8,12 @@ import uk.ac.ucl.shell.CommandVisitor;
 import uk.ac.ucl.shell.Parser.pack.type.atom.*;
 
 public class Call implements Command {
-    private ArrayList<Atom> rawCommand;
-    private ArrayList<Command> selfList = new ArrayList<>();;
-    
+    private final ArrayList<Atom> rawCommand;
+    private final ArrayList<Command> selfList = new ArrayList<>();
+
     public Call(ArrayList<Atom> arguments){
         rawCommand = arguments;
         selfList.add(this);
-    }
-
-    public ArrayList<Command> getCommands(){
-        return selfList;
     }
 
     public ArrayList<Atom> getArgs(){

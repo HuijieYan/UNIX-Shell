@@ -36,7 +36,7 @@ Concatenates the content of given files and prints it to stdout:
 
     cat [FILE]...
 
-- `FILE`(s) is the name(s) of the file(s) to contatenate. If no files are specified, uses stdin.
+- `FILE`(s) is the name(s) of the file(s) to concatenate. If no files are specified, uses stdin.
 
 ## echo
 

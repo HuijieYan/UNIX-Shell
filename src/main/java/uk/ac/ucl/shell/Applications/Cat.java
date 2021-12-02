@@ -12,9 +12,9 @@ import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
 
 public class Cat implements ShellApplication {
-    private String currentDirectory;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor of Cat application
@@ -33,8 +33,8 @@ public class Cat implements ShellApplication {
      * The function takes list of files from appArg & read into a bufferReader.
      * The content from bufferReader is then write into writer
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "cat: no data from pipe or redirection and can not find file to read" // When appArgs is empty & reader object is null
      * - "cat: fail to read from pipe or redirection" // When appArgs is empty & failed to read from pipe or redirection
      * - "cat: can not open " + file // When file can not be opened
@@ -64,7 +64,7 @@ public class Cat implements ShellApplication {
     }
 
     /*
-     * writeToBuffer fuction
+     * writeToBuffer function
      * The function takes a BufferedReader then write content from reader into a writer 
      * @param reader A BufferedReader which tells function the source of the content 
      */
