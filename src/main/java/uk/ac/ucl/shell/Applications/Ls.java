@@ -8,8 +8,8 @@ import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
 
 public class Ls implements ShellApplication {
-    private String currentDirectory;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor of Ls application
@@ -24,8 +24,8 @@ public class Ls implements ShellApplication {
     /**
      * exec function of "Ls" application.
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "ls: too many arguments" // When app argument has size more than 1.
      * - "ls: no such directory: " + appArgs.get(0) // Failed to open directory given from argument
      */

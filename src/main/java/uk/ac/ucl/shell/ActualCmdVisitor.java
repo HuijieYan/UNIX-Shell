@@ -13,8 +13,17 @@ import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;
 import uk.ac.ucl.shell.Parser.pack.type.atom.RedirectionSymbol;
 
 public class ActualCmdVisitor implements CommandVisitor {
-    private ShellParser shellParser = new ShellParser();
+    private final ShellParser shellParser = new ShellParser();
 
+    /**
+     * Main entry for Call
+     * @param myCall Call object
+     * @param currentDirectory CurrentDirectory of the shell
+     * @param bufferedReader source of reading content
+     * @param writer destination StreamWriter
+     * @return currentDirectory of the shell (for tracking).
+     * @throws RuntimeException
+     */
     public String visit(Call myCall, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException {
         ArrayList<Atom> cmdArgs = myCall.getArgs();
         this.eval(cmdArgs,currentDirectory);
@@ -48,6 +57,41 @@ public class ActualCmdVisitor implements CommandVisitor {
         return currentDirectory;
     }
 
+    /**
+     * Main entry for Pipe
+     * @param myPipe pipe object
+     * @param currentDirectory CurrentDirectory of the shell
+     * @param bufferedReader source of reading content
+     * @param writer destination StreamWriter
+     * @return currentDirectory of the shell (for tracking).
+     * @throws RuntimeException
+     */
+    public String visit(Pipe myPipe, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException {
+        ByteArrayOutputStream subStream = new ByteArrayOutputStream();
+        OutputStreamWriter subStreamWriter = new OutputStreamWriter(subStream);
+        ArrayList<Command> calls = myPipe.getCommands();
+
+        //iterate size - 2 times
+        for(int callIndex = 0; callIndex < calls.size(); callIndex++){
+            if(callIndex > 0){
+                bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
+                subStream.reset();
+            }
+            if(callIndex == calls.size() - 1){
+                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, writer);
+            }else {
+                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, subStreamWriter);
+            }
+        }
+        return currentDirectory;
+    }
+
+    /*
+     * Utility function for writing content from bufferedStream into a file.
+     * @param currentDirectory target directory of file
+     * @fileName target filename to be written
+     * @bufferedStream source stream that contains the content to be written into the file
+     */
     private void writeToOutputFile(String currentDirectory, String fileName, ByteArrayOutputStream bufferedStream) {
         try {
             File file = new File(fileName);
@@ -63,6 +107,12 @@ public class ActualCmdVisitor implements CommandVisitor {
         }
     }
 
+    /*
+     * Utility function for opening file into a bufferReader.
+     * @param currentDirectory target directory of file
+     * @fileName target filename to be written
+     * @return BufferedReader that contains the content from inputFile
+     */
     private BufferedReader openInputFile(String currentDirectory, String fileName) {
         BufferedReader bufferedReader;
         try {
@@ -73,6 +123,13 @@ public class ActualCmdVisitor implements CommandVisitor {
         return bufferedReader;
     }
 
+    /*
+     * Function that checks redirection
+     * @param cmdArgs List of arguments(Atom)
+     * @return a list that contains information of inputFle/outputFile extracted from arguments
+     * inputAndOutputFile -> [inputFileName, outputFileName]
+     * @throws RuntimeException // "Error: several files are specified for output"
+     */
     private ArrayList<String> checkRedirection(ArrayList<Atom> cmdArgs) throws RuntimeException {
         ArrayList<String> inputAndOutputFile = new ArrayList<>();
         inputAndOutputFile.add(null);
@@ -102,7 +159,6 @@ public class ActualCmdVisitor implements CommandVisitor {
                     }else {
                         throw new RuntimeException("Error: several files are specified for input");
                     }
-
                 }
             }else {
                 argIndex++;
@@ -111,6 +167,12 @@ public class ActualCmdVisitor implements CommandVisitor {
         return inputAndOutputFile;
     }
 
+    /*
+     * evaluation (entry) function for evaluating arguments
+     * @param cmdArgs List of arguments(Atom)
+     * @param currentDirectory of the shell
+     * @throws RuntimeException // Error : ambiguous redirect argument
+     */
     private void eval(ArrayList<Atom> cmdArgs, String currentDirectory) throws RuntimeException {
         for (int argIndex = 0; argIndex < cmdArgs.size(); argIndex++){
             Atom evaluatedArg = this.evalArg(cmdArgs.get(argIndex), currentDirectory);
@@ -128,6 +190,13 @@ public class ActualCmdVisitor implements CommandVisitor {
         }
     }
 
+
+    /*
+     * helper function to deal with globbing
+     * @param arg Single argument(Atom) to do further globbing
+     * @param currentDirectory current directory of the shell
+     * @return List of results after globbing
+     */
     private ArrayList<String> globbingHelper(Atom arg, String currentDirectory) {
         ArrayList<String> result = new ArrayList<>();
 
@@ -142,6 +211,12 @@ public class ActualCmdVisitor implements CommandVisitor {
         return result;
     }
 
+    /*
+     * Evaluation function for single argument(Atom)
+     * @param arg Single argument(Atom) to do further globbing
+     * @param currentDirectory current directory of the shell
+     * @throws RuntimeException
+     */
     private Atom evalArg(Atom arg, String currentDirectory) throws RuntimeException {
         if (arg.isRedirectionSymbol()){
             return arg;
@@ -173,12 +248,22 @@ public class ActualCmdVisitor implements CommandVisitor {
             args.setCanBeGlob(true);
         }
         return args;
-    }//> echo echo 123
+    }
 
+    /*
+     * function removes quotes ("1234" -> 1234)
+     */
     private String removeQuote(String str){
         return str.substring(1,str.length()-1);
     }
 
+    /*
+     * Function dealing with command substitution
+     * @param str current argument
+     * @param builders list of stringBuilders that contains arguments
+     * @param currentDirectory current directory of the shell
+     * @returns boolean // true if command can be globed, vise versa
+     */
     private boolean commandSubstitution(String str, ArrayList<StringBuilder> builders, String currentDirectory) throws RuntimeException {
         ArrayList<String> contentList = new ArrayList<>();
         boolean canBeGlob = false;
@@ -211,23 +296,5 @@ public class ActualCmdVisitor implements CommandVisitor {
         return canBeGlob;
     }
 
-    public String visit(Pipe myPipe, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException {
-        ByteArrayOutputStream subStream = new ByteArrayOutputStream();
-        OutputStreamWriter subStreamWriter = new OutputStreamWriter(subStream);
-        ArrayList<Command> calls = myPipe.getCommands();
 
-        //iterate size - 2 times
-        for(int callIndex = 0; callIndex < calls.size(); callIndex++){
-            if(callIndex > 0){
-                bufferedReader = new BufferedReader(new StringReader(subStream.toString()));
-                subStream.reset();
-            }
-            if(callIndex == calls.size() - 1){
-                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, writer);
-            }else {
-                currentDirectory = calls.get(callIndex).accept(this, currentDirectory, bufferedReader, subStreamWriter);
-            }
-        }
-        return currentDirectory;
-    }
 }

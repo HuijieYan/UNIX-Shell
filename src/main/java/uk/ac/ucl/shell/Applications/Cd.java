@@ -22,8 +22,8 @@ public class Cd implements ShellApplication {
      * The function takes list of files from appArg & read into a bufferReader.
      * The content from bufferReader is then write into writer
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "cd: missing argument" // When appArgs is empty
      * - "cd: too many arguments" // When appArgs has more than one arguments
      * - "cd: fail to change the directory" // When directory is not valid or can not be opened

@@ -4,7 +4,7 @@ package uk.ac.ucl.shell.Parser.pack.type;
     Type I is the rest of the input stream.
 */
 public interface MonadicValue<V,I>{
-    public V getValue();
-    public I getInputStream();
-    public Boolean isEmpty();
+    V getValue();
+    I getInputStream();
+    Boolean isEmpty();
 }

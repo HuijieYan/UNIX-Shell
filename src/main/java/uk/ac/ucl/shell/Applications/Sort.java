@@ -9,12 +9,11 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.io.OutputStreamWriter;
 
 public class Sort implements ShellApplication {
-    private String currentDirectory;
-    private BufferedReader reader;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final BufferedReader reader;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor of Sort application
@@ -32,8 +31,8 @@ public class Sort implements ShellApplication {
     /**
      * exec function of Sort application.
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "sort: wrong argument number" // if number of arguments is more than 2
      * - "sort: invalid option "+option // When argument size is 2 and option not equal to "-r"
      */

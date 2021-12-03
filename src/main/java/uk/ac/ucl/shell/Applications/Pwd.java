@@ -6,8 +6,8 @@ import java.util.List;
 import uk.ac.ucl.shell.ShellApplication;
 
 public class Pwd implements ShellApplication {
-    private String currentDirectory;
-    private OutputStreamWriter writer;
+    private final String currentDirectory;
+    private final OutputStreamWriter writer;
 
     /**
      * Constructor of Pwd application
@@ -23,10 +23,10 @@ public class Pwd implements ShellApplication {
      * exec function of "Pwd" application.
      * The function writes the current shell directory into writer.
      * @param appArgs list of application arguments stored in List<String>
-     * @return currentDirecory This is not used in this function (variable exists here because of the requirement from interface)
-     * @throws RuntimeException The exception is throwed due to following reasons:
+     * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException The exception is thrown due to following reasons:
      * - "Pwd: there can not be argument" // When appArgs is greater than 0
-     * - "Pwd: fail to write to the output" // When IOException is catched from writer
+     * - "Pwd: fail to write to the output" // When IOException is caught from writer
      */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {
