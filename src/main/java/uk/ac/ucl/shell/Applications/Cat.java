@@ -49,11 +49,9 @@ public class Cat implements ShellApplication {
             }
 
         } else {
-            //Use UTF8 charset
-            Charset encoding = StandardCharsets.UTF_8;
             for(String file : appArgs){
                 try {
-                    writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, file), encoding));
+                    writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, file), StandardCharsets.UTF_8));
                 }catch (IOException e){
                     throw new RuntimeException("cat: can not open: " + file);
                 }

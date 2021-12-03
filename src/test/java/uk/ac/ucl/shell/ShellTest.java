@@ -840,6 +840,42 @@ public class ShellTest {
     }
 
     @Test
+    public void testMkdirRmdir(){
+        ArrayList<String> argList = new ArrayList<>();
+        argList.add("subDir111");
+        new Mkdir(currentDir).exec(argList);
+        new Rmdir(currentDir).exec(argList);
+
+        argList.set(0, currentDir + fileSep + ".subDir1");
+        new Mkdir(currentDir).exec(argList);
+        new Rmdir(currentDir).exec(argList);
+    }
+
+    @Test
+    public void testMkdir_exception(){
+        ArrayList<String> argList = new ArrayList<>();
+        try {
+            argList.add("subDir");
+            new Mkdir(currentDir).exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("mkdir: subDir is already exist", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRmdir_exception(){
+        ArrayList<String> argList = new ArrayList<>();
+        try {
+            argList.add("subDir");
+            new Rmdir(currentDir).exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("rmdir: can not delete nonempty directory subDir", e.getMessage());
+        }
+    }
+
+    @Test
     public void openFileTest_currentPath(){
         try {
             assertEquals("file1.txt", ShellUtil.getPath(currentDir, "file1.txt").getFileName().toString());
