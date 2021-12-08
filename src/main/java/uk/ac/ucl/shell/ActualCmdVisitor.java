@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
@@ -27,33 +28,36 @@ public class ActualCmdVisitor implements CommandVisitor {
     public String visit(Call myCall, String currentDirectory, BufferedReader bufferedReader, OutputStreamWriter writer) throws RuntimeException {
         ArrayList<Atom> cmdArgs = myCall.getArgs();
         this.eval(cmdArgs,currentDirectory);
-        ArrayList<String> inputAndOutputFile = this.checkRedirection(cmdArgs);
 
-        if(inputAndOutputFile.get(0) != null){
-            bufferedReader = openInputFile(currentDirectory, inputAndOutputFile.get(0));
-        }
+        ArrayList<String> inputAndOutputFile = this.checkRedirection(cmdArgs);
 
         ArrayList<String> callArgs = new ArrayList<>();
         for(Atom arg : cmdArgs){
             callArgs.addAll(arg.get());
         }
 
-        String appName = callArgs.get(0);
+        return this.execCall(callArgs, currentDirectory, bufferedReader, inputAndOutputFile, writer);
+    }
+
+    private String execCall(ArrayList<String> callArgs, String currentDirectory, BufferedReader bufferedReader,
+                          ArrayList<String> inputAndOutputFile, OutputStreamWriter writer){
+        if(inputAndOutputFile.get(0) != null){
+            bufferedReader = doInputRedirection(currentDirectory, inputAndOutputFile.get(0));
+        }
+
         ByteArrayOutputStream bufferedStream = new ByteArrayOutputStream();
         OutputStreamWriter innerWriter = new OutputStreamWriter(bufferedStream);
-        ShellApplication myApp = new AppBuilder(appName, currentDirectory, bufferedReader, innerWriter).createApp();
+        ShellApplication myApp = new AppBuilder(callArgs.get(0), currentDirectory, bufferedReader, innerWriter).createApp();
         currentDirectory = myApp.exec(new ArrayList<>(callArgs.subList(1, callArgs.size())));
 
-
         if(inputAndOutputFile.get(1) != null) {
-            writeToOutputFile(currentDirectory, inputAndOutputFile.get(1), bufferedStream);
+            doOutputRedirection(currentDirectory, inputAndOutputFile.get(1), bufferedStream);
         } else {
             try {
                 writer.write(bufferedStream.toString());
                 writer.flush();
             }catch (Exception ignored){}
         }
-
         return currentDirectory;
     }
 
@@ -92,7 +96,7 @@ public class ActualCmdVisitor implements CommandVisitor {
      * @fileName target filename to be written
      * @bufferedStream source stream that contains the content to be written into the file
      */
-    private void writeToOutputFile(String currentDirectory, String fileName, ByteArrayOutputStream bufferedStream) {
+    private void doOutputRedirection(String currentDirectory, String fileName, ByteArrayOutputStream bufferedStream) {
         try {
             File file = new File(fileName);
             if(!file.isAbsolute()){
@@ -113,7 +117,7 @@ public class ActualCmdVisitor implements CommandVisitor {
      * @fileName target filename to be written
      * @return BufferedReader that contains the content from inputFile
      */
-    private BufferedReader openInputFile(String currentDirectory, String fileName) {
+    private BufferedReader doInputRedirection(String currentDirectory, String fileName) {
         BufferedReader bufferedReader;
         try {
             bufferedReader = Files.newBufferedReader(ShellUtil.getPath(currentDirectory, fileName), StandardCharsets.UTF_8);
@@ -141,30 +145,28 @@ public class ActualCmdVisitor implements CommandVisitor {
             Atom arg = cmdArgs.get(argIndex);
             if(arg instanceof RedirectionSymbol){
                 if(((RedirectionSymbol)arg).isTowardsNext()){
-                    if(!hasSeveralInput){
-                        inputAndOutputFile.set(1, cmdArgs.get(argIndex + 1).get().get(0));
-                        cmdArgs.remove(argIndex);
-                        cmdArgs.remove(argIndex);
-                        hasSeveralInput = true;
+                    if(!hasSeveralOutput){
+                        hasSeveralOutput = saveTargetFile(cmdArgs, inputAndOutputFile, argIndex, 1);
                     }else {
                         throw new RuntimeException("Error: several files are specified for output");
                     }
-
                 } else {
-                    if(!hasSeveralOutput){
-                        inputAndOutputFile.set(0, cmdArgs.get(argIndex + 1).get().get(0));
-                        cmdArgs.remove(argIndex);
-                        cmdArgs.remove(argIndex);
-                        hasSeveralOutput = true;
+                    if(!hasSeveralInput){
+                        hasSeveralInput = saveTargetFile(cmdArgs, inputAndOutputFile, argIndex, 0);
                     }else {
                         throw new RuntimeException("Error: several files are specified for input");
                     }
                 }
-            }else {
-                argIndex++;
-            }
+            }else {argIndex++;}
         }
         return inputAndOutputFile;
+    }
+
+    private boolean saveTargetFile(ArrayList<Atom> cmdArgs, ArrayList<String> inputAndOutputFile, int argIndex, int position){
+        inputAndOutputFile.set(position, cmdArgs.get(argIndex + 1).get().get(0));
+        cmdArgs.remove(argIndex);
+        cmdArgs.remove(argIndex);
+        return true;
     }
 
     /*
@@ -224,8 +226,7 @@ public class ActualCmdVisitor implements CommandVisitor {
 
         boolean canBeGlob = false;
         ArrayList<String> argumentStrings = arg.get();
-        ArrayList<StringBuilder> builders = new ArrayList<>();
-        builders.add(new StringBuilder());
+        ArrayList<StringBuilder> builders = new ArrayList<>(List.of(new StringBuilder()));
         for (String str : argumentStrings){
             if (str.charAt(0) == '\"' || str.charAt(0) == '`'){
                 canBeGlob = this.commandSubstitution(str, builders, currentDirectory);
@@ -238,15 +239,17 @@ public class ActualCmdVisitor implements CommandVisitor {
                 builders.get(builders.size() - 1).append(str);
             }
         }
+        return getFinalAtom(builders, canBeGlob);
+    }
 
+    //Get atom which has the list of fully executed and tidied string
+    private Atom getFinalAtom(ArrayList<StringBuilder> builders, boolean canBeGlob){
         ArrayList<String> subArgs = new ArrayList<>();
         for(StringBuilder builder : builders){
             subArgs.add(builder.toString());
         }
         NonRedirectionString args = new NonRedirectionString(subArgs);
-        if(canBeGlob){
-            args.setCanBeGlob(true);
-        }
+        args.setCanBeGlob(canBeGlob);
         return args;
     }
 
@@ -271,8 +274,7 @@ public class ActualCmdVisitor implements CommandVisitor {
             canBeGlob = true;
             contentList.add(str);
         }else{
-            str = removeQuote(str);
-            contentList = shellParser.decodeDoubleQuoted().parse(str).getValue();
+            contentList = shellParser.decodeDoubleQuoted().parse(removeQuote(str)).getValue();
             //"abc`echo 123`def" becomes [abc,`echo 123 234`,def]
         }
 
@@ -280,21 +282,22 @@ public class ActualCmdVisitor implements CommandVisitor {
             if (content.charAt(0) != '`'){
                 builders.get(builders.size() - 1).append(content);
             }else{
-                ByteArrayOutputStream subStream = new ByteArrayOutputStream();
-                OutputStreamWriter subStreamWriter = new OutputStreamWriter(subStream);
-                Shell.eval(removeQuote(content), subStreamWriter, currentDirectory);
-                String[] resultArgs = subStream.toString().replaceAll("\r\n|\r|\n|\t", " ").split(" ");
-                for(int argIndex = 0; argIndex < resultArgs.length; argIndex++){
-                    builders.get(builders.size() - 1).append(resultArgs[argIndex]);
-                    if(argIndex != resultArgs.length - 1){
-                        builders.add(new StringBuilder());
-                    }
-                }
+                this.doSubstitution(content, builders, currentDirectory);
             }
         }
-
         return canBeGlob;
     }
 
-
+    private void doSubstitution(String content, ArrayList<StringBuilder> builders, String currentDirectory){
+        ByteArrayOutputStream subStream = new ByteArrayOutputStream();
+        OutputStreamWriter subStreamWriter = new OutputStreamWriter(subStream);
+        Shell.eval(removeQuote(content), subStreamWriter, currentDirectory);
+        String[] resultArgs = subStream.toString().replaceAll("\r\n|\r|\n|\t", " ").split(" ");
+        for(int argIndex = 0; argIndex < resultArgs.length; argIndex++){
+            builders.get(builders.size() - 1).append(resultArgs[argIndex]);
+            if(argIndex != resultArgs.length - 1){
+                builders.add(new StringBuilder());
+            }
+        }
+    }
 }
