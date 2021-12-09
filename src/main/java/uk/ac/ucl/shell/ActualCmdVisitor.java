@@ -274,11 +274,8 @@ public class ActualCmdVisitor implements CommandVisitor {
             canBeGlob = true;
             contentList.add(str);
         }else{
-<<<<<<< HEAD
             contentList = shellParser.decodeDoubleQuoted(removeQuote(str)).getValue();
-=======
-            contentList = shellParser.decodeDoubleQuoted().parse(removeQuote(str)).getValue();
->>>>>>> bdff62ad751f389759d5b9590e3c69cf6a9f7263
+
             //"abc`echo 123`def" becomes [abc,`echo 123 234`,def]
         }
 
