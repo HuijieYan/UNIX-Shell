@@ -19,13 +19,7 @@ public class Shell {
      */
     public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {
 
-        // Using monad Parser
-        ShellParser myParser = new ShellParser();
-        MonadicValue<ArrayList<Command>, String> resultPair = myParser.parse(cmdline);
-        ArrayList<Command> commandList = resultPair.getValue();
-        if(!resultPair.getInputStream().equals("") || commandList == null){
-            throw new RuntimeException("Error: the input does not satisfy the syntax");
-        }
+        ArrayList<Command> commandList = getCommands(cmdline);
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
         // in seq
@@ -45,6 +39,17 @@ public class Shell {
             }
         }
         return currentDirectory;
+    }
+
+    private static ArrayList<Command> getCommands(String cmdLine) throws RuntimeException{
+        // Using monad Parser to parse command line
+        ShellParser myParser = new ShellParser();
+        MonadicValue<ArrayList<Command>, String> resultPair = myParser.parse(cmdLine);
+        ArrayList<Command> commandList = resultPair.getValue();
+        if(!resultPair.getInputStream().equals("") || commandList == null){
+            throw new RuntimeException("Error: the input does not satisfy the syntax");
+        }
+        return commandList;
     }
 
     /**
