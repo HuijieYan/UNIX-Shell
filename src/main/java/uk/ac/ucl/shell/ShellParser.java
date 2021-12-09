@@ -428,7 +428,7 @@ public class ShellParser {
      * is between double quotes and returns a list of double-quoted content and back quoted
      * string, which will be used during command substitution.
      */
-    public Monad<ArrayList<String>> decodeDoubleQuoted(){
+    private Monad<ArrayList<String>> decodeDoubleQuotedParser(){
         return new Parser<>(input->{
             ArrayList<Character> exception = new ArrayList<>();
             exception.add('`');
@@ -439,5 +439,13 @@ public class ShellParser {
             ArrayList<String> result = new ArrayList<>(doubleQuotedContent.parse(input).getValue());
             return parserOperation.result(result).parse(input);
         });
+    }
+
+    public MonadicValue<ArrayList<Command>,String> parse(String input){
+        return this.parseCommand().parse(input);
+    }
+
+    public MonadicValue<ArrayList<String>,String> decodeDoubleQuoted(String input){
+        return decodeDoubleQuotedParser().parse(input);
     }
 }

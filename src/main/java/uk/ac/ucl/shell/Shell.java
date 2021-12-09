@@ -22,8 +22,7 @@ public class Shell {
 
         // Using monad Parser
         ShellParser myParser = new ShellParser();
-        Monad<ArrayList<Command>> sat = myParser.parseCommand();
-        MonadicValue<ArrayList<Command>, String> resultPair = sat.parse(cmdline);
+        MonadicValue<ArrayList<Command>, String> resultPair = myParser.parse(cmdline);
         ArrayList<Command> commandList = resultPair.getValue();
         if(!resultPair.getInputStream().equals("") || commandList == null){
             throw new RuntimeException("Error: the input does not satisfy the syntax");
