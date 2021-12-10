@@ -9,11 +9,9 @@ import uk.ac.ucl.shell.Parser.pack.type.atom.*;
 
 public class Call implements Command {
     private final ArrayList<Atom> rawCommand;
-    private final ArrayList<Command> selfList = new ArrayList<>();
 
     public Call(ArrayList<Atom> arguments){
         rawCommand = arguments;
-        selfList.add(this);
     }
 
     public ArrayList<Atom> getArgs(){

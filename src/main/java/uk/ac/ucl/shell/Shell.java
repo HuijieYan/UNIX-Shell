@@ -4,8 +4,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import uk.ac.ucl.shell.Applications.UnsafeException;
-import uk.ac.ucl.shell.Parser.Monad;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
@@ -21,14 +19,7 @@ public class Shell {
      */
     public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {
 
-        // Using monad Parser
-        ShellParser myParser = new ShellParser();
-        Monad<ArrayList<Command>> sat = myParser.parseCommand();
-        MonadicValue<ArrayList<Command>, String> resultPair = sat.parse(cmdline);
-        ArrayList<Command> commandList = resultPair.getValue();
-        if(!resultPair.getInputStream().equals("") || commandList == null){
-            throw new RuntimeException("Error: the input does not satisfy the syntax");
-        }
+        ArrayList<Command> commandList = getCommands(cmdline);
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
         // in seq
@@ -36,14 +27,29 @@ public class Shell {
             //access visitor
             try {
                 currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
-            }catch (UnsafeException e){
-                try {
-                    writer.write(e.getMessage() + System.getProperty("line.separator"));
-                    writer.flush();
-                }catch (Exception ignored){}
+            }catch (Exception e){
+                if(e.getMessage().startsWith("ignore")){
+                    try {
+                        writer.write(e.getMessage().substring(6) + System.getProperty("line.separator"));
+                        writer.flush();
+                    }catch (Exception ignored){}
+                }else {
+                    throw new RuntimeException(e.getMessage());
+                }
             }
         }
         return currentDirectory;
+    }
+
+    private static ArrayList<Command> getCommands(String cmdLine) throws RuntimeException{
+        // Using monad Parser to parse command line
+        ShellParser myParser = new ShellParser();
+        MonadicValue<ArrayList<Command>, String> resultPair = myParser.parse(cmdLine);
+        ArrayList<Command> commandList = resultPair.getValue();
+        if(!resultPair.getInputStream().equals("") || commandList == null){
+            throw new RuntimeException("Error: the input does not satisfy the syntax");
+        }
+        return commandList;
     }
 
     /**
