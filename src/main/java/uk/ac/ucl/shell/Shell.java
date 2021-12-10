@@ -4,6 +4,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import uk.ac.ucl.shell.Applications.UnsafeException;
 import uk.ac.ucl.shell.Parser.Monad;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
@@ -35,15 +36,11 @@ public class Shell {
             //access visitor
             try {
                 currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
-            }catch (Exception e){
-                if(e.getMessage().startsWith("ignore")){
-                    try {
-                        writer.write(e.getMessage().substring(6) + System.getProperty("line.separator"));
-                        writer.flush();
-                    }catch (Exception ignored){}
-                }else {
-                    throw new RuntimeException(e.getMessage());
-                }
+            }catch (UnsafeException e){
+                try {
+                    writer.write(e.getMessage() + System.getProperty("line.separator"));
+                    writer.flush();
+                }catch (Exception ignored){}
             }
         }
         return currentDirectory;

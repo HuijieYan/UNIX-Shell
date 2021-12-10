@@ -27,7 +27,7 @@ public class UnsafeDecorator implements ShellApplication {
         try {
             return this.app.exec(appArgs);
         }catch (Exception e){
-            throw new RuntimeException("ignore" + e.getMessage());
+            throw new UnsafeException(e);
         }
     }
 }
