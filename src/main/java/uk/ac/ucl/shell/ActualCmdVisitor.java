@@ -275,7 +275,6 @@ public class ActualCmdVisitor implements CommandVisitor {
             contentList.add(str);
         }else{
             contentList = shellParser.decodeDoubleQuoted(removeQuote(str)).getValue();
-
             //"abc`echo 123`def" becomes [abc,`echo 123 234`,def]
         }
 
@@ -294,6 +293,7 @@ public class ActualCmdVisitor implements CommandVisitor {
         OutputStreamWriter subStreamWriter = new OutputStreamWriter(subStream);
         Shell.eval(removeQuote(content), subStreamWriter, currentDirectory);
         String[] resultArgs = subStream.toString().replaceAll("\r\n|\r|\n|\t", " ").split(" ");
+
         for(int argIndex = 0; argIndex < resultArgs.length; argIndex++){
             builders.get(builders.size() - 1).append(resultArgs[argIndex]);
             if(argIndex != resultArgs.length - 1){
