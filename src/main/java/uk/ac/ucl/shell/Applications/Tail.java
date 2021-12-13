@@ -48,23 +48,35 @@ public class Tail implements ShellApplication{
         if (argSize > 3) {
             throw new RuntimeException("tail: wrong argument number");
         }else if (argSize == 3 || argSize == 2) {
-            if(!appArgs.get(0).equals("-n")){
-                throw new RuntimeException("tail: wrong argument " + appArgs.get(0) + " should be -n");
-            }
-
-            try {
-                tailLines = Integer.parseInt(appArgs.get(1));
-            } catch (NumberFormatException e) {
-                throw new RuntimeException("tail: " + appArgs.get(1) + " is not an integer");
-            }
-
-            if(argSize == 3){
-                fileName = appArgs.get(2);
-            }
+            fileName = getName_TwoOrThree(appArgs, fileName, argSize);
         }else if(argSize == 1){
             fileName = appArgs.get(0);
         }
+        execAux(fileName);
 
+        return currentDirectory;
+    }
+
+    //helper function which returns filename when argument size is 2 or 3
+    private String getName_TwoOrThree(List<String> appArgs, String fileName, int argSize) {
+        if(!appArgs.get(0).equals("-n")){
+            throw new RuntimeException("tail: wrong argument " + appArgs.get(0) + " should be -n");
+        }
+
+        try {
+            tailLines = Integer.parseInt(appArgs.get(1));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("tail: " + appArgs.get(1) + " is not an integer");
+        }
+
+        if(argSize == 3){
+            fileName = appArgs.get(2);
+        }
+        return fileName;
+    }
+
+    // aux function of exec. Write content to buffer
+    private void execAux(String fileName) {
         if(fileName == null){
             try {
                 writeToBuffer(this.reader);
@@ -78,8 +90,6 @@ public class Tail implements ShellApplication{
                 throw new RuntimeException("tail: cannot open: " + fileName);
             }
         }
-
-        return currentDirectory;
     }
 
     // Helper function to write content required into reader object

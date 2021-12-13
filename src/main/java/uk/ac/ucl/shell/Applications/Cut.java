@@ -53,6 +53,13 @@ public class Cut implements ShellApplication {
 
         findIndexRange(args, singleIndexes, ranges);
 
+        processPipe(appArgs, singleIndexes, ranges);
+
+        return currentDirectory;
+    }
+
+    // Helper function of exec which dealing whe case of Pipeline situation
+    private void processPipe(List<String> appArgs, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) {
         if (appArgs.size() == 2) {
             try {
                 this.writeToBuffer(this.reader, singleIndexes, ranges);
@@ -66,8 +73,6 @@ public class Cut implements ShellApplication {
                 throw new RuntimeException("cut: can not open file " + appArgs.get(2));
             }
         }
-
-        return currentDirectory;
     }
 
     /*
@@ -92,57 +97,77 @@ public class Cut implements ShellApplication {
                     singleIndexes.add(index);
                 }
             } else {
-                if(arg.indexOf('-') != arg.lastIndexOf('-')){
-                    throw new RuntimeException("cut: invalid argument " + arg);
-                }else if (arg.charAt(0) == '-') {
-                    String stringIndex = arg.substring(1);
-                    int index = Integer.parseInt(stringIndex);
-                    if (index < 1) {
-                        throw new RuntimeException("cut: invalid argument " + arg);
-                    } else {
-                        ArrayList<Integer> range = new ArrayList<>();
-                        range.add(1);
-                        range.add(index);
-                        ranges.add(range);
-                    }
-
-                } else if (arg.charAt(arg.length() - 1) == '-') {
-                    String stringIndex = arg.substring(0, arg.length() - 1);
-                    int index = Integer.parseInt(stringIndex);
-                    if (index < 1) {
-                        throw new RuntimeException("cut: invalid argument " + arg);
-                    } else {
-                        ArrayList<Integer> range = new ArrayList<>();
-                        range.add(index);
-                        range.add(Integer.MAX_VALUE);
-                        ranges.add(range);
-                    }
-
-                } else {
-                    int rangeSymbolIndex;
-                    rangeSymbolIndex = arg.indexOf('-');
-                    ArrayList<Integer> range = new ArrayList<>();
-
-                    String bound = arg.substring(0,rangeSymbolIndex);
-                    int lowerBound = Integer.parseInt(bound);
-                    if (lowerBound < 1) {
-                        throw new RuntimeException("cut: invalid argument " + arg);
-                    } else {
-                        range.add(lowerBound);
-                    }
-
-                    bound = arg.substring(rangeSymbolIndex+1);
-                    int upperBound = Integer.parseInt(bound);
-                    if (upperBound < 1) {
-                        throw new RuntimeException("cut: invalid argument " + arg);
-                    }else if(lowerBound > upperBound){
-                        throw new RuntimeException("cut: invalid argument " + arg);
-                    }else {
-                        range.add(upperBound);
-                    }
-                    ranges.add(range);
-                }
+                findIndexRange_Dash(ranges, arg);
             }
+        }
+    }
+
+    // helper function of findIndexRange which dealing with case when there's "-" in argument
+    private void findIndexRange_Dash(ArrayList<ArrayList<Integer>> ranges, String arg) {
+        if(arg.indexOf('-') != arg.lastIndexOf('-')){
+            throw new RuntimeException("cut: invalid argument " + arg);
+        }else if (arg.charAt(0) == '-') {
+            findIndexRange_DashAtFirst(ranges, arg);
+
+        } else if (arg.charAt(arg.length() - 1) == '-') {
+            findIndexRange_DashAtLast(ranges, arg);
+
+        } else {
+            findIndexRange_DashInMiddle(ranges, arg);
+        }
+    }
+
+    // Aux function dealing with "-" at first eg. (1-5) means from 1 to 5
+    private void findIndexRange_DashInMiddle(ArrayList<ArrayList<Integer>> ranges, String arg) {
+        int rangeSymbolIndex;
+        rangeSymbolIndex = arg.indexOf('-');
+        ArrayList<Integer> range = new ArrayList<>();
+
+        String bound = arg.substring(0,rangeSymbolIndex);
+        int lowerBound = Integer.parseInt(bound);
+        if (lowerBound < 1) {
+            throw new RuntimeException("cut: invalid argument " + arg);
+        } else {
+            range.add(lowerBound);
+        }
+
+        bound = arg.substring(rangeSymbolIndex+1);
+        int upperBound = Integer.parseInt(bound);
+        if (upperBound < 1) {
+            throw new RuntimeException("cut: invalid argument " + arg);
+        }else if(lowerBound > upperBound){
+            throw new RuntimeException("cut: invalid argument " + arg);
+        }else {
+            range.add(upperBound);
+        }
+        ranges.add(range);
+    }
+
+    // Aux function dealing with "-" at first eg. (5-) means from 5 to end
+    private void findIndexRange_DashAtLast(ArrayList<ArrayList<Integer>> ranges, String arg) {
+        String stringIndex = arg.substring(0, arg.length() - 1);
+        int index = Integer.parseInt(stringIndex);
+        if (index < 1) {
+            throw new RuntimeException("cut: invalid argument " + arg);
+        } else {
+            ArrayList<Integer> range = new ArrayList<>();
+            range.add(index);
+            range.add(Integer.MAX_VALUE);
+            ranges.add(range);
+        }
+    }
+
+    // Aux function dealing with "-" at first eg. (-5) means from start to 5
+    private void findIndexRange_DashAtFirst(ArrayList<ArrayList<Integer>> ranges, String arg) {
+        String stringIndex = arg.substring(1);
+        int index = Integer.parseInt(stringIndex);
+        if (index < 1) {
+            throw new RuntimeException("cut: invalid argument " + arg);
+        } else {
+            ArrayList<Integer> range = new ArrayList<>();
+            range.add(1);
+            range.add(index);
+            ranges.add(range);
         }
     }
 
@@ -153,20 +178,7 @@ public class Cut implements ShellApplication {
         while ((line = reader.readLine()) != null) {
             byte[] bytes = line.getBytes(charset);
             ArrayList<Integer> bytesToPrintIndexes = new ArrayList<>();
-            for(int index = 0; index < bytes.length; index++){
-                int bytesToPrintIndex = index + 1;
-                if(singleIndexes.contains(bytesToPrintIndex)){
-                    bytesToPrintIndexes.add(index);
-                    continue;
-                }
-
-                for(ArrayList<Integer> range : ranges){
-                    if(range.get(0) <= bytesToPrintIndex && bytesToPrintIndex <= range.get(1)){
-                        bytesToPrintIndexes.add(index);
-                        break;
-                    }
-                }
-            }
+            writeToBufferAux(singleIndexes, ranges, bytes, bytesToPrintIndexes);
 
             byte[] bytesToPrint = new byte[bytesToPrintIndexes.size()];
             for(int index = 0; index < bytesToPrintIndexes.size(); index++){
@@ -177,4 +189,23 @@ public class Cut implements ShellApplication {
         }
         writer.flush();
     }
+
+    //Aux function of writeToBuffer
+    private void writeToBufferAux(ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges, byte[] bytes, ArrayList<Integer> bytesToPrintIndexes) {
+        for(int index = 0; index < bytes.length; index++){
+            int bytesToPrintIndex = index + 1;
+            if(singleIndexes.contains(bytesToPrintIndex)){
+                bytesToPrintIndexes.add(index);
+                continue;
+            }
+
+            for(ArrayList<Integer> range : ranges){
+                if(range.get(0) <= bytesToPrintIndex && bytesToPrintIndex <= range.get(1)){
+                    bytesToPrintIndexes.add(index);
+                    break;
+                }
+            }
+        }
+    }
+
 }

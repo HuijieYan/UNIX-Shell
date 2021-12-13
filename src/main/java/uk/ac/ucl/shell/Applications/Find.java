@@ -48,17 +48,7 @@ public class Find implements ShellApplication {
             rootDirectory = new File(currentDirectory);
             this.rootDirLength = currentDirectory.length();
         } else {
-            rootDirectory = new File(currentDirectory, appArgs.get(0));
-            if(rootDirectory.isDirectory()){
-                this.rootDirLength = currentDirectory.length() + 1;
-                this.isChildDir = true;
-            } else {
-                try {
-                    rootDirectory = ShellUtil.getDir(currentDirectory, appArgs.get(0));
-                }catch (RuntimeException e){
-                    throw new RuntimeException("find: no such root directory " + appArgs.get(0));
-                }
-            }
+            rootDirectory = execHelper_OtherArgSize(appArgs);
         }
 
         Pattern findPattern = Pattern.compile(appArgs.get(appArgs.size() - 1).replaceAll("\\*", ".*"));
@@ -70,8 +60,24 @@ public class Find implements ShellApplication {
         return currentDirectory;
     }
 
+    // Helper function deal with argument size != 2
+    private File execHelper_OtherArgSize(List<String> appArgs) {
+        File rootDirectory;
+        rootDirectory = new File(currentDirectory, appArgs.get(0));
+        if(rootDirectory.isDirectory()){
+            this.rootDirLength = currentDirectory.length() + 1;
+            this.isChildDir = true;
+        } else {
+            try {
+                rootDirectory = ShellUtil.getDir(currentDirectory, appArgs.get(0));
+            }catch (RuntimeException e){
+                throw new RuntimeException("find: no such root directory " + appArgs.get(0));
+            }
+        }
+        return rootDirectory;
+    }
 
-    
+
     // helper function which write matched files into writer
     private void findFilesInDir(File currDirectory, Pattern findPattern) throws IOException {
         File[] listFiles = currDirectory.listFiles();

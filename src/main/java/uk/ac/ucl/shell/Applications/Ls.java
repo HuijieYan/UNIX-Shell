@@ -1,6 +1,7 @@
 package uk.ac.ucl.shell.Applications;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
@@ -45,23 +46,28 @@ public class Ls implements ShellApplication {
                 rootDirLength = currDir.getCanonicalPath().length() + 1;
             }
 
-            File[] listOfFiles = currDir.listFiles();
-            if (listOfFiles.length > 0) {
-                for(int index = 0; index < listOfFiles.length; index++){
-                    if (!listOfFiles[index].getName().startsWith(".")) {
-                        writer.write(listOfFiles[index].getCanonicalPath().substring(rootDirLength));
-                        if(index != listOfFiles.length - 1){
-                            writer.write("\t");
-                        }
-                    }
-                }
-                writer.write(System.getProperty("line.separator"));
-            }
-            writer.flush();
+            execAux(currDir, rootDirLength);
         } catch (Exception e) {
             throw new RuntimeException("ls: no such directory: " + appArgs.get(0));
         }
         return currentDirectory;
+    }
+
+    // Aux function of exec
+    private void execAux(File currDir, int rootDirLength) throws IOException {
+        File[] listOfFiles = currDir.listFiles();
+        if (listOfFiles.length > 0) {
+            for(int index = 0; index < listOfFiles.length; index++){
+                if (!listOfFiles[index].getName().startsWith(".")) {
+                    writer.write(listOfFiles[index].getCanonicalPath().substring(rootDirLength));
+                    if(index != listOfFiles.length - 1){
+                        writer.write("\t");
+                    }
+                }
+            }
+            writer.write(System.getProperty("line.separator"));
+        }
+        writer.flush();
     }
 
 }

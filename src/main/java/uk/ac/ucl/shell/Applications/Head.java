@@ -46,23 +46,18 @@ public class Head implements ShellApplication {
         if (argSize > 3) {
             throw new RuntimeException("head: wrong argument number");
         }else if (argSize == 3 || argSize == 2) {
-            if(!appArgs.get(0).equals("-n")){
-                throw new RuntimeException("head: wrong argument " + appArgs.get(0) + " should be -n");
-            }
-
-            try {
-                headLines = Integer.parseInt(appArgs.get(1));
-            } catch (NumberFormatException e) {
-                throw new RuntimeException("head: " + appArgs.get(1) + " is not an integer");
-            }
-
-            if(argSize == 3){
-                fileName = appArgs.get(2);
-            }
+            fileName = getName_TwoOrThree(appArgs, fileName, argSize);
         }else if(argSize == 1){
             fileName = appArgs.get(0);
         }
 
+        execAux(fileName);
+
+        return currentDirectory;
+    }
+
+    // Helper function of exec that deals with writing content into buffer
+    private void execAux(String fileName) {
         if(fileName == null){
             try {
                 writeToBuffer(this.reader);
@@ -76,8 +71,24 @@ public class Head implements ShellApplication {
                 throw new RuntimeException("head: cannot open: " + fileName);
             }
         }
-        
-        return currentDirectory;
+    }
+
+    //helper function which returns filename when argument size is 2 or 3
+    private String getName_TwoOrThree(List<String> appArgs, String fileName, int argSize) {
+        if(!appArgs.get(0).equals("-n")){
+            throw new RuntimeException("head: wrong argument " + appArgs.get(0) + " should be -n");
+        }
+
+        try {
+            headLines = Integer.parseInt(appArgs.get(1));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("head: " + appArgs.get(1) + " is not an integer");
+        }
+
+        if(argSize == 3){
+            fileName = appArgs.get(2);
+        }
+        return fileName;
     }
 
     /*
