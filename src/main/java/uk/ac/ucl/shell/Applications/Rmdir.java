@@ -9,10 +9,22 @@ import java.util.List;
 public class Rmdir implements ShellApplication {
     private String currentDirectory;
 
+    /**
+     * Constructor of Rmdir app
+     * The app receives list of names of empty directories & remove them under current shell path
+     * @param currentDirectory currentDirectory of the Shell
+     */
     public Rmdir(String currentDirectory) {
         this.currentDirectory = currentDirectory;
     }
 
+
+    /**
+     * Execution function of Rmdir app
+     * @param appArgs // list of names of empty directories to be deleted
+     * @return currentDirectory // This is not used in this function (variable exists here because of the requirement from interface)
+     * @throws RuntimeException When directory to be delted is not empty
+     */
     public String exec(List<String> appArgs) throws RuntimeException {
         for (String dir : appArgs){
             File targetDir = ShellUtil.getDir(currentDirectory, dir);

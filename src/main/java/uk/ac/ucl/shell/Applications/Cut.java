@@ -71,11 +71,11 @@ public class Cut implements ShellApplication {
     }
 
     /*
-     * helper function of exec() to find the indexRange from arguments
-     * @param args Application arguments
-     * @param singleIndexes stores cut(single index) information for cutting content (eg. 7)
-     * @param ranges stores range information for cutting content (eg. 7-10)
-     * @throws RuntimeException // When argument is invalid
+      helper function of exec() to find the indexRange from arguments
+      @param args Application arguments
+      @param singleIndexes stores cut(single index) information for cutting content (eg. 7)
+      @param ranges stores range information for cutting content (eg. 7-10)
+      @throws RuntimeException // When argument is invalid
      */
     private void findIndexRange(String[] args, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) {
         for (String arg : args) {
@@ -146,12 +146,7 @@ public class Cut implements ShellApplication {
         }
     }
 
-    /* helper function to write required content into destination stream
-     * @param source bufferedReader for reading content
-     * @param singleIndexes stores cut(single index) information for cutting content (eg. 7)
-     * @param ranges stores range information for cutting content (eg. 7-10)
-     * @throws IOException When IO error caught from OS.
-     */
+    // helper function to write required content into destination stream
     private void writeToBuffer(BufferedReader reader, ArrayList<Integer> singleIndexes, ArrayList<ArrayList<Integer>> ranges) throws IOException{
         Charset charset = StandardCharsets.UTF_8;
         String line;

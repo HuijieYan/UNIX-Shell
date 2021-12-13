@@ -9,6 +9,9 @@ public class UnsafeDecorator implements ShellApplication {
 
     /**
      * Constructor of UnsafeDecorator
+     * Exception of inner App with this decorator is caught in this class
+     * An UnsafeException is thrown
+     * Outer Shell will ignore error from app inside an UnsafeDecorator (continue execution).
      * @param app application object to be decorated
      */
     public UnsafeDecorator(ShellApplication app){
@@ -20,7 +23,7 @@ public class UnsafeDecorator implements ShellApplication {
      * @param appArgs list of application arguments stored in List<String>
      * @return currentDirectory This is not used in this function (variable exists here because of the requirement from interface)
      * @throws RuntimeException The exception is thrown due to following reasons:
-     * - "ignore" + e.getMessage() // Exception caught from inner application
+     * - unsafe exception with error message // Exception caught from inner application
      */
     @Override
     public String exec(List<String> appArgs) throws RuntimeException {

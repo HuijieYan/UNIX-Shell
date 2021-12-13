@@ -11,6 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -32,6 +35,8 @@ public class ShellTest {
         File tempFile2 = tempFolder.newFile("file2.txt");
         File tempFile3 = tempFolder.newFile("file3.txt");
         tempFolder.newFolder("subDir");
+        tempFolder.newFolder("subDir2");
+        tempFolder.newFolder("subDir2","subsub1");
         tempFolder.newFolder("emptyFolder");
         tempFolder.newFolder(".subDir");
         currentDir = tempFolder.getRoot().getCanonicalPath();
@@ -40,12 +45,19 @@ public class ShellTest {
         File subTempFile2 = tempFolder.newFile("subDir/file2.txt");
         File subTempFile3 = tempFolder.newFile("subDir/file3.txt");
 
+        File sub2Temp1 = tempFolder.newFile("subDir2/file1.txt");
+        File sub2Temp2 = tempFolder.newFile("subDir2/file2.txt");
+        File sub2Temp3 = tempFolder.newFile("subDir2/subsub1/file3.txt");
+
         writeToFile(tempFile1, "AAA\nBBB\nbbb\nCCC\nccc");
         writeToFile(tempFile2, "CCC\nDDD");
         writeToFile(tempFile3, "*.txt");
         writeToFile(subTempFile1, "AAA\nBBB\nbbb\nCCC\nccc");
         writeToFile(subTempFile2, "CCC\nCCC\nccc\nDDD\nddd");
         writeToFile(subTempFile3, "abc\n123\n789\n456\n666");
+        writeToFile(sub2Temp1, "AAA\nBBB\nbbb\nCCC\nccc");
+        writeToFile(sub2Temp2, "CCC\nCCC\nccc\nDDD\nddd");
+        writeToFile(sub2Temp3, "abc\n123\n789\n456\n666");
     }
 
     public void writeToFile(File file, String content) throws IOException {
@@ -109,11 +121,11 @@ public class ShellTest {
     public void testCd_invalidPath(){
         try {
             ArrayList<String> argList = new ArrayList<>();
-            argList.add("subDir2");
+            argList.add("subDir3");
             new Cd(currentDir).exec(argList);
             fail();
         }catch (RuntimeException e){
-            assertEquals("cd: can not switch to such directory subDir2", e.getMessage());
+            assertEquals("cd: can not switch to such directory subDir3", e.getMessage());
         }
     }
 
@@ -156,7 +168,7 @@ public class ShellTest {
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
         Ls ls = new Ls(currentDir, writer);
-        String result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir\temptyFolder" + System.getProperty("line.separator");
+        String result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir\temptyFolder\tsubDir2" + System.getProperty("line.separator");
         ls.exec(argList);
         this.assertEqualSet(result, out.toString());
 
@@ -178,7 +190,7 @@ public class ShellTest {
 
         out.reset();
         argList.set(0, fileSep + "subDir" + fileSep + "..");
-        result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir\temptyFolder" + lineSep;
+        result = "file1.txt\tfile2.txt\tfile3.txt\tsubDir\temptyFolder\tsubDir2" + lineSep;
         ls.exec(argList);
         this.assertEqualSet(result, out.toString());
 
@@ -207,11 +219,11 @@ public class ShellTest {
 
         try {
             ArrayList<String> argList = new ArrayList<>();
-            argList.add("subDir2");
+            argList.add("subDir3");
             new Ls(currentDir, writer).exec(argList);
             fail();
         }catch (RuntimeException e){
-            assertEquals("ls: no such directory: subDir2", e.getMessage());
+            assertEquals("ls: no such directory: subDir3", e.getMessage());
         }
     }
 
@@ -622,6 +634,64 @@ public class ShellTest {
     }
 
     @Test
+    public void testGlob_curDir() {
+        out.reset();
+        List<String> result = Globbing.exec(currentDir, "*.txt");
+        Set<String> actResult = new HashSet<>(result);
+        Set<String> expResult = new HashSet<>();
+        expResult.add("file1.txt");
+        expResult.add("file2.txt");
+        expResult.add("file3.txt");
+        assertEqualSet(expResult.toString(), actResult.toString());
+    }
+
+    @Test
+    public void testGlob_NOResult() {
+        out.reset();
+        List<String> result = Globbing.exec(currentDir, "*.pdf");
+        Set<String> actResult = new HashSet<>(result);
+        Set<String> expResult = new HashSet<>();
+        expResult.add("*.pdf");
+        assertEqualSet(expResult.toString(), actResult.toString());
+    }
+
+    @Test
+    public void testGlob_DoubleStar() {
+        out.reset();
+        List<String> result = Globbing.exec(currentDir, "**/*.txt");
+        Set<String> actResult = new HashSet<>(result);
+        Set<String> expResult = new HashSet<>();
+        expResult.add("subDir2/file1.txt");
+        expResult.add("subDir2/file2.txt");
+        expResult.add("subDir2/subsub1/file3.txt");
+        expResult.add("subDir/file1.txt");
+        expResult.add("subDir/file2.txt");
+        expResult.add("subDir/file3.txt");
+        assertEqualSet(expResult.toString(), actResult.toString());        
+    }
+
+    @Test
+    public void testGlob_Abso() {
+        List<String> result = Globbing.exec(currentDir, currentDir + fileSep +"*");
+        Set<String> actResult = new HashSet<>(result);
+        Set<String> expResult = new HashSet<>();
+        expResult.add(currentDir + fileSep + "file1.txt");
+        expResult.add(currentDir + fileSep + "file2.txt");
+        expResult.add(currentDir + fileSep + "file3.txt");
+        assertEqualSet(expResult.toString(), actResult.toString());        
+    }        
+
+    @Test
+    public void testGlob_empty() {
+        // No * symbol
+        List<String> result = Globbing.exec(currentDir, "123456");
+        Set<String> actResult = new HashSet<>(result);
+        Set<String> expResult = new HashSet<>();
+        expResult.add("123456");
+        assertEqualSet(expResult.toString(), actResult.toString());        
+    }           
+
+    @Test
     public void testFind_currentDir(){
         out.reset();
         ArrayList<String> argList = new ArrayList<>();
@@ -629,7 +699,7 @@ public class ShellTest {
         argList.add("*1.txt");
         new Find(currentDir, writer).exec(argList);
         this.assertEqualSet("." + fileSep + "file1.txt" + lineSep+ "." + fileSep + "subDir"
-                + fileSep + "file1.txt" + lineSep, out.toString());
+                + fileSep + "file1.txt" + lineSep + "." + fileSep + "subDir2" + fileSep + "file1.txt", out.toString());
     }
 
     @Test
@@ -642,6 +712,7 @@ public class ShellTest {
         argList.add("*1.txt");
         new Find(currentDir, writer).exec(argList);
         this.assertEqualSet(prefix + fileSep + "file1.txt" + lineSep + prefix + fileSep + "subDir"
+                + fileSep + "file1.txt" + lineSep + prefix + fileSep + "subDir2"
                 + fileSep + "file1.txt" + lineSep, out.toString());
 
         out.reset();
@@ -649,6 +720,7 @@ public class ShellTest {
         argList.set(0, prefix);
         new Find(currentDir, writer).exec(argList);
         this.assertEqualSet(prefix + fileSep + "file1.txt" + lineSep + prefix + fileSep + "subDir"
+                + fileSep + "file1.txt" + lineSep + prefix + fileSep + "subDir2"
                 + fileSep + "file1.txt" + lineSep, out.toString());
     }
 

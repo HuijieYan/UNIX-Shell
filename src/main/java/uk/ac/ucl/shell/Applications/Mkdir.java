@@ -9,10 +9,20 @@ import java.util.List;
 public class Mkdir implements ShellApplication {
     private String currentDirectory;
 
+    /**
+     * Constructor of Mkdir app
+     * The app receives list of directory names & creates them under current shell path
+     * @param currentDirectory currentDirectory of the Shell
+     */
     public Mkdir(String currentDirectory) {
         this.currentDirectory = currentDirectory;
     }
 
+    /**
+     * Execution function of Mkdir app
+     * @param appArgs // list of directory names to be created
+     * @return currentDirectory // This is not used in this function (variable exists here because of the requirement from interface)
+     */
     public String exec(List<String> appArgs) throws RuntimeException {
         for (String dir : appArgs){
             try {

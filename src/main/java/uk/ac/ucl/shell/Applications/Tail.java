@@ -82,9 +82,7 @@ public class Tail implements ShellApplication{
         return currentDirectory;
     }
 
-    /* Helper function to write content required into reader object
-     * @param reader destination of content required.
-     */
+    // Helper function to write content required into reader object
     private void writeToBuffer(BufferedReader reader) throws IOException {
         ArrayList<String> storage = new ArrayList<>();
         String line;

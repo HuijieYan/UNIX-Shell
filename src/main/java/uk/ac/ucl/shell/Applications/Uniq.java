@@ -63,11 +63,10 @@ public class Uniq implements ShellApplication{
     }
 
     /*
-     * execFromStream
-     * helper function of exec() which does the execution from stream.
-     * @param option // if "-i" then ignores case when doing comparison (case insensitive)
-     * @param fileName //file to read
-     */
+     helper function of exec() which does the execution from stream.
+     @param option // if "-i" then ignores case when doing comparison (case insensitive)
+     @param fileName //file to read
+    */
     private void execFromStream(String option, String fileName) {
         BufferedReader reader;
         if(fileName == null){
@@ -91,12 +90,8 @@ public class Uniq implements ShellApplication{
     }
 
 
-    /*
-     * writeToBuffer
-     * helper function of execFromStream() which reads content & write into writer(destination stream)
-     * @param option // if "-i" then ignores case when doing comparison (case insensitive)
-     * @param reader // Source stream of reading content
-     */
+
+    // helper function of execFromStream() which reads content & write into writer(destination stream)
     private void writeToBuffer(String option, BufferedReader reader) throws IOException {
         String lastLine = null;
         String currentLine;
@@ -110,11 +105,10 @@ public class Uniq implements ShellApplication{
     }
 
     /*
-     * notEqual
-     * helper function of writeToBuffer
-     * The function compares current line and previous line
-     * @param option // if "-i" then ignores case when doing comparison (case insensitive)
-     * @return boolean // true when not equal, vice versa.
+     helper function of writeToBuffer
+     The function compares current line and previous line
+     @param option // if "-i" then ignores case when doing comparison (case insensitive)
+     @return boolean // true when not equal, vice versa.
      */
     private boolean notEqual(String option, String currentLine, String lastLine){
         if(lastLine == null){

@@ -3,7 +3,6 @@ package uk.ac.ucl.shell.Applications;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -61,11 +60,8 @@ public class Cat implements ShellApplication {
         return currentDirectory;
     }
 
-    /*
-     * writeToBuffer function
-     * The function takes a BufferedReader then write content from reader into a writer 
-     * @param reader A BufferedReader which tells function the source of the content 
-     */
+
+    // The function takes a BufferedReader then write content from reader into a writer 
     private void writeToBuffer(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {

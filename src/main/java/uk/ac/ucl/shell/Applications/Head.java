@@ -81,11 +81,9 @@ public class Head implements ShellApplication {
     }
 
     /*
-     * helper function of exec()
-     * The function writes content from reader into writer
-     * @param reader //Source of reading content
-     * @throws IOException The exception is thrown from writer object.
-     */
+     helper function of exec()
+     The function writes content from reader into writer
+    */
     private void writeToBuffer(BufferedReader reader) throws IOException {
         for (int i = 0; i < headLines; i++) {
             String line;

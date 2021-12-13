@@ -38,8 +38,7 @@ public class Globbing {
         //dealing with root
         String rootDir = findRootPath(pathShell, targetDir);
         boolean isAbsolute = Paths.get(targetDir).isAbsolute();
-
-        return processGlobbing(pathShell, rootDir, isAbsolute, glob);
+        return processGlobbing(pathShell, rootDir, isAbsolute, glob, pattern);
     }
 
     //file visitor
@@ -116,7 +115,7 @@ public class Globbing {
      * @return List of matched result
      * @throw RuntimeException When failed to change the directory
      */    
-    private static List<String> processGlobbing(String pathMask, String rootDirectory, boolean isAbsolute, String glob) {
+    private static List<String> processGlobbing(String pathMask, String rootDirectory, boolean isAbsolute, String glob, String usrPattern) {
 
         ArrayList<String> processedList = new ArrayList<>();
         try {
@@ -130,7 +129,7 @@ public class Globbing {
 
             List<Path> matchedRes = getFiles(Paths.get(rootDirectory), pattern);
             if (matchedRes.size() == 0) {
-                processedList.add(glob);
+                processedList.add(usrPattern);
                 return processedList;
             }
 
@@ -138,9 +137,6 @@ public class Globbing {
                 //if using relative path
                 if (!isAbsolute) {
                     Path relativePath = Paths.get(pathMask).relativize(curElem);
-                    if (!relativePath.toFile().isFile()) {
-                        relativePath = relativePath.resolve(curElem.getFileName());
-                    }
                     processedList.add(relativePath.toString());
                 } else {
                     String curStr = curElem.toString();

@@ -71,11 +71,8 @@ public class Find implements ShellApplication {
     }
 
 
-    /*
-     * helper function which write matched files into writer
-     * @param currentDirectory directory for recursive search
-     * @param findPattern pattern to match files (eg. *.txt)
-     */    
+    
+    // helper function which write matched files into writer
     private void findFilesInDir(File currDirectory, Pattern findPattern) throws IOException {
         File[] listFiles = currDirectory.listFiles();
         for (File file : listFiles) {

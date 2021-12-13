@@ -67,13 +67,9 @@ public class Grep implements ShellApplication {
     }
 
     /*
-     * help function of exec()
-     * The function writes matched content from reader into writer
-     * @param grepPattern //Grep pattern
-     * @param reader //Source of reading content
-     * @param fileName //name of the file
-     * @throws IOException The exception is thrown from writer object.
-     */
+     help function of exec()
+     The function writes matched content from reader into writer
+    */
     private void writeToBuffer(Pattern grepPattern, BufferedReader reader, String fileName) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {

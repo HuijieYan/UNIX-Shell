@@ -65,10 +65,9 @@ public class Sort implements ShellApplication {
     }
 
     /*
-     * execFromStream
-     * helper function of exec() which does the execution from stream.
-     * @param option // if "-r" then sorts lines in reverse order
-     * @param fileName //file to read
+     execFromStream
+     helper function of exec() which does the execution from stream.
+     @param option // if "-r" then sorts lines in reverse order
      */
     private void execFromStream(String option, String fileName) {
         BufferedReader reader;
@@ -93,12 +92,7 @@ public class Sort implements ShellApplication {
         }
     }
 
-    /*
-     * sort
-     * helper function to sort a list of string
-     * @param option // if "-r" then sorts lines in reverse order
-     * @param readLines // Collection of lines
-     */    
+    // helper function to sort a list of string
     private void sort(String option, ArrayList<String> readLines){
         Collections.sort(readLines);
         if (option.equals("-r")){
@@ -106,12 +100,8 @@ public class Sort implements ShellApplication {
         }
     }
 
-    /*
-     * readFromReader
-     * helper function which reads content from a stream into a list of string
-     * @param option // if "-r" then sorts lines in reverse order
-     * @param readLines // Collection of lines
-     */    
+
+    // helper function which reads content from a stream into a list of string  
     private ArrayList<String> readFromReader(BufferedReader reader) throws IOException{
         ArrayList<String> lines = new ArrayList<>();
         String line;
@@ -121,10 +111,8 @@ public class Sort implements ShellApplication {
         return lines;
     }
 
-    /*
-     * writeToBuffer
-     * helper function which takes list of string and writes the content into writer.
-     */
+
+    // helper function which takes list of string and writes the content into writer.
     private void writeToBuffer(ArrayList<String> lines) throws IOException{
         for(String str : lines){
             writer.write(str);
