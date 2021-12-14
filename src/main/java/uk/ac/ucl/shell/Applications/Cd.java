@@ -1,6 +1,7 @@
 package uk.ac.ucl.shell.Applications;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import uk.ac.ucl.shell.ShellApplication;
@@ -39,7 +40,7 @@ public class Cd implements ShellApplication {
         try {
             File dir = ShellUtil.getDir(currentDirectory, appArgs.get(0));
             currentDirectory = dir.getCanonicalPath();
-        }catch (Exception e){
+        }catch (IOException e){
             throw new RuntimeException("cd: can not switch to such directory " + appArgs.get(0));
         }
         return currentDirectory;

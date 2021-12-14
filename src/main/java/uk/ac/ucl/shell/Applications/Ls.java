@@ -47,7 +47,7 @@ public class Ls implements ShellApplication {
             }
 
             execAux(currDir, rootDirLength);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("ls: no such directory: " + appArgs.get(0));
         }
         return currentDirectory;

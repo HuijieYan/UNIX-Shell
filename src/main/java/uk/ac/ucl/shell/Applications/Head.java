@@ -62,6 +62,7 @@ public class Head implements ShellApplication {
             try {
                 writeToBuffer(this.reader);
             }catch (Exception e){
+                //catch Exception for reader is null or fail to read
                 throw new RuntimeException("head: no data from pipe or redirection and can not find file to read");
             }
         } else {

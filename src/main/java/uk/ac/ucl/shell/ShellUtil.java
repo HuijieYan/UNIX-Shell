@@ -30,9 +30,9 @@ public class ShellUtil {
      * @param currentDirectory directory of Shell
      * @param dir target directory
      * @return File object of target directory
-     * @throws RuntimeException "no such directory: " + dir // Invalid directory or IO error
+     * @throws IOException "no such directory: " + dir // Invalid directory or IO error
      */
-    public static File getDir(String currentDirectory, String dir) throws RuntimeException {
+    public static File getDir(String currentDirectory, String dir) throws IOException {
         File file = new File(currentDirectory,dir);
         if(file.isDirectory()){
             return file;
@@ -41,6 +41,6 @@ public class ShellUtil {
         if(file.isAbsolute() && file.isDirectory()){
             return file;
         }
-        throw new RuntimeException("no such directory: " + dir);
+        throw new IOException("no such directory: " + dir);
     }
 }

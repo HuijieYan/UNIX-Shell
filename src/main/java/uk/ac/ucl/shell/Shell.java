@@ -1,5 +1,6 @@
 package uk.ac.ucl.shell;
 
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -32,7 +33,7 @@ public class Shell {
                 try {
                     writer.write(e.getMessage() + System.getProperty("line.separator"));
                     writer.flush();
-                }catch (Exception ignored){}
+                }catch (IOException ignored){}
             }
         }
         return currentDirectory;
@@ -66,7 +67,7 @@ public class Shell {
             }
             try {
                 Shell.eval(args[1], writer, currentDirectory);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 System.out.print("");
             }
         } else {
@@ -77,7 +78,7 @@ public class Shell {
                     String cmdline = input.nextLine();
                     currentDirectory = Shell.eval(cmdline, writer, currentDirectory);
                 }
-            }catch (Exception e){
+            }catch (RuntimeException e){
                 System.out.println(e.getMessage());
             }
         }

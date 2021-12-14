@@ -85,6 +85,7 @@ public class Uniq implements ShellApplication{
         try {
             this.writeToBuffer(option, reader);
         } catch (Exception e) {
+            //catch Exception for writer or reader is null or fail to write or read
             throw new RuntimeException("uniq: fail to read or write");
         }
     }
