@@ -92,7 +92,7 @@ public class ParserOperation {
     //Assumed the shell is using ascii
         return this.sat(input->{
             int ascii = (int) input;
-            return (ascii >= ((int) '0') && ascii <= ((int) '9'));
+            return ascii >= ((int) '0') && ascii <= ((int) '9');
         });
     }
 
@@ -100,7 +100,7 @@ public class ParserOperation {
     //Assumed the shell is using ascii
         return this.sat(input->{
             int ascii = (int) input;
-            return (ascii >= ((int) 'a') && ascii <= ((int) 'z'));
+            return ascii >= ((int) 'a') && ascii <= ((int) 'z');
         });
     }
 
@@ -108,7 +108,7 @@ public class ParserOperation {
     //Assumed the shell is using ascii
         return this.sat(input->{
             int ascii = (int) input;
-            return (ascii >= ((int) 'A') && ascii <= ((int) 'Z'));
+            return ascii >= ((int) 'A') && ascii <= ((int) 'Z');
         });
     }
 

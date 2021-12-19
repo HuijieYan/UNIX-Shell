@@ -1241,7 +1241,5 @@ public class ShellTest {
     @Test
     public void globbingTest(){
         this.systemTest_resultChecker("*.txt" + lineSep, "cat < `echo file3.txt`");
-        //this.systemTest_resultChecker("*.txt" + lineSep, "cat < `echo *1.txt`");
-        //systemTest_resultChecker("file1.txt\\file1.txt" + System.getProperty("line.separator"), "echo *'1.txt'");
     }
 }
