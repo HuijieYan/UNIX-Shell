@@ -4,6 +4,7 @@ import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class Mkdir implements ShellApplication {
@@ -27,7 +28,7 @@ public class Mkdir implements ShellApplication {
         for (String dir : appArgs){
             try {
                 ShellUtil.getDir(currentDirectory, dir);
-            }catch (RuntimeException e){
+            }catch (IOException e){
                 File newDir = new File(dir);
                 if(!newDir.isAbsolute()){
                     newDir = new File(currentDirectory, dir);

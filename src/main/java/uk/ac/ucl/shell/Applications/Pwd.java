@@ -38,6 +38,7 @@ public class Pwd implements ShellApplication {
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }catch (Exception e){
+            //catch Exception for writer is null or fail to write
             throw new RuntimeException("Pwd: fail to write to the output");
         }
         return currentDirectory;

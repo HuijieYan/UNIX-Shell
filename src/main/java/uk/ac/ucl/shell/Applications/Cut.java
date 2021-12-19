@@ -64,12 +64,13 @@ public class Cut implements ShellApplication {
             try {
                 this.writeToBuffer(this.reader, singleIndexes, ranges);
             }catch (Exception e){
+                //catch Exception for reader is null or fail to read
                 throw new RuntimeException("cut: no data from pipe or redirection and can not find file to read");
             }
         } else {
             try {
             this.writeToBuffer(Files.newBufferedReader(ShellUtil.getPath(currentDirectory, appArgs.get(2)), StandardCharsets.UTF_8), singleIndexes, ranges);
-            }catch (Exception e){
+            }catch (IOException e){
                 throw new RuntimeException("cut: can not open file " + appArgs.get(2));
             }
         }

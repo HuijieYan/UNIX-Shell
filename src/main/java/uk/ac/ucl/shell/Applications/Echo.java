@@ -44,6 +44,7 @@ public class Echo implements ShellApplication {
             writer.write(System.getProperty("line.separator"));
             writer.flush();
         }catch (Exception e){
+            //catch Exception for writer is null or fail to write
             throw new RuntimeException("Echo: fail to print the arguments");
         }
         return currentDirectory;

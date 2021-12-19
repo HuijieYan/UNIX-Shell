@@ -55,6 +55,7 @@ public class Find implements ShellApplication {
         try {
             findFilesInDir(rootDirectory, findPattern);
         }catch (Exception e){
+            //catch Exception for writer is null or fail to write
             throw new RuntimeException("find: fail to write to the output");
         }
         return currentDirectory;
@@ -70,7 +71,7 @@ public class Find implements ShellApplication {
         } else {
             try {
                 rootDirectory = ShellUtil.getDir(currentDirectory, appArgs.get(0));
-            }catch (RuntimeException e){
+            }catch (IOException e){
                 throw new RuntimeException("find: no such root directory " + appArgs.get(0));
             }
         }

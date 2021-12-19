@@ -88,6 +88,7 @@ public class Sort implements ShellApplication {
             sort(option, lines);
             writeToBuffer(lines);
         }catch (Exception e){
+            //catch Exception for writer or reader is null or fail to write or read
             throw new RuntimeException("sort: fail to read or write");
         }
     }

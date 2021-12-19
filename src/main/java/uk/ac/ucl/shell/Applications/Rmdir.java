@@ -4,6 +4,7 @@ import uk.ac.ucl.shell.ShellApplication;
 import uk.ac.ucl.shell.ShellUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class Rmdir implements ShellApplication {
@@ -27,7 +28,13 @@ public class Rmdir implements ShellApplication {
      */
     public String exec(List<String> appArgs) throws RuntimeException {
         for (String dir : appArgs){
-            File targetDir = ShellUtil.getDir(currentDirectory, dir);
+            File targetDir;
+            try {
+                targetDir = ShellUtil.getDir(currentDirectory, dir);
+            }catch (IOException e){
+                throw new RuntimeException("rmdir: no such directory " + dir);
+            }
+
             File[] listFiles = targetDir.listFiles();
             if(listFiles.length > 0){
                 throw new RuntimeException("rmdir: can not delete nonempty directory " + dir);

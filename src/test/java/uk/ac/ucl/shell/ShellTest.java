@@ -657,12 +657,12 @@ public class ShellTest {
         List<String> result = Globbing.exec(currentDir, "**/*.txt");
         Set<String> actResult = new HashSet<>(result);
         Set<String> expResult = new HashSet<>();
-        expResult.add("subDir2/file1.txt");
-        expResult.add("subDir2/file2.txt");
-        expResult.add("subDir2/subsub1/file3.txt");
-        expResult.add("subDir/file1.txt");
-        expResult.add("subDir/file2.txt");
-        expResult.add("subDir/file3.txt");
+        expResult.add("subDir2"+ fileSep + "file1.txt");
+        expResult.add("subDir2" + fileSep + "file2.txt");
+        expResult.add("subDir2" + fileSep + "subsub1" + fileSep + "file3.txt");
+        expResult.add("subDir" + fileSep + "file1.txt");
+        expResult.add("subDir" + fileSep + "file2.txt");
+        expResult.add("subDir" + fileSep + "file3.txt");
         assertEqualSet(expResult.toString(), actResult.toString());        
     }
 
@@ -976,12 +976,21 @@ public class ShellTest {
     @Test
     public void testRmdir_exception(){
         ArrayList<String> argList = new ArrayList<>();
+        Rmdir rmdir = new Rmdir(currentDir);
         try {
             argList.add("subDir");
-            new Rmdir(currentDir).exec(argList);
+            rmdir.exec(argList);
             fail();
         }catch (RuntimeException e){
             assertEquals("rmdir: can not delete nonempty directory subDir", e.getMessage());
+        }
+
+        try {
+            argList.set(0, "abc");
+            rmdir.exec(argList);
+            fail();
+        }catch (RuntimeException e){
+            assertEquals("rmdir: no such directory abc", e.getMessage());
         }
     }
 

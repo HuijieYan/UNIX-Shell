@@ -99,7 +99,7 @@ public class Globbing {
             File myFile = ShellUtil.getDir(currentDirectory, dir);
             currentDirectory = myFile.getPath();
             return currentDirectory;
-        }catch (RuntimeException ex) {
+        }catch (IOException e) {
             throw new RuntimeException("glob: fail to change the directory");
         }
     }
