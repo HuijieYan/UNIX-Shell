@@ -9,11 +9,7 @@ import uk.ac.ucl.shell.Applications.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -689,7 +685,49 @@ public class ShellTest {
         Set<String> expResult = new HashSet<>();
         expResult.add("123456");
         assertEqualSet(expResult.toString(), actResult.toString());        
-    }           
+    }
+
+    @Test
+    public void testGlob_canBeGlob() {
+
+        // No * symbol
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+
+        try {
+            out = new PipedOutputStream(in);
+            OutputStreamWriter outWriter = new OutputStreamWriter(out);
+            Shell.eval("echo 123456", outWriter, currentDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        Scanner scn = new Scanner(in);
+        assertEquals(scn.next(),"123456");
+    }
+
+    @Test
+    public void testGlob_canBeGlob1() {
+
+        // with * symbol
+        PipedInputStream in = new PipedInputStream();
+        PipedOutputStream out;
+
+        try {
+            out = new PipedOutputStream(in);
+            OutputStreamWriter outWriter = new OutputStreamWriter(out);
+            Shell.eval("echo *.pdf", outWriter, currentDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        Scanner scn = new Scanner(in);
+        assertEquals(scn.next(),"*.pdf");
+    }
+
+
 
     @Test
     public void testFind_currentDir(){
