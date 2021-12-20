@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import uk.ac.ucl.shell.Applications.UnsafeException;
-import uk.ac.ucl.shell.Parser.pack.command.Command;
-import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
+import uk.ac.ucl.shell.ShellUtils.CommandVisitor.ActualCmdVisitor;
+import uk.ac.ucl.shell.ShellUtils.CommandVisitor.CommandVisitor;
+import uk.ac.ucl.shell.ShellUtils.Parser.ShellParser;
+import uk.ac.ucl.shell.lib.Parser.pack.command.Command;
+import uk.ac.ucl.shell.lib.Parser.pack.type.MonadicValue;
 
 public class Shell {
 

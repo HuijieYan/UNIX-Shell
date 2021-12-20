@@ -3,8 +3,6 @@ package uk.ac.ucl.shell.Applications;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
-import uk.ac.ucl.shell.ShellApplication;
-
 public class Echo implements ShellApplication {
     private final String currentDirectory;
     private final OutputStreamWriter writer;

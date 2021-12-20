@@ -5,6 +5,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.ac.ucl.shell.Applications.*;
+import uk.ac.ucl.shell.ShellUtils.Utils.Globbing;
+import uk.ac.ucl.shell.ShellUtils.Utils.ShellUtil;
 
 import java.io.*;
 import java.nio.file.Files;

@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import uk.ac.ucl.shell.ShellApplication;
-import uk.ac.ucl.shell.ShellUtil;
+import uk.ac.ucl.shell.ShellUtils.Utils.ShellUtil;
 
 public class Cd implements ShellApplication {
     private String currentDirectory;

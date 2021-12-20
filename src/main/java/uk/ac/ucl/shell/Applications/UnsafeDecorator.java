@@ -1,7 +1,5 @@
 package uk.ac.ucl.shell.Applications;
 
-import uk.ac.ucl.shell.ShellApplication;
-
 import java.util.List;
 
 public class UnsafeDecorator implements ShellApplication {

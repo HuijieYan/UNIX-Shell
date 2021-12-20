@@ -1,7 +1,6 @@
 package uk.ac.ucl.shell.Applications;
 
-import uk.ac.ucl.shell.ShellApplication;
-import uk.ac.ucl.shell.ShellUtil;
+import uk.ac.ucl.shell.ShellUtils.Utils.ShellUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

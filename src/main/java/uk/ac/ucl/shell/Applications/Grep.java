@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import uk.ac.ucl.shell.ShellApplication;
-import uk.ac.ucl.shell.ShellUtil;
+import uk.ac.ucl.shell.ShellUtils.Utils.ShellUtil;
 
 public class Grep implements ShellApplication {
     private final String currentDirectory;

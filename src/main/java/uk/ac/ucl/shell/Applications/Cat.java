@@ -7,8 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 
-import uk.ac.ucl.shell.ShellApplication;
-import uk.ac.ucl.shell.ShellUtil;
+import uk.ac.ucl.shell.ShellUtils.Utils.ShellUtil;
 
 public class Cat implements ShellApplication {
     private final String currentDirectory;

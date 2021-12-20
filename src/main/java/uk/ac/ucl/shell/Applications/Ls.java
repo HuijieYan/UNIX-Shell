@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
-import uk.ac.ucl.shell.ShellApplication;
-import uk.ac.ucl.shell.ShellUtil;
+import uk.ac.ucl.shell.ShellUtils.Utils.ShellUtil;
 
 public class Ls implements ShellApplication {
     private final String currentDirectory;

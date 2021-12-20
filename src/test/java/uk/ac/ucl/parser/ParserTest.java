@@ -2,11 +2,11 @@ package uk.ac.ucl.parser;
 
 import org.junit.Assert;
 import org.junit.Test;
-import uk.ac.ucl.shell.Parser.pack.command.Call;
-import uk.ac.ucl.shell.Parser.pack.command.Command;
-import uk.ac.ucl.shell.Parser.pack.command.Pipe;
-import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
-import uk.ac.ucl.shell.ShellParser;
+import uk.ac.ucl.shell.lib.Parser.pack.command.Call;
+import uk.ac.ucl.shell.lib.Parser.pack.command.Command;
+import uk.ac.ucl.shell.lib.Parser.pack.command.Pipe;
+import uk.ac.ucl.shell.lib.Parser.pack.type.atom.Atom;
+import uk.ac.ucl.shell.ShellUtils.Parser.ShellParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
