@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.function.BiFunction;
 
-import uk.ac.ucl.shell.Parser.Monad;
-import uk.ac.ucl.shell.Parser.Parser;
 import uk.ac.ucl.shell.Parser.ParserOperation;
 import uk.ac.ucl.shell.Parser.pack.command.Call;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
 import uk.ac.ucl.shell.Parser.pack.command.Pipe;
+import uk.ac.ucl.shell.Parser.pack.monad.Monad;
+import uk.ac.ucl.shell.Parser.pack.parser.Parser;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 import uk.ac.ucl.shell.Parser.pack.type.atom.Atom;
 import uk.ac.ucl.shell.Parser.pack.type.atom.NonRedirectionString;

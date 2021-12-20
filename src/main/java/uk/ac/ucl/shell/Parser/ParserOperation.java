@@ -7,6 +7,8 @@ import java.util.function.Function;
 
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
+import uk.ac.ucl.shell.Parser.pack.monad.Monad;
+import uk.ac.ucl.shell.Parser.pack.parser.Parser;
 
 public class ParserOperation {
 

@@ -1,7 +1,8 @@
-package uk.ac.ucl.shell.Parser;
+package uk.ac.ucl.shell.Parser.pack.parser;
 
 import java.util.function.Function;
 
+import uk.ac.ucl.shell.Parser.pack.monad.Monad;
 import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
 
@@ -13,7 +14,7 @@ import uk.ac.ucl.shell.Parser.pack.type.pair.Pair;
  * @param parseFunction the function of parsing, must be declared when
  * declaring a new Parser
  */
-public class Parser<T> implements Monad<T>{
+public class Parser<T> implements Monad<T> {
     private final Function<String,MonadicValue<T,String>> parseFunction;
 
     public Parser(Function<String,MonadicValue<T,String>> function){
