@@ -5,8 +5,8 @@ import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
     Type I is the rest of the input stream.
 */
 public class Pair<V,I> implements MonadicValue<V,I>{
-    private V value;
-    private I inputStream;
+    private final V value;
+    private final I inputStream;
 
     public Pair(V value, I inputStream){
         this.value = value;
@@ -16,10 +16,6 @@ public class Pair<V,I> implements MonadicValue<V,I>{
     public V getValue(){return value;}
     public I getInputStream(){return inputStream;}
     public Boolean isEmpty(){
-        try{
-            return (value == null);
-        }catch(Exception e){
-            return false;
-        }
+        return value == null;
     }
 }

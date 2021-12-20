@@ -1,45 +1,62 @@
 package uk.ac.ucl.shell;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import uk.ac.ucl.shell.Parser.Monad;
-import uk.ac.ucl.shell.Parser.ParserBuilder;
+import uk.ac.ucl.shell.Applications.UnsafeException;
 import uk.ac.ucl.shell.Parser.pack.command.Command;
+import uk.ac.ucl.shell.Parser.pack.type.MonadicValue;
 
 public class Shell {
 
-    private static String currentDirectory = System.getProperty("user.dir");
+    /**
+     * The main eval function of Shell program
+     * @param cmdline commandline from user
+     * @param writer Destination of writing content
+     * @param currentDirectory currentDirectory of the Shell
+     * @return currentDirectory of Shell
+     * @throws RuntimeException
+     */
+    public static String eval(String cmdline, OutputStreamWriter writer, String currentDirectory) throws RuntimeException {
 
-    //change to non-static at the moment
-    public static void eval(String cmdline, OutputStream output) throws IOException {
-
-        // Using monad Parser
-        ParserBuilder myParser = new ParserBuilder();
-        Monad<ArrayList<Command>> sat = myParser.parseCommand();
-        ArrayList<Command> commandList = sat.parse(cmdline).getValue();
+        ArrayList<Command> commandList = getCommands(cmdline);
 
         CommandVisitor myVisitor = new ActualCmdVisitor();
-
-        //TBD: need to raise error when parsing is failed
-        String stuffLeft = sat.parse(cmdline).getInputStream();
-        //System.out.println("stuff left (should be empty if parese success) -> "+stuffLeft);
-
         // in seq
         for (Command curCmd: commandList) {
             //access visitor
             try {
-                currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, output);
-            } catch (IOException e) {
-                System.out.println("IO error catched");
+                currentDirectory = curCmd.accept(myVisitor, currentDirectory, null, writer);
+            }catch (UnsafeException e){
+                try {
+                    writer.write(e.getMessage() + System.getProperty("line.separator"));
+                    writer.flush();
+                }catch (IOException ignored){}
             }
-
         }
+        return currentDirectory;
     }
 
+    private static ArrayList<Command> getCommands(String cmdLine) throws RuntimeException{
+        // Using monad Parser to parse command line
+        ShellParser myParser = new ShellParser();
+        MonadicValue<ArrayList<Command>, String> resultPair = myParser.parse(cmdLine);
+        ArrayList<Command> commandList = resultPair.getValue();
+        if(!resultPair.getInputStream().equals("") || commandList == null){
+            throw new RuntimeException("Error: the input does not satisfy the syntax");
+        }
+        return commandList;
+    }
+
+    /**
+     * Entry of the Shell Program
+     * @param args
+     */
     public static void main(String[] args) {
+        String currentDirectory = System.getProperty("user.dir");
+        OutputStreamWriter writer = new OutputStreamWriter(System.out);
         if (args.length > 0) {
             if (args.length != 2) {
                 System.out.println("COMP0010 shell: wrong number of arguments");
@@ -49,25 +66,20 @@ public class Shell {
                 System.out.println("COMP0010 shell: " + args[0] + ": unexpected argument");
             }
             try {
-                Shell.eval(args[1], System.out);
-            } catch (Exception e) {
-                System.out.println("COMP0010 shell: " + e.getMessage());
+                Shell.eval(args[1], writer, currentDirectory);
+            } catch (RuntimeException e) {
+                System.out.print("");
             }
         } else {
-            Scanner input = new Scanner(System.in);
-            try {
+            try (Scanner input = new Scanner(System.in)) {
                 while (true) {
                     String prompt = currentDirectory + "> ";
                     System.out.print(prompt);
-                    try {
-                        String cmdline = input.nextLine();
-                        Shell.eval(cmdline, System.out);
-                    } catch (Exception e) {
-                        System.out.println("COMP0010 shell: " + e.getMessage());
-                    }
+                    String cmdline = input.nextLine();
+                    currentDirectory = Shell.eval(cmdline, writer, currentDirectory);
                 }
-            } finally {
-                input.close();
+            }catch (RuntimeException e){
+                System.out.println(e.getMessage());
             }
         }
     }

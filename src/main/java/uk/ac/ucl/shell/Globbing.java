@@ -1,127 +1,153 @@
 package uk.ac.ucl.shell;
 
-/**
- * Sample code that finds files that match the specified glob pattern.
- * For more information on what constitutes a glob pattern, see
- * https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob
- *
- * The file or directories that match the pattern are printed to
- * standard out.  The number of matches is also printed.
- *
- * When executing this application, you must put the glob pattern
- * in quotes, so the shell will not expand any wild cards:
- *              java Find . -name "*.java"
- */
-
-import static java.nio.file.FileVisitResult.CONTINUE;
-
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Globbing {
 
-    public static class Finder
-        extends SimpleFileVisitor<Path> {
+    /**
+     * execution function of Globbing
+     * @param pathShell currentDirectory of Shell
+     * @param pattern pattern to do globing (eg. *.txt, *//*.txt)
+     * @return globed result in a list of string.
+     */
+    public static List<String> exec(String pathShell, String pattern) {
 
-        private final PathMatcher matcher;
-        private final OutputStreamWriter writer;
-        private int numMatches = 0;
-
-        Finder(String pattern, OutputStreamWriter writer) {
-            this.writer = writer;
-            matcher = FileSystems.getDefault()
-                    .getPathMatcher("glob:" + pattern);
+        int index = pattern.indexOf("*");
+        ArrayList<String> resultList = new ArrayList<>();
+        if (index == -1) {
+            resultList.add(pattern);
+            return resultList;
         }
+        
+        //Split pattern into path and actual glob content
+        String targetDir = pattern.substring(0, index);
+        String glob = pattern.substring(index, pattern.length());
+ 
+        //dealing with root
+        String rootDir = findRootPath(pathShell, targetDir);
+        boolean isAbsolute = Paths.get(targetDir).isAbsolute();
+        return processGlobbing(pathShell, rootDir, isAbsolute, glob, pattern);
+    }
 
-        // Compares the glob pattern against
-        // the file or directory name.
-        void find(Path file) {
-            Path name = file.getFileName();
-            if (name != null && matcher.matches(name)) {
-                numMatches++;
-                //writer.println(file);
-                try {
-                    writer.write(file.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    //file visitor
+    /**
+     * getFiles does the recursive search from given path
+     * The function returns list of matched path.
+     * @param directory Root directory to start the search
+     * @param glob glob pattern (eg. *.txt)
+     * @return List of matched path
+     * @throws IOException if an I/O error occurs
+     */
+    public static List<Path> getFiles(final Path directory, final String glob) throws IOException {
+        final var myFileVisitor = new GlobFileVisitor(glob);
+        Files.walkFileTree(directory, myFileVisitor);
+        return myFileVisitor.getMatchedFiles();
+    }
+    
+    public static class GlobFileVisitor extends SimpleFileVisitor<Path> {
+    
+        private final PathMatcher pathMatcher;
+        private final List<Path> matchedFiles = new ArrayList<>();
+    
+        /**
+         * Constructor of GlobFileVisitor
+         * @param glob pattern to be globed
+         */
+        public GlobFileVisitor(final String glob) {
+            this.pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
+        }
+    
+        @Override
+        public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) {
+            if (pathMatcher.matches(path)) {
+                matchedFiles.add(path);
             }
-            try {
-                writer.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return FileVisitResult.CONTINUE;
         }
-
-        // Prints the total number of
-        // matches to standard out.
-        void done() {
-            System.out.println("Matched: "
-                + numMatches);
+    
+        /**
+         * Function gets the list that contains matched path
+         * @return list of matched path.
+         */
+        public List<Path> getMatchedFiles() {
+            return matchedFiles;
         }
+    }
+    //
 
-        // Invoke the pattern matching
-        // method on each file.
-        @Override
-        public FileVisitResult visitFile(Path file,
-                BasicFileAttributes attrs) {
-            find(file);
-            return CONTINUE;
-        }
-
-        // Invoke the pattern matching
-        // method on each directory.
-        @Override
-        public FileVisitResult preVisitDirectory(Path dir,
-                BasicFileAttributes attrs) {
-            find(dir);
-            return CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult visitFileFailed(Path file,
-                IOException exc) {
-            System.err.println(exc);
-            return CONTINUE;
+    /*
+     * Help function of exec() that change Path into given directory
+     * @param currentDirectory currentDirectory of Shell
+     * @param target directory
+     * @return New path changed from current Shell directory
+     * @throw RuntimeException When failed to change the directory
+     */
+    private static String findRootPath(String currentDirectory, String dir) {
+        try {
+            File myFile = ShellUtil.getDir(currentDirectory, dir);
+            currentDirectory = myFile.getPath();
+            return currentDirectory;
+        }catch (IOException e) {
+            throw new RuntimeException("glob: fail to change the directory");
         }
     }
 
-    // static void usage() {
-    //     System.err.println("java Find <path>" +
-    //         " -name \"<glob_pattern>\"");
-    //     System.exit(-1);
-    // }
+    /*
+     * Help function of exec() that process the actual globbing
+     * The function will do the actual globbing and add each matched result as an element into a list in proper format (relative/absolute)
+     * IF no result is matched, add the original pattern into list
+     * @param pathMask currentDirectory of Shell
+     * @param rootDirectory Root directory for the actual recursive search.
+     * @param isAbsolute True if this globbing pattern is using absolute path, false if using relative
+     * @param glob pattern of globbing
+     * @return List of matched result
+     * @throw RuntimeException When failed to change the directory
+     */    
+    private static List<String> processGlobbing(String pathMask, String rootDirectory, boolean isAbsolute, String glob, String usrPattern) {
 
-    public static String exec(Path dir, String glob) throws IOException {
+        ArrayList<String> processedList = new ArrayList<>();
+        try {
+            // Build the path pattern with glob syntax for further matching inside PathMatcher
+            String pattern = Paths.get(rootDirectory)+ FileSystems.getDefault().getSeparator() + glob;
 
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        OutputStreamWriter writer = new OutputStreamWriter(output);
-        Finder finder = new Finder(glob, writer);
-        Files.walkFileTree(dir, finder);
-        //finder.done(); 
-        return output.toString();
+            //if on windows
+            if (pattern.contains("\\")) {
+                pattern = pattern.replace("\\", "\\\\");
+            }
+
+            List<Path> matchedRes = getFiles(Paths.get(rootDirectory), pattern);
+            if (matchedRes.size() == 0) {
+                processedList.add(usrPattern);
+                return processedList;
+            }
+
+            for (Path curElem : matchedRes) {
+                //if using relative path
+                if (!isAbsolute) {
+                    Path relativePath = Paths.get(pathMask).relativize(curElem);
+                    processedList.add(relativePath.toString());
+                } else {
+                    String curStr = curElem.toString();
+                    processedList.add(curStr);
+                }                
+            }
+
+        } catch (IOException e) {
+            return new ArrayList<>();
+        }
+        
+        return processedList;
     }
-
-    // public static void main(String[] args)
-    //     throws IOException {
-
-    //     if (args.length < 3 || !args[1].equals("-name"))
-    //         usage();
-
-    //     Path startingDir = Paths.get(args[0]);
-    //     String pattern = args[2];
-
-    //     Finder finder = new Finder(pattern);
-    //     Files.walkFileTree(startingDir, finder);
-    //     //finder.done();
-    // }
 }
