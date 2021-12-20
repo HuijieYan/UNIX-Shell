@@ -29,10 +29,10 @@ public class Parser<T> implements Monad<T> {
      */
     public MonadicValue<T,String> parse(String input){
         if (input == null){
-            return new Pair<T,String>(null, "");
+            return new Pair<>(null, "");
             //same as using parser zero
         }
-        return (MonadicValue<T,String>)parseFunction.apply(input);
+        return parseFunction.apply(input);
     }
 }
 

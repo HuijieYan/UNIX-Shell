@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class Rmdir implements ShellApplication {
-    private String currentDirectory;
+    private final String currentDirectory;
 
     /**
      * Constructor of Rmdir app
