@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class Mkdir implements ShellApplication {
-    private String currentDirectory;
+    private final String currentDirectory;
 
     /**
      * Constructor of Mkdir app

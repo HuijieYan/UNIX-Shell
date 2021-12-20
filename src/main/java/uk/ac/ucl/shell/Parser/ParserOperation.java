@@ -13,7 +13,7 @@ import uk.ac.ucl.shell.Parser.pack.parser.Parser;
 public class ParserOperation {
 
     public <T> Monad<T> result(final T value){
-        return new Parser<T>(input->{return new Pair<>(value, input);});
+        return new Parser<>(input -> new Pair<>(value, input));
     }
 
 
@@ -47,16 +47,14 @@ public class ParserOperation {
      * the input can be null or empty
      */   
     public <T> Monad<T> zero(){
-        return new Parser<T>(input -> {
-            return new Pair<T,String>(null, "");
-        });
+        return new Parser<>(input -> new Pair<>(null, ""));
     }
 
     public Monad<Character> item(){
     //returns the first character of input string, string can be empty
         return new Parser<>(input->{
             if (input.length() > 0){
-                return new Pair<Character,String>(input.charAt(0), input.substring(1));
+                return new Pair<>(input.charAt(0), input.substring(1));
             }
 
             Monad<Character> zero = this.zero();
@@ -72,22 +70,18 @@ public class ParserOperation {
      * input string must satisfy.
      */   
     public Monad<Character> sat(final Function<Character,Boolean> validation){
-        return new Parser<>(input -> {
-            return this.bind(this.item(),value ->{
-                if (validation.apply(value)){
-                    return this.result(value);
-                }else{
-                    return this.zero();
-                }
-            }).parse(input);
-        });
+        return new Parser<>(input -> this.bind(this.item(), value ->{
+            if (validation.apply(value)){
+                return this.result(value);
+            }else{
+                return this.zero();
+            }
+        }).parse(input));
     }
 
     public Monad<Character> isChar(final Character value){
     //Identifies if the first character of the input matches the value
-        return this.sat(input->{
-            return input.equals(value);
-        });
+        return this.sat(input-> input.equals(value));
     }
 
     public Monad<Character> isDigit(){
@@ -129,13 +123,11 @@ public class ParserOperation {
     public <T> Monad<Deque<T>> many(final Monad<T> parser){
     // 
             return new Parser<>(input ->{
-                Deque<T> empty = new LinkedList<T>();
-                return this.or(this.bind(parser,x->{
-                    return this.bind(this.many(parser),xs ->{
-                        xs.addFirst(x);
-                        return this.result(xs);
-                    });
-                }),this.result(empty)).parse(input);
+                Deque<T> empty = new LinkedList<>();
+                return this.or(this.bind(parser,x-> this.bind(this.many(parser), xs ->{
+                    xs.addFirst(x);
+                    return this.result(xs);
+                })),this.result(empty)).parse(input);
             });
     }
     //see if can do dag
@@ -145,14 +137,10 @@ public class ParserOperation {
      * must have successfully parsed the input at least once.
      */
     public <T> Monad<Deque<T>> many1(final Monad<T> parser){ 
-        return new Parser<>(input ->{
-            return this.bind(parser,x->{
-                return this.bind(this.many(parser),xs ->{
-                    xs.addFirst(x);
-                    return this.result(xs);
-                });
-            }).parse(input);
-        });
+        return new Parser<>(input -> this.bind(parser, x-> this.bind(this.many(parser), xs ->{
+                xs.addFirst(x);
+                return this.result(xs);
+            })).parse(input));
     }
 
 

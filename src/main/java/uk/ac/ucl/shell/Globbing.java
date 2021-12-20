@@ -33,7 +33,7 @@ public class Globbing {
         
         //Split pattern into path and actual glob content
         String targetDir = pattern.substring(0, index);
-        String glob = pattern.substring(index, pattern.length());
+        String glob = pattern.substring(index);
  
         //dealing with root
         String rootDir = findRootPath(pathShell, targetDir);

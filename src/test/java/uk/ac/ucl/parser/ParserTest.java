@@ -362,8 +362,7 @@ public class ParserTest {
     }
 
     private ArrayList<String> getResultList(Atom atom){
-        ArrayList<String> result = new ArrayList<>();
-        result.addAll(atom.get());
+        ArrayList<String> result = new ArrayList<>(atom.get());
 
         return result;
     }

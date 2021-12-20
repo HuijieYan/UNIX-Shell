@@ -35,42 +35,29 @@ public class ShellParser {
      */
     public Monad<String> symbolQuoted(char symbol, Monad<String> parser){
         //assumes the content between symbols excludes the symbol
-        return new Parser<>(input->{
-            return parserOperation.bind(parserOperation.isChar(symbol), x->{
-                return parserOperation.bind(parser, y->{
-                    return parserOperation.bind(parserOperation.isChar(symbol),z->{
-                        StringBuilder builder = new StringBuilder();
-                        builder.append(x);
-                        builder.append(y);
-                        builder.append(z);
+        return new Parser<>(input-> parserOperation.bind(parserOperation.isChar(symbol), x-> parserOperation.bind(parser, y-> parserOperation.bind(parserOperation.isChar(symbol), z->{
 
-                        return parserOperation.result(builder.toString());
-                    });
-                });
-            }).parse(input);
-        });
+            String builder = x +
+                    y +
+                    z;
+            return parserOperation.result(builder);
+                }))).parse(input));
     }
 
     public Monad<String> symbolQuoted(Monad<Deque<String>> parser,char symbol){
     //This is a different version of symbolQuoted parser, the content between
     //given symbol is a combination of several strings.
     //swap the order of argument for method overloading
-        return new Parser<>(input->{
-            return parserOperation.bind(parserOperation.isChar(symbol), x->{
-                return parserOperation.bind(parser, y->{
-                    return parserOperation.bind(parserOperation.isChar(symbol),z->{
-                        StringBuilder builder = new StringBuilder();
-                        builder.append(x);
-                        for(String str:y){
-                            builder.append(str);
-                        }
-                        builder.append(z);
+        return new Parser<>(input-> parserOperation.bind(parserOperation.isChar(symbol), x-> parserOperation.bind(parser, y-> parserOperation.bind(parserOperation.isChar(symbol), z->{
+                    StringBuilder builder = new StringBuilder();
+                    builder.append(x);
+                    for(String str:y){
+                        builder.append(str);
+                    }
+                    builder.append(z);
 
-                        return parserOperation.result(builder.toString());
-                    });
-                });
-            }).parse(input);
-        });
+                    return parserOperation.result(builder.toString());
+                }))).parse(input));
     }
 
     /**
@@ -80,16 +67,14 @@ public class ShellParser {
      * @param exception a list of characters that should not appear in the input, can be empty
      */
     public Monad<String> quotedContent(ArrayList<Character> exception){
-        return new Parser<>(input->{
-            return parserOperation.bind(parserOperation.many1(parserOperation.anyCharacterExcept(exception)), y->{
-                StringBuilder builder = new StringBuilder();
-                for(char letter:y){
-                    builder.append(letter);
-                }
+        return new Parser<>(input-> parserOperation.bind(parserOperation.many1(parserOperation.anyCharacterExcept(exception)), y->{
+            StringBuilder builder = new StringBuilder();
+            for(char letter:y){
+                builder.append(letter);
+            }
 
-                return parserOperation.result(builder.toString());
-            }).parse(input);
-        });
+            return parserOperation.result(builder.toString());
+        }).parse(input));
     }
 
     public Monad<String> singleQuoted(){
@@ -220,15 +205,7 @@ public class ShellParser {
     private Monad<ArrayList<Command>> sepBySymbol(Monad<ArrayList<Command>> parser1,Monad<ArrayList<Command>> parser2,
                                                   char symbol,BiFunction<ArrayList<Command>,ArrayList<Command>,
                                                     Monad<ArrayList<Command>>> function){
-        return new Parser<>(input->{
-            return parserOperation.bind(parser1, x->{
-                return parserOperation.bind(parserOperation.isChar(symbol), y->{
-                    return parserOperation.bind(parser2,z->{
-                        return function.apply(x, z);
-                    });
-                });
-            }).parse(input);
-        });
+        return new Parser<>(input-> parserOperation.bind(parser1, x-> parserOperation.bind(parserOperation.isChar(symbol), y-> parserOperation.bind(parser2, z-> function.apply(x, z)))).parse(input));
     }
 
     public Monad<ArrayList<Command>> seq(){
@@ -270,20 +247,18 @@ public class ShellParser {
      * indicates parsing unsuccessful but not empty
      */
     public Monad<ArrayList<Command>> call(){
-        return new Parser<>(input->{
-            return parserOperation.bind(parserOperation.many(parserOperation.or(quoted(), nonKeyword())),strings->{
-                ArrayList<Command> arr = new ArrayList<>();
-                ArrayList<Atom> value = callGetAtoms(strings);
-                if (value == null){
-                    return parserOperation.zero();
-                }
+        return new Parser<>(input-> parserOperation.bind(parserOperation.many(parserOperation.or(quoted(), nonKeyword())), strings->{
+            ArrayList<Command> arr = new ArrayList<>();
+            ArrayList<Atom> value = callGetAtoms(strings);
+            if (value == null){
+                return parserOperation.zero();
+            }
 
-                Command call = new Call(value);
-                arr.add(call);
+            Command call = new Call(value);
+            arr.add(call);
 
-                return parserOperation.result(arr);
-            }).parse(input);
-        });
+            return parserOperation.result(arr);
+        }).parse(input));
     }
 
     private ArrayList<Atom> callGetAtoms(Deque<String> strings){
@@ -318,92 +293,62 @@ public class ShellParser {
      * @return a Monad that returns an arraylist of strings, list can be null but not empty.
      */
     public Monad<ArrayList<Atom>> parseCall(){
-        return new Parser<>(input->{
-            return parserOperation.bind(this.manySpaces(), emptySpaces1->{
-                return parserOperation.bind(this.redirectionWithSpaces(), redirections->{
-                    return parserOperation.bind(this.parseArgument(), argument->{
-                        return parserOperation.bind(this.atomWithSpaces(), atoms->{
-                            return parserOperation.bind(this.manySpaces(), emptySpaces2->{
-                                ArrayList<Atom> result = new ArrayList<>();
-                                for (ArrayList<Atom> redirection:redirections){
-                                    result.addAll(redirection);
-                                }
+        return new Parser<>(input-> parserOperation.bind(this.manySpaces(), emptySpaces1-> parserOperation.bind(this.redirectionWithSpaces(), redirections-> parserOperation.bind(this.parseArgument(), argument-> parserOperation.bind(this.atomWithSpaces(), atoms-> parserOperation.bind(this.manySpaces(), emptySpaces2->{
+                            ArrayList<Atom> result = new ArrayList<>();
+                            for (ArrayList<Atom> redirection:redirections){
+                                result.addAll(redirection);
+                            }
 
-                                result.add(argument);
+                            result.add(argument);
 
-                                for (ArrayList<Atom> atom:atoms){
-                                    result.addAll(atom);
-                                }
+                            for (ArrayList<Atom> atom:atoms){
+                                result.addAll(atom);
+                            }
 
-                                return parserOperation.result(result);
-                            });
-                        });
-                    });
-                });
-            }).parse(input);
-        });
+                            return parserOperation.result(result);
+                        }))))).parse(input));
     }
 
     private Monad<Deque<ArrayList<Atom>>> atomWithSpaces(){
-        return parserOperation.many(parserOperation.bind(this.many1Spaces(),spaces->{
-            return parserOperation.bind(this.atom(),x->{
-                return parserOperation.result(x);
-            });
-        }));
+        return parserOperation.many(parserOperation.bind(this.many1Spaces(),spaces-> parserOperation.bind(this.atom(), parserOperation::result)));
     }
 
     private Monad<Deque<ArrayList<Atom>>> redirectionWithSpaces(){
     //represents [<redirection> <whitespace>] in BNF
-        return parserOperation.many(parserOperation.bind(this.redirection(),x->{
-            return parserOperation.bind(this.many1Spaces(),spaces->{
-                return parserOperation.result(x);
-            });
-        }));
+        return parserOperation.many(parserOperation.bind(this.redirection(),x-> parserOperation.bind(this.many1Spaces(), spaces-> parserOperation.result(x))));
     }
 
     public Monad<ArrayList<Atom>> redirection(){
     //represents <redirection> ::= "<" [ <whitespace> ] <argument> in BNF
-        return new Parser<>(input->{
-            return parserOperation.bind(parserOperation.or(parserOperation.isChar('<'),parserOperation.isChar('>')), symbol->{
-                return parserOperation.bind(this.manySpaces(),spaces->{
-                    return parserOperation.bind(this.argument(),argument->{
-                        ArrayList<Atom> result = new ArrayList<>();
-                        Atom symbolAtom = new RedirectionSymbol(symbol);
-                        Atom argumentAtom = new NonRedirectionString(argument);
+        return new Parser<>(input-> parserOperation.bind(parserOperation.or(parserOperation.isChar('<'),parserOperation.isChar('>')), symbol-> parserOperation.bind(this.manySpaces(), spaces-> parserOperation.bind(this.argument(), argument->{
+                    ArrayList<Atom> result = new ArrayList<>();
+                    Atom symbolAtom = new RedirectionSymbol(symbol);
+                    Atom argumentAtom = new NonRedirectionString(argument);
 
-                        result.add(symbolAtom);
-                        result.add(argumentAtom);
+                    result.add(symbolAtom);
+                    result.add(argumentAtom);
 
-                        return parserOperation.result(result);
-                    });
-                });
-            }).parse(input);
-        });
+                    return parserOperation.result(result);
+                }))).parse(input));
     }
 
     public Monad<ArrayList<Atom>> atom(){
     //represents <atom> ::= <redirection> | <argument> in BNF
-        return new Parser<>(input->{
-            return parserOperation.or(this.redirection(),parserOperation.bind(this.parseArgument(),argument->{
-                ArrayList<Atom> result = new ArrayList<>();
-                result.add(argument);
+        return new Parser<>(input-> parserOperation.or(this.redirection(),parserOperation.bind(this.parseArgument(), argument->{
+            ArrayList<Atom> result = new ArrayList<>();
+            result.add(argument);
 
-                return parserOperation.result(result);
-            })).parse(input);
-        });
+            return parserOperation.result(result);
+        })).parse(input));
     }
 
     private Monad<Deque<Character>> many1Spaces(){
-        return new Parser<>(input->{
-            return parserOperation.many1(parserOperation.or(parserOperation.isChar(' '),parserOperation.isChar('\t'))).parse(input);
-        });
+        return new Parser<>(input-> parserOperation.many1(parserOperation.or(parserOperation.isChar(' '),parserOperation.isChar('\t'))).parse(input));
     }
 
     private Monad<Deque<Character>> manySpaces(){
     //parses multiple spaces formed by whitespaces and tabs(\t)
-        return new Parser<>(input->{
-            return parserOperation.many(parserOperation.or(parserOperation.isChar(' '),parserOperation.isChar('\t'))).parse(input);
-        });
+        return new Parser<>(input-> parserOperation.many(parserOperation.or(parserOperation.isChar(' '),parserOperation.isChar('\t'))).parse(input));
     }
 
     public Monad<Atom> parseArgument(){
@@ -415,12 +360,10 @@ public class ShellParser {
 
     private Monad<ArrayList<String>> argument(){
     //represents <argument> ::= ( <quoted> | <unquoted> )+
-        return new Parser<>(input->{
-            return parserOperation.bind(parserOperation.many1(parserOperation.or(this.quoted(), this.unQuoted())),ls->{
-                ArrayList<String> list = new ArrayList<>(ls);
-                return parserOperation.result(list);
-            }).parse(input);
-        });
+        return new Parser<>(input-> parserOperation.bind(parserOperation.many1(parserOperation.or(this.quoted(), this.unQuoted())), ls->{
+            ArrayList<String> list = new ArrayList<>(ls);
+            return parserOperation.result(list);
+        }).parse(input));
     }
 
     /**
